@@ -1,0 +1,31 @@
+{"objects":{
+"145": {
+    "name": "TargetSphere",
+    "components": [
+        {
+            "type": "mesh",
+            "mesh": {
+                "mesh": 3,
+                "material": 3
+            }
+        }
+    ],
+    "scaling": [
+        0.2,
+        0.2,
+        0.2
+    ],
+    "translation": [
+        0.0,
+        1.4495368,
+        0.0
+    ],
+    "rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+    ]
+}
+}
+}
