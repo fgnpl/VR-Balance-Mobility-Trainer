@@ -7,7 +7,7 @@ var Constants = {
   WebXROptionalFeatures: ["local", "local-floor", "hand-tracking", "hit-test"]
 };
 var RuntimeOptions = {
-  physx: false,
+  physx: true,
   loader: false,
   xrFramebufferScaleFactor: 1,
   xrOfferSession: {

@@ -7593,115 +7593,6 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
-// js/scripts/controller-hit.js
-import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
-var ControllerHit = class extends Component29 {
-  onCollisionEnter(other) {
-    if (other.object.hasComponent("target-collision")) {
-      console.log(`${this.hand} hand hit a target!`);
-      other.object.getComponent("target-collision").onHit(this.object);
-    }
-  }
-};
-__publicField(ControllerHit, "TypeName", "controller-hit");
-/* Properties that are configurable in the editor */
-__publicField(ControllerHit, "Properties", {
-  hand: Property2.string("right")
-});
-
-// js/scripts/target-collision.js
-import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
-var TargetCollision = class extends Component30 {
-  start() {
-    this.hit = false;
-  }
-  update() {
-    if (this.hit) {
-      return;
-    }
-    const spherePos = this.object.getPositionWorld();
-    const sticks = [
-      this.engine.scene.getObjectByName("ControllerRight"),
-      this.engine.scene.getObjectByName("ControllerLeft")
-    ];
-    for (let stick of sticks) {
-      if (!stick) {
-        continue;
-      }
-      const stickPos = stick.getPositionWorld();
-      const dx = spherePos[0] - stickPos[0];
-      const dy = spherePos[1] - stickPos[1];
-      const dz = spherePos[2] - stickPos[2];
-      const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      const radiusSphere = 0.2;
-      const radiusStick = 0.15;
-      const tolerance = 0.05;
-      if (distance2 < radiusSphere + radiusStick + tolerance) {
-        this.hit = true;
-        const reactionTime = (performance.now() - this.object.startTime) / 1e3;
-        this.manager.onTargetHit(this.object, reactionTime);
-      }
-    }
-  }
-  onHit(controllerObject) {
-    console.log("Target was hit by: ", controllerObject.name);
-    this.object.active = false;
-  }
-};
-__publicField(TargetCollision, "TypeName", "target-collision");
-/* Properties that are configurable in the editor */
-__publicField(TargetCollision, "Properties", {
-  manager: Property3.object()
-});
-
-// js/scripts/target-manager.js
-import { Component as Component31, Property as Property4 } from "@wonderlandengine/api";
-console.log("target-manager.js loaded");
-var TargetManager = class extends Component31 {
-  start() {
-    this.hitCount = 0;
-    this.reactionTimes = [];
-    this.activeTarget = null;
-    this.spherePrefab.active = false;
-    this.spawnTarget();
-  }
-  spawnTarget() {
-    if (this.hitCount >= this.maxTargets) {
-      this.endGame();
-      return;
-    }
-    const sphere = this.spherePrefab.clone(this.object);
-    sphere.active = true;
-    this.activeTarget = sphere;
-    const x = (Math.random() - 0.5) * 1.5;
-    const y = 1.5 + Math.random() * 0.5;
-    const z = -1.5 - Math.pow(x, 2) / 2;
-    console.log("Target position:", x, y, z);
-    sphere.setPositionWorld([x, y, z]);
-    sphere.startTime = performance.now();
-    const collisionComp = sphere.addComponent("target-collision");
-    collisionComp.manager = this;
-    console.log("Spawned at:", sphere.getPositionWorld());
-  }
-  onTargetHit(sphere, reactionTime) {
-    this.hitCount++;
-    this.reactionTimes.push(reactionTime);
-    sphere.destroy();
-    setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
-  }
-  endGame() {
-    console.log("Game over! Reaction times: ", this.reactionTimes);
-  }
-};
-__publicField(TargetManager, "TypeName", "target-manager");
-/* Properties that are configurable in the editor */
-__publicField(TargetManager, "Properties", {
-  spherePrefab: Property4.object(),
-  maxTargets: Property4.int(20),
-  spawnInterval: Property4.float(1)
-  // seconds
-});
-
 // js/index.js
 function js_default(engine) {
   engine.registerComponent(AudioListener);
@@ -7712,9 +7603,7 @@ function js_default(engine) {
   engine.registerComponent(PlayerHeight);
   engine.registerComponent(TeleportComponent);
   engine.registerComponent(VrModeActiveSwitch);
-  engine.registerComponent(ControllerHit);
-  engine.registerComponent(TargetCollision);
-  engine.registerComponent(TargetManager);
+  engine.registerComponent(WasdControlsComponent);
 }
 export {
   js_default as default
