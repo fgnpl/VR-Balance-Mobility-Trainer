@@ -21,7 +21,7 @@
         },
         "17": {
             "name": "NonVrCamera",
-            "parent": "205",
+            "parent": "237",
             "components": [
                 {
                     "type": "view"
@@ -47,9 +47,9 @@
                 }
             ],
             "translation": [
-                0.0,
-                0.0,
-                0.0
+                -2.5,
+                1.75,
+                1.1575535
             ],
             "rotation": [
                 0.0,
@@ -151,7 +151,7 @@
                 1.0,
                 1.0
             ],
-            "parent": "15"
+            "parent": "235"
         },
         "23": {
             "name": "Light.000",
@@ -179,7 +179,7 @@
                 1.0,
                 1.0
             ],
-            "parent": "15"
+            "parent": "235"
         },
         "53": {
             "link": {
@@ -1593,9 +1593,8 @@
                 {
                     "type": "physx",
                     "physx": {
-                        "sphere": {
-                            "radius": 0.2
-                        }
+                        "kinematic": false,
+                        "static": false
                     }
                 }
             ],
@@ -1635,13 +1634,63 @@
             ]
         },
         "235": {
+            "name": "Environment"
+        },
+        "236": {
+            "name": "Level",
+            "parent": "235",
+            "translation": [
+                0.0,
+                -1.5,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "237": {
+            "name": "WebPlayer",
+            "components": [
+                {
+                    "type": "wasd-controls"
+                },
+                {
+                    "type": "player-height",
+                    "player-height": {
+                        "height": 0.2
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "box",
+                        "box": {
+                            "extents": [
+                                0.2,
+                                0.4,
+                                0.2
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "238": {
             "link": {
                 "name": "tileLarge_forest",
                 "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
             },
             "translation": [
                 0.0,
-                -0.8551108,
+                -1.0,
                 0.0
             ],
             "rotation": [
@@ -1654,59 +1703,70 @@
                 1.0,
                 1.0,
                 1.0
-            ],
-            "parent": "237",
-            "components": [
-                {
-                    "originalIndex": 0
-                },
-                {
-                    "originalIndex": 1
-                },
-                {
-                    "type": "physx",
-                    "active": false
-                }
             ]
         },
         "15": {
-            "name": "Environment"
-        },
-        "237": {
-            "name": "Level",
-            "parent": "15"
-        },
-        "238": {
-            "name": "PhysicsBody",
+            "name": "PhysicsPlane",
+            "parent": null,
             "components": [
                 {
                     "type": "physx",
                     "physx": {
                         "shape": "plane",
-                        "static": true
-                    }
+                        "static": true,
+                        "trigger": false
+                    },
+                    "active": true
                 }
             ],
-            "parent": "15",
             "translation": [
-                5.21540641784668e-8,
-                0.1698638,
+                3.827186390026327e-8,
+                3.764741407508154e-8,
+                4.775837325610155e-8
+            ],
+            "rotation": [
+                0.0848168,
+                -0.0486703,
+                -0.6907656,
+                0.7164356
+            ],
+            "scaling": [
+                0.9999972,
+                0.9999971,
+                0.9999983
+            ]
+        },
+        "240": {
+            "name": "Mesh",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "morphTargets": null,
+                        "material": "20"
+                    }
+                },
+                {
+                    "type": "physx"
+                }
+            ],
+            "translation": [
+                0.0,
+                1.6,
                 0.0
             ],
             "rotation": [
                 0.0,
                 0.0,
-                0.7071066,
-                0.7071068
+                0.0,
+                1.0
             ],
             "scaling": [
-                0.9999945,
-                2.4579997,
-                1.0
+                -0.2989999,
+                -0.2989999,
+                -0.2989999
             ]
-        },
-        "239": {
-            "name": "Empty"
         }
     },
     "meshes": {
