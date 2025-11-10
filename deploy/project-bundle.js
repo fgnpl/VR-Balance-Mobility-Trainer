@@ -7593,10 +7593,61 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
+// js/scripts/head-bob.js
+import { Component as Component29, Object as Object2, Property as Property2 } from "@wonderlandengine/api";
+var HeadBob = class extends Component29 {
+  start() {
+    this.initialLocalPosition = vec3_exports.create();
+    this.object.getTranslationLocal(this.initialLocalPosition);
+    this.lastPlayerPosition = vec3_exports.create();
+    if (this.playerObject) {
+      this.playerObject.getTranslationWorld(this.lastPlayerPosition);
+    }
+    this.bobTime = 0;
+  }
+  update(dt) {
+    if (!this.playerObject) {
+      if (this.engine.frame % 60 === 0) {
+        console.warn('HeadBob: "Player Object" property is not set.');
+      }
+      return;
+    }
+    const currentPlayerPosition = vec3_exports.create();
+    this.playerObject.getTranslationWorld(currentPlayerPosition);
+    const deltaX = this.lastPlayerPosition[0] - currentPlayerPosition[0];
+    const deltaZ = this.lastPlayerPosition[2] - currentPlayerPosition[2];
+    const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+    let bobOffset = 0;
+    if (distanceMoved > this.epsilon) {
+      this.bobTime += dt * this.bobFrequency;
+      bobOffset = Math.sin(this.bobTime) * this.bobAmount;
+    } else {
+      this.bobTime = 0;
+    }
+    const newLocalPosition = vec3_exports.create();
+    vec3_exports.copy(newLocalPosition, this.initialLocalPosition);
+    newLocalPosition[1] += bobOffset;
+    this.object.setTranslationLocal(newLocalPosition);
+    vec3_exports.copy(this.lastPlayerPosition, currentPlayerPosition);
+  }
+};
+__publicField(HeadBob, "TypeName", "head-bob");
+__publicField(HeadBob, "Properties", {
+  /** The Player object that has the wasd-controls component */
+  playerObject: Property2.object(),
+  /** How fast the bobbing effect is (e.g., 10.0) */
+  bobFrequency: Property2.float(10),
+  /** How much the camera bobs up and down (e.g., 0.03) */
+  bobAmount: Property2.float(0.03),
+  /** A small value to ignore tiny movements and stop bobbing */
+  epsilon: Property2.float(1e-3)
+});
+
 // js/index.js
 function js_default(engine) {
   engine.registerComponent(AudioListener);
   engine.registerComponent(Cursor);
+  engine.registerComponent(CursorTarget);
   engine.registerComponent(FingerCursor);
   engine.registerComponent(HandTracking);
   engine.registerComponent(MouseLookComponent);
@@ -7604,6 +7655,7 @@ function js_default(engine) {
   engine.registerComponent(TeleportComponent);
   engine.registerComponent(VrModeActiveSwitch);
   engine.registerComponent(WasdControlsComponent);
+  engine.registerComponent(HeadBob);
 }
 export {
   js_default as default

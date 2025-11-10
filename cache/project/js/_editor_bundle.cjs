@@ -567,6 +567,13 @@
       (decorator = decorators[i]) && (result = (kind ? decorator(target, key, result) : decorator(result)) || result);
     return kind && result && __defProp2(target, key, result), result;
   };
+  var threads = () => (async (e) => {
+    try {
+      return typeof MessageChannel < "u" && new MessageChannel().port1.postMessage(new SharedArrayBuffer(1)), WebAssembly.validate(e);
+    } catch {
+      return false;
+    }
+  })(new Uint8Array([0, 97, 115, 109, 1, 0, 0, 0, 1, 4, 1, 96, 0, 0, 3, 2, 1, 0, 5, 4, 1, 3, 1, 1, 10, 11, 1, 9, 0, 65, 0, 254, 16, 2, 0, 26, 11]));
   var Type = ((Type2) => (Type2[Type2.Native = 0] = "Native", Type2[Type2.Bool = 1] = "Bool", Type2[Type2.Int = 2] = "Int", Type2[Type2.Float = 3] = "Float", Type2[Type2.String = 4] = "String", Type2[Type2.Enum = 5] = "Enum", Type2[Type2.Object = 6] = "Object", Type2[Type2.Mesh = 7] = "Mesh", Type2[Type2.Texture = 8] = "Texture", Type2[Type2.Material = 9] = "Material", Type2[Type2.Animation = 10] = "Animation", Type2[Type2.Skin = 11] = "Skin", Type2[Type2.Color = 12] = "Color", Type2[Type2.Vector2 = 13] = "Vector2", Type2[Type2.Vector3 = 14] = "Vector3", Type2[Type2.Vector4 = 15] = "Vector4", Type2[Type2.Array = 16] = "Array", Type2[Type2.Record = 17] = "Record", Type2[Type2.ParticleEffect = 18] = "ParticleEffect", Type2[Type2.Count = 19] = "Count", Type2))(Type || {});
   var DefaultPropertyCloner = class {
     clone(type, value) {
@@ -652,8 +659,14 @@
       let functor = Property[name];
       return propertyDecorator(functor(...args));
     };
+  function isString(value) {
+    return value === "" ? true : value && (typeof value == "string" || value.constructor === String);
+  }
   function isNumber(value) {
     return value == null ? false : typeof value == "number" || value.constructor === Number;
+  }
+  function isImageLike(value) {
+    return value instanceof HTMLImageElement || value instanceof HTMLVideoElement || value instanceof HTMLCanvasElement;
   }
   var Emitter = class {
     _listeners = [];
@@ -732,6 +745,42 @@
       this._transactions.length = 0;
     }
   };
+  var RetainEmitterUndefined = {};
+  var RetainEmitter = class extends Emitter {
+    _event = RetainEmitterUndefined;
+    _reset;
+    add(listener, opts) {
+      let immediate = opts?.immediate ?? true;
+      return this._event !== RetainEmitterUndefined && immediate && listener(...this._event), super.add(listener, opts), this;
+    }
+    once(listener, immediate) {
+      return this.add(listener, { once: true, immediate });
+    }
+    notify(...data) {
+      this._event = data, super.notify(...data);
+    }
+    notifyUnsafe(...data) {
+      this._event = data, super.notifyUnsafe(...data);
+    }
+    reset() {
+      return this._event = RetainEmitterUndefined, this;
+    }
+    get data() {
+      return this.isDataRetained ? this._event : void 0;
+    }
+    get isDataRetained() {
+      return this._event !== RetainEmitterUndefined;
+    }
+  };
+  function createDestroyedProxy(host, type) {
+    return new Proxy({}, { get(_, param) {
+      if (param === "isDestroyed")
+        return true;
+      throw new Error(`Cannot read '${param}' of destroyed '${type.name}' resource from ${host}`);
+    }, set(_, param) {
+      throw new Error(`Cannot write '${param}' of destroyed '${type.name}' resource from ${host}`);
+    } });
+  }
   var Resource = class {
     _index = -1;
     _id = -1;
@@ -776,6 +825,47 @@
     }
     get isDestroyed() {
       return this._id <= 0;
+    }
+  };
+  var ResourceManager = class {
+    _host;
+    _cache = [];
+    _template;
+    _destructor = null;
+    _engine;
+    constructor(host, Class) {
+      this._host = host, this._template = Class, this._engine = host.engine ?? host;
+    }
+    wrap(index) {
+      return index <= 0 ? null : this._cache[index] ?? (this._cache[index] = new this._template(this._host, index));
+    }
+    get(index) {
+      return this._cache[index] ?? null;
+    }
+    get allocatedCount() {
+      return this._cache.length;
+    }
+    get count() {
+      let count = 0;
+      for (let res of this._cache)
+        res && res.index >= 0 && ++count;
+      return count;
+    }
+    get engine() {
+      return this._engine;
+    }
+    _destroy(instance) {
+      let index = instance.index;
+      instance._index = -1, instance._id = -1, this._cache[index] = null, this.engine.erasePrototypeOnDestroy && (this._destructor || (this._destructor = createDestroyedProxy(this._host, this._template)), Object.setPrototypeOf(instance, this._destructor));
+    }
+    _clear() {
+      if (this.engine.erasePrototypeOnDestroy) {
+        for (let i = 0; i < this._cache.length; ++i) {
+          let instance = this._cache[i];
+          instance && this._destroy(instance);
+        }
+        this._cache.length = 0;
+      }
     }
   };
   var CBORType = ((CBORType2) => (CBORType2[CBORType2.Array = 0] = "Array", CBORType2[CBORType2.Record = 1] = "Record", CBORType2[CBORType2.Constant = 2] = "Constant", CBORType2[CBORType2.Native = 3] = "Native", CBORType2))(CBORType || {});
@@ -1005,6 +1095,111 @@
       return this.offset += length5, value;
     }
   };
+  var ComponentManagers = class {
+    animation = -1;
+    collision = -1;
+    js = -1;
+    physx = -1;
+    view = -1;
+    _cache = [];
+    _constructors;
+    _nativeManagers = /* @__PURE__ */ new Map();
+    _scene;
+    constructor(scene) {
+      this._scene = scene;
+      let wasm = this._scene.engine.wasm, native = [AnimationComponent, CollisionComponent, InputComponent, LightComponent, MeshComponent, PhysXComponent, TextComponent, ViewComponent, ParticleEffectComponent];
+      this._cache = new Array(native.length), this._constructors = new Array(native.length);
+      for (let Class of native) {
+        let ptr2 = wasm.tempUTF8(Class.TypeName), manager = wasm._wl_scene_get_component_manager_index(scene._index, ptr2);
+        this._constructors[manager] = Class, this._cache[manager] = [], this._nativeManagers.set(Class.TypeName, manager);
+      }
+      this.animation = this._nativeManagers.get(AnimationComponent.TypeName), this.collision = this._nativeManagers.get(CollisionComponent.TypeName), this.physx = this._nativeManagers.get(PhysXComponent.TypeName), this.view = this._nativeManagers.get(ViewComponent.TypeName);
+      let ptr = wasm.tempUTF8("js");
+      this.js = wasm._wl_scene_get_component_manager_index(scene._index, ptr), this._cache[this.js] = [];
+    }
+    createJs(index, id, type, object) {
+      let ctor = this._scene.engine.wasm._componentTypes[type];
+      if (!ctor)
+        throw new Error(`Type index ${type} isn't registered`);
+      let log = this._scene.engine.log, component = null;
+      try {
+        component = new ctor(this._scene, this.js, id);
+      } catch (e) {
+        log.error(2, `Exception during instantiation of component ${ctor.TypeName}`), log.error(2, e), component = new BrokenComponent(this._scene);
+      }
+      component._object = this._scene.wrap(object);
+      try {
+        component.resetProperties();
+      } catch (e) {
+        log.error(2, `Exception during ${component.type} resetProperties() on object ${component.object.name}`), log.error(2, e);
+      }
+      return this._scene._jsComponents[index] = component, this._cache[this.js][id] = component, component;
+    }
+    components(type, active) {
+      return this.componentsFromTypename(type.TypeName, active);
+    }
+    componentsFromTypename(typename, active) {
+      let wasm = this._scene.engine.wasm, manager = this.getNativeManager(typename) ?? this.js, subTypeIndex = manager === this.js ? wasm._componentTypeIndices[typename] ?? 0 : 0, maxRead = wasm._tempMemSize / 4, components = [], read = 0, offset2 = 0;
+      for (; read = wasm._wl_scene_get_components(this._scene._index, manager, subTypeIndex, active, offset2, maxRead, wasm._tempMem); ) {
+        for (let i = 0; i < read; ++i) {
+          let id = wasm._tempMemUint32[i];
+          components.push(this.wrapAny(manager, id));
+        }
+        offset2 += maxRead;
+      }
+      return components;
+    }
+    componentAt(type, index) {
+      let wasm = this._scene.engine.wasm, manager = this.getNativeManager(type.TypeName), id = wasm._wl_scene_get_component(this._scene._index, manager, index);
+      return this.wrapAny(manager, id);
+    }
+    get(manager, id) {
+      return this._cache[manager][id] ?? null;
+    }
+    wrapAnimation(id) {
+      return this.wrapNative(this.animation, id);
+    }
+    wrapCollision(id) {
+      return this.wrapNative(this.collision, id);
+    }
+    wrapView(id) {
+      return this.wrapNative(this.view, id);
+    }
+    wrapPhysx(id) {
+      return this.wrapNative(this.physx, id);
+    }
+    wrapNative(manager, id) {
+      if (id < 0)
+        return null;
+      let cache = this._cache[manager];
+      if (cache[id])
+        return cache[id];
+      let scene = this._scene, Class = this._constructors[manager], component = new Class(scene, manager, id);
+      return cache[id] = component, component;
+    }
+    wrapAny(manager, id) {
+      if (id < 0)
+        return null;
+      if (manager === this.js) {
+        let found = this._cache[this.js][id];
+        if (!found)
+          throw new Error("JS components must always be cached");
+        return found.constructor !== BrokenComponent ? found : null;
+      }
+      return this.wrapNative(manager, id);
+    }
+    getNativeManager(name) {
+      let manager = this._nativeManagers.get(name);
+      return manager !== void 0 ? manager : null;
+    }
+    destroy(instance) {
+      let localId = instance._localId, manager = instance._manager;
+      instance._id = -1, instance._localId = -1, instance._manager = -1, this._scene.engine.erasePrototypeOnDestroy && instance && Object.setPrototypeOf(instance, DestroyedComponentInstance), this._cache[manager][localId] = null;
+    }
+    get managersCount() {
+      return this._scene.engine.wasm._wl_scene_get_component_manager_count(this._scene._index);
+    }
+  };
   function resetComponentProperties(record) {
     let properties = record.constructor.Properties;
     if (properties)
@@ -1157,6 +1352,250 @@
   function _setPropertyOrder(ctor) {
     ctor._propertyOrder = ctor.hasOwnProperty("Properties") ? Object.keys(ctor.Properties).sort() : [];
   }
+  var FetchProgressTransformer = class {
+    #progress = 0;
+    #callback;
+    #totalSize;
+    constructor(callback, totalSize = 0) {
+      this.#callback = callback, this.#totalSize = totalSize;
+    }
+    transform(chunk, controller) {
+      controller.enqueue(chunk), this.#progress += chunk.length, this.#totalSize > 0 && this.#callback(this.#progress, this.#totalSize);
+    }
+    flush() {
+      this.#callback(this.#progress, this.#progress);
+    }
+  };
+  var ArrayBufferSink = class {
+    #buffer;
+    #offset = 0;
+    constructor(size = 0) {
+      this.#buffer = new Uint8Array(size);
+    }
+    get arrayBuffer() {
+      let arrayBuffer = this.#buffer.buffer;
+      return this.#offset < arrayBuffer.byteLength ? arrayBuffer.slice(0, this.#offset) : arrayBuffer;
+    }
+    write(chunk) {
+      let newLength = this.#offset + chunk.length;
+      if (newLength > this.#buffer.length) {
+        let newBuffer = new Uint8Array(Math.max(this.#buffer.length * 1.5, newLength));
+        newBuffer.set(this.#buffer), this.#buffer = newBuffer;
+      }
+      this.#buffer.set(chunk, this.#offset), this.#offset = newLength;
+    }
+  };
+  var ArrayBufferSource = class {
+    #buffer;
+    constructor(buffer) {
+      this.#buffer = buffer;
+    }
+    start(controller) {
+      this.#buffer.byteLength > 0 && controller.enqueue(new Uint8Array(this.#buffer)), controller.close();
+    }
+  };
+  async function fetchWithProgress(path, onProgress, signal) {
+    let res = await fetch(path, { signal });
+    if (!res.ok)
+      throw res.statusText;
+    if (!onProgress || !res.body)
+      return res.arrayBuffer();
+    let size = Number(res.headers.get("Content-Length") ?? 0);
+    Number.isNaN(size) && (size = 0);
+    let sink = new ArrayBufferSink(size);
+    return await res.body.pipeThrough(new TransformStream(new FetchProgressTransformer(onProgress, size))).pipeTo(new WritableStream(sink)), sink.arrayBuffer;
+  }
+  async function fetchStreamWithProgress(path, onProgress, signal) {
+    let res = await fetch(path, { signal });
+    if (!res.ok)
+      throw res.statusText;
+    let body = res.body ?? new ReadableStream(), size = Number(res.headers.get("Content-Length") ?? 0);
+    return Number.isNaN(size) && (size = 0), onProgress ? body.pipeThrough(new TransformStream(new FetchProgressTransformer(onProgress, size))) : body;
+  }
+  function getBaseUrl(url) {
+    return url.substring(0, url.lastIndexOf("/"));
+  }
+  function getFilename(url) {
+    url.endsWith("/") && (url = url.substring(0, url.lastIndexOf("/")));
+    let lastSlash = url.lastIndexOf("/");
+    return lastSlash < 0 ? url : url.substring(lastSlash + 1);
+  }
+  function onImageReady(image) {
+    return new Promise((res, rej) => {
+      if (image instanceof HTMLVideoElement) {
+        if (image.readyState >= 2) {
+          res(image);
+          return;
+        }
+        image.addEventListener("loadeddata", () => {
+          image.readyState >= 2 && res(image);
+        }, { once: true });
+        return;
+      } else if (!(image instanceof HTMLImageElement) || image.complete) {
+        res(image);
+        return;
+      }
+      image.addEventListener("load", () => res(image), { once: true }), image.addEventListener("error", rej, { once: true });
+    });
+  }
+  var Prefab = class _Prefab {
+    static makeUrlLoadOptions(options) {
+      return isString(options) ? { url: options } : options;
+    }
+    static async loadBuffer(options, progress) {
+      let opts = _Prefab.makeUrlLoadOptions(options), buffer = await fetchWithProgress(opts.url, progress, opts.signal), baseURL = getBaseUrl(opts.url), filename = getFilename(opts.url);
+      return { ...opts, buffer, baseURL, filename };
+    }
+    static async loadStream(options, progress) {
+      let opts = _Prefab.makeUrlLoadOptions(options), stream = await fetchStreamWithProgress(opts.url, progress, opts.signal), baseURL = getBaseUrl(opts.url), filename = getFilename(opts.url);
+      return { ...opts, stream, baseURL, filename };
+    }
+    static validateBufferOptions(options) {
+      let { buffer, baseURL, filename = "scene.bin" } = options;
+      if (!buffer)
+        throw new Error("missing 'buffer' in options");
+      if (!isString(baseURL))
+        throw new Error("missing 'baseURL' in options");
+      let url = baseURL ? `${baseURL}/${filename}` : filename;
+      return { buffer, baseURL, url };
+    }
+    static validateStreamOptions(options) {
+      let { stream, baseURL, filename = "scene.bin" } = options;
+      if (!stream)
+        throw new Error("missing 'stream' in options");
+      if (!isString(baseURL))
+        throw new Error("missing 'baseURL' in options");
+      let url = baseURL ? `${baseURL}/${filename}` : filename;
+      return { stream, baseURL, url };
+    }
+    _index;
+    _engine;
+    _components;
+    _jsComponents = [];
+    _pxCallbacks = /* @__PURE__ */ new Map();
+    _animations;
+    _animationGraphs;
+    _skins;
+    _objectCache = [];
+    _pendingDestroy = 0;
+    constructor(engine, index) {
+      this._engine = engine, this._index = index, this._components = new ComponentManagers(this), this._animations = new ResourceManager(this, Animation), this._animationGraphs = new ResourceManager(this, AnimationGraph), this._skins = new ResourceManager(this, Skin);
+    }
+    addChild() {
+      return this.wrap(0).addChild();
+    }
+    addObject(parent = null) {
+      if (parent?.markedDestroyed)
+        throw new Error(`Failed to add object. ${parent} is marked as destroyed.`);
+      return this.assertOrigin(parent), (parent ?? this.wrap(0)).addChild();
+    }
+    addObjects(count, parent = null, componentCountHint = 0) {
+      let parentId = parent ? parent._id : 0;
+      this.engine.wasm.requireTempMem(count * 2);
+      let actualCount = this.engine.wasm._wl_scene_add_objects(this._index, parentId, count, componentCountHint || 0, this.engine.wasm._tempMem, this.engine.wasm._tempMemSize >> 1), ids = this.engine.wasm._tempMemUint16.subarray(0, actualCount), wrapper = this.wrap.bind(this);
+      return Array.from(ids, wrapper);
+    }
+    reserveObjects(objectCount, componentCountPerType) {
+      let wasm = this.engine.wasm;
+      if (!componentCountPerType)
+        return;
+      let countsPerTypeIndex = wasm._tempMemInt, managerCount = this._components.managersCount;
+      for (let i = 0; i < managerCount; ++i)
+        countsPerTypeIndex[i] = 0;
+      let names = Object.keys(componentCountPerType);
+      for (let name of names) {
+        let count = componentCountPerType[name], nativeIndex = this._components.getNativeManager(name);
+        countsPerTypeIndex[nativeIndex !== null ? nativeIndex : this._components.js] += count;
+      }
+      wasm._wl_scene_reserve_objects(this._index, objectCount, wasm._tempMem);
+    }
+    getChildren(out = new Array(this.childrenCount)) {
+      return this.wrap(0).getChildren(out);
+    }
+    getComponents(typeOrClass) {
+      let typename = isString(typeOrClass) ? typeOrClass : typeOrClass.TypeName;
+      return this._components.componentsFromTypename(typename, false);
+    }
+    getActiveComponents(typeOrClass) {
+      let typename = isString(typeOrClass) ? typeOrClass : typeOrClass.TypeName;
+      return this._components.componentsFromTypename(typename, true);
+    }
+    get children() {
+      return this.wrap(0).children;
+    }
+    get childrenCount() {
+      let root = this.wrap(0);
+      return this.engine.wasm._wl_object_get_children_count(root._id);
+    }
+    findByName(name, recursive = false) {
+      return this.wrap(0).findByName(name, recursive);
+    }
+    findByNameDirect(name) {
+      return this.wrap(0).findByNameDirect(name);
+    }
+    findByNameRecursive(name) {
+      return this.wrap(0).findByNameRecursive(name);
+    }
+    wrap(objectId) {
+      let cache = this._objectCache;
+      return cache[objectId] || (cache[objectId] = new Object3D2(this, objectId));
+    }
+    destroy() {
+      if (this._pendingDestroy > 0)
+        throw new Error("It's forbidden to destroy a scene from onDestroy().");
+      this._pxCallbacks.clear(), this.engine._destroyScene(this);
+    }
+    get isActive() {
+      return !!this.engine.wasm._wl_scene_active(this._index);
+    }
+    get baseURL() {
+      let wasm = this.engine.wasm, ptr = wasm._wl_scene_get_baseURL(this._index);
+      return ptr ? wasm.UTF8ToString(ptr) : "";
+    }
+    get filename() {
+      let wasm = this.engine.wasm, ptr = wasm._wl_scene_get_filename(this._index);
+      return ptr ? wasm.UTF8ToString(ptr) : "";
+    }
+    get animations() {
+      return this._animations;
+    }
+    get animationsGraphs() {
+      return this._animationGraphs;
+    }
+    get skins() {
+      return this._skins;
+    }
+    get engine() {
+      return this._engine;
+    }
+    get isDestroyed() {
+      return this._index < 0;
+    }
+    toString() {
+      return this.isDestroyed ? "Scene(destroyed)" : `Scene('${this.filename}', ${this._index})`;
+    }
+    assertOrigin(other) {
+      if (other && other.scene !== this)
+        throw new Error(`Attempt to use ${other} from ${other.scene} in ${this}`);
+    }
+    _initialize() {
+      this.engine.wasm._wl_scene_initialize(this._index);
+    }
+    _destroyObject(localId) {
+      let instance = this._objectCache[localId];
+      instance && (instance._id = -1, instance._localId = -1, this.engine.erasePrototypeOnDestroy && instance && Object.setPrototypeOf(instance, DestroyedObjectInstance), this._objectCache[localId] = null);
+    }
+    _destroyComponent(manager, id) {
+      let component = this._components.get(manager, id);
+      ++this._pendingDestroy, component?._triggerOnDestroy(), --this._pendingDestroy;
+    }
+  };
+  function clamp(val, min2, max2) {
+    return Math.max(Math.min(max2, val), min2);
+  }
+  function capitalizeFirstUTF8(str5) {
+    return `${str5[0].toUpperCase()}${str5.substring(1)}`;
+  }
   function createDestroyedProxy2(type) {
     return new Proxy({}, { get(_, param) {
       if (param === "isDestroyed")
@@ -1190,6 +1629,7 @@
   function isBaseComponentClass(value) {
     return !!value && value.hasOwnProperty("_isBaseComponent") && value._isBaseComponent;
   }
+  var UP_VECTOR = [0, 1, 0];
   var SQRT_3 = Math.sqrt(3);
   var _a;
   var Component3 = (_a = class {
@@ -2055,6 +2495,26 @@
     }
   }, __publicField(_a11, "TypeName", "physx"), _a11);
   __decorateClass([nativeProperty()], PhysXComponent.prototype, "static", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "translationOffset", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "rotationOffset", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "kinematic", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "gravity", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "simulate", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "allowSimulation", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "allowQuery", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "trigger", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "shape", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "shapeData", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "extents", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "staticFriction", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "dynamicFriction", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "bounciness", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "linearDamping", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "angularDamping", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "linearVelocity", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "angularVelocity", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "groupsMask", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "blocksMask", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "linearLockAxis", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "angularLockAxis", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "mass", 1), __decorateClass([nativeProperty()], PhysXComponent.prototype, "sleepOnActivate", 1);
+  var Physics = class {
+    _hit;
+    _engine;
+    _rayHit;
+    constructor(engine) {
+      this._engine = engine;
+      let wasm = engine.wasm;
+      this._rayHit = wasm._malloc(4 * (3 * 4 + 3 * 4 + 4 + 2) + 4), this._hit = new RayHit(engine.scene, this._rayHit), wasm._wl_physx_set_collision_callback(wasm.addFunction((a, index, type, b) => {
+        let physxA = this._engine.scene._components.wrapPhysx(a), physxB = this._engine.scene._components.wrapPhysx(b), callback = this._engine.scene._pxCallbacks.get(physxA._id)[index];
+        callback(type, physxB);
+      }, "viiii"));
+    }
+    rayCast(o, d, groupMask, maxDistance = 100) {
+      let scene = this._engine.scene._index;
+      return this._engine.wasm._wl_physx_ray_cast(scene, o[0], o[1], o[2], d[0], d[1], d[2], groupMask, maxDistance, this._rayHit), this._hit;
+    }
+    get engine() {
+      return this._engine;
+    }
+  };
   var MeshIndexType = ((MeshIndexType2) => (MeshIndexType2[MeshIndexType2.UnsignedByte = 1] = "UnsignedByte", MeshIndexType2[MeshIndexType2.UnsignedShort = 2] = "UnsignedShort", MeshIndexType2[MeshIndexType2.UnsignedInt = 4] = "UnsignedInt", MeshIndexType2))(MeshIndexType || {});
   var MeshSkinningType = ((MeshSkinningType2) => (MeshSkinningType2[MeshSkinningType2.None = 0] = "None", MeshSkinningType2[MeshSkinningType2.FourJoints = 1] = "FourJoints", MeshSkinningType2[MeshSkinningType2.EightJoints = 2] = "EightJoints", MeshSkinningType2))(MeshSkinningType || {});
   var Mesh = class extends Resource {
@@ -2148,9 +2608,724 @@
       return this._engine;
     }
   };
+  var Font = class extends Resource {
+    get emHeight() {
+      return this.engine.wasm._wl_font_get_emHeight(this._id);
+    }
+    get capHeight() {
+      return this.engine.wasm._wl_font_get_capHeight(this._id);
+    }
+    get xHeight() {
+      return this.engine.wasm._wl_font_get_xHeight(this._id);
+    }
+    get outlineSize() {
+      return this.engine.wasm._wl_font_get_outlineSize(this._id);
+    }
+  };
+  var ParticleEffect = class extends Resource {
+    clone() {
+      let index = this.engine.wasm._wl_particleEffect_clone(this._id);
+      return this.engine.particleEffects.wrap(index);
+    }
+  };
+  var temp2d = null;
+  var Texture = class extends Resource {
+    constructor(engine, param) {
+      if (isImageLike(param)) {
+        let texture = engine.textures.create(param);
+        return super(engine, texture._index), texture;
+      }
+      super(engine, param);
+    }
+    get valid() {
+      return !this.isDestroyed && this.width !== 0 && this.height !== 0;
+    }
+    get id() {
+      return this.index;
+    }
+    update() {
+      let image = this._imageIndex;
+      !this.valid || !image || this.engine.wasm._wl_image_markDirty(image);
+    }
+    get width() {
+      let element = this.htmlElement;
+      if (element)
+        return element.videoWidth ?? element.width;
+      let wasm = this.engine.wasm;
+      return wasm._wl_image_size(this._imageIndex, wasm._tempMem), wasm._tempMemUint32[0];
+    }
+    get height() {
+      let element = this.htmlElement;
+      if (element)
+        return element.videoHeight ?? element.height;
+      let wasm = this.engine.wasm;
+      return wasm._wl_image_size(this._imageIndex, wasm._tempMem), wasm._tempMemUint32[1];
+    }
+    get htmlElement() {
+      let image = this._imageIndex;
+      if (!image)
+        return null;
+      let wasm = this.engine.wasm, jsImageIndex = wasm._wl_image_get_jsImage_index(image);
+      return wasm._images[jsImageIndex];
+    }
+    updateSubImage(srcX, srcY, srcWidth, srcHeight, dstX = srcX, dstY = srcY, content) {
+      if (this.isDestroyed)
+        return false;
+      let image = this._imageIndex;
+      if (!image)
+        return false;
+      let img = content ?? this.htmlElement;
+      if (!img)
+        return false;
+      let isImageBitmap = img instanceof ImageBitmap, flipY = !isImageBitmap;
+      if (srcX || srcY) {
+        if (!temp2d) {
+          let canvas2 = document.createElement("canvas"), ctx = canvas2.getContext("2d");
+          if (!ctx)
+            throw new Error("Texture.updateSubImage(): Failed to obtain CanvasRenderingContext2D.");
+          temp2d = { canvas: canvas2, ctx };
+        }
+        temp2d.canvas.width = srcWidth, temp2d.canvas.height = srcHeight, temp2d.ctx.drawImage(img, srcX, isImageBitmap ? img.height - srcY - srcHeight : srcY, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight), img = temp2d.canvas;
+      }
+      let wasm = this.engine.wasm;
+      wasm._images[0] = img;
+      let width = srcWidth - Math.max(srcWidth + dstX - this.width, 0), height = srcHeight - Math.max(srcHeight + dstY - this.height, 0), dstReversedY = this.height - dstY - height, ret = wasm._wl_renderer_updateImage(image, 0, width, height, dstX, dstReversedY, flipY);
+      return wasm._images[0] = null, !!ret;
+    }
+    destroy() {
+      let wasm = this.engine.wasm, img = wasm._images[this._imageIndex];
+      img instanceof ImageBitmap && img.close(), wasm._wl_texture_destroy(this._id), this.engine.textures._destroy(this);
+    }
+    toString() {
+      return this.isDestroyed ? "Texture(destroyed)" : `Texture(${this._index})`;
+    }
+    get _imageIndex() {
+      return this.engine.wasm._wl_texture_get_image_index(this._id);
+    }
+  };
+  var Animation = class extends SceneResource {
+    constructor(host = WL, index) {
+      let scene = host instanceof Prefab ? host : host.scene;
+      super(scene, index);
+    }
+    get duration() {
+      return this.engine.wasm._wl_animation_get_duration(this._id);
+    }
+    get trackCount() {
+      return this.engine.wasm._wl_animation_get_trackCount(this._id);
+    }
+    retarget(newTargets) {
+      let wasm = this.engine.wasm;
+      if (newTargets instanceof Skin) {
+        let index2 = wasm._wl_animation_retargetToSkin(this._id, newTargets._id);
+        return this._scene.animations.wrap(index2);
+      }
+      if (newTargets.length != this.trackCount)
+        throw Error("Expected " + this.trackCount.toString() + " targets, but got " + newTargets.length.toString());
+      let ptr = wasm._malloc(2 * newTargets.length);
+      for (let i = 0; i < newTargets.length; ++i) {
+        let object3d = newTargets[i];
+        this.scene.assertOrigin(object3d), wasm.HEAPU16[(ptr >>> 1) + i] = newTargets[i].objectId;
+      }
+      let index = wasm._wl_animation_retarget(this._id, ptr);
+      return wasm._free(ptr), this._scene.animations.wrap(index);
+    }
+    toString() {
+      return this.isDestroyed ? "Animation(destroyed)" : `Animation(${this._index})`;
+    }
+  };
   var AnimationGraph = class extends SceneResource {
     toString() {
       return this.isDestroyed ? "AnimationGraph(destroyed)" : `AnimationGraph(${this._index})`;
+    }
+  };
+  var Object3D2 = class {
+    _id = -1;
+    _localId = -1;
+    _scene;
+    _engine;
+    constructor(scene, id) {
+      scene = scene instanceof Prefab ? scene : scene.scene, this._localId = id, this._id = scene._index << 22 | id, this._scene = scene, this._engine = scene.engine;
+    }
+    get name() {
+      let wasm = this._engine.wasm;
+      return wasm.UTF8ToString(wasm._wl_object_name(this._id));
+    }
+    set name(newName) {
+      let wasm = this._engine.wasm;
+      wasm._wl_object_set_name(this._id, wasm.tempUTF8(newName));
+    }
+    get parent() {
+      let p = this._engine.wasm._wl_object_parent(this._id);
+      return p === 0 ? null : this._scene.wrap(p);
+    }
+    get children() {
+      return this.getChildren();
+    }
+    get childrenCount() {
+      return this._engine.wasm._wl_object_get_children_count(this._id);
+    }
+    set parent(newParent) {
+      if (this.markedDestroyed) {
+        let strThis = this.toString(), strParent = newParent || "root";
+        throw new Error(`Failed to attach ${strThis} to ${strParent}. ${strThis} is marked as destroyed.`);
+      } else if (newParent?.markedDestroyed) {
+        let strParent = newParent.toString();
+        throw new Error(`Failed to attach ${this} to ${strParent}. ${strParent} is marked as destroyed.`);
+      }
+      this.scene.assertOrigin(newParent), this._engine.wasm._wl_object_set_parent(this._id, newParent == null ? 0 : newParent._id);
+    }
+    get objectId() {
+      return this._localId;
+    }
+    get scene() {
+      return this._scene;
+    }
+    get engine() {
+      return this._engine;
+    }
+    addChild() {
+      let objectId = this.engine.wasm._wl_scene_add_object(this.scene._index, this._id);
+      return this.scene.wrap(objectId);
+    }
+    clone(parent = null) {
+      this.scene.assertOrigin(parent);
+      let id = this._engine.wasm._wl_object_clone(this._id, parent ? parent._id : 0);
+      return this._scene.wrap(id);
+    }
+    getChildren(out = new Array(this.childrenCount)) {
+      let childrenCount = this.childrenCount;
+      if (childrenCount === 0)
+        return out;
+      let wasm = this._engine.wasm;
+      wasm.requireTempMem(childrenCount * 2), this._engine.wasm._wl_object_get_children(this._id, wasm._tempMem, wasm._tempMemSize >> 1);
+      for (let i = 0; i < childrenCount; ++i)
+        out[i] = this._scene.wrap(wasm._tempMemUint16[i]);
+      return out;
+    }
+    resetTransform() {
+      return this._engine.wasm._wl_object_reset_translation_rotation(this._id), this._engine.wasm._wl_object_reset_scaling(this._id), this;
+    }
+    resetPositionRotation() {
+      return this._engine.wasm._wl_object_reset_translation_rotation(this._id), this;
+    }
+    resetTranslationRotation() {
+      return this.resetPositionRotation();
+    }
+    resetRotation() {
+      return this._engine.wasm._wl_object_reset_rotation(this._id), this;
+    }
+    resetPosition() {
+      return this._engine.wasm._wl_object_reset_translation(this._id), this;
+    }
+    resetTranslation() {
+      return this.resetPosition();
+    }
+    resetScaling() {
+      return this._engine.wasm._wl_object_reset_scaling(this._id), this;
+    }
+    translate(v) {
+      return this.translateLocal(v);
+    }
+    translateLocal(v) {
+      return this._engine.wasm._wl_object_translate(this._id, v[0], v[1], v[2]), this;
+    }
+    translateObject(v) {
+      return this._engine.wasm._wl_object_translate_obj(this._id, v[0], v[1], v[2]), this;
+    }
+    translateWorld(v) {
+      return this._engine.wasm._wl_object_translate_world(this._id, v[0], v[1], v[2]), this;
+    }
+    rotateAxisAngleDeg(a, d) {
+      return this.rotateAxisAngleDegLocal(a, d), this;
+    }
+    rotateAxisAngleDegLocal(a, d) {
+      return this._engine.wasm._wl_object_rotate_axis_angle(this._id, a[0], a[1], a[2], d), this;
+    }
+    rotateAxisAngleRad(a, d) {
+      return this.rotateAxisAngleRadLocal(a, d);
+    }
+    rotateAxisAngleRadLocal(a, d) {
+      return this._engine.wasm._wl_object_rotate_axis_angle_rad(this._id, a[0], a[1], a[2], d), this;
+    }
+    rotateAxisAngleDegObject(a, d) {
+      return this._engine.wasm._wl_object_rotate_axis_angle_obj(this._id, a[0], a[1], a[2], d), this;
+    }
+    rotateAxisAngleRadObject(a, d) {
+      return this._engine.wasm._wl_object_rotate_axis_angle_rad_obj(this._id, a[0], a[1], a[2], d), this;
+    }
+    rotate(q) {
+      return this.rotateLocal(q), this;
+    }
+    rotateLocal(q) {
+      return this._engine.wasm._wl_object_rotate_quat(this._id, q[0], q[1], q[2], q[3]), this;
+    }
+    rotateObject(q) {
+      return this._engine.wasm._wl_object_rotate_quat_obj(this._id, q[0], q[1], q[2], q[3]), this;
+    }
+    scale(v) {
+      return this.scaleLocal(v), this;
+    }
+    scaleLocal(v) {
+      return this._engine.wasm._wl_object_scale(this._id, v[0], v[1], v[2]), this;
+    }
+    getPositionLocal(out = new Float32Array(3)) {
+      let wasm = this._engine.wasm;
+      return wasm._wl_object_get_translation_local(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    getTranslationLocal(out = new Float32Array(3)) {
+      return this.getPositionLocal(out);
+    }
+    getPositionWorld(out = new Float32Array(3)) {
+      let wasm = this._engine.wasm;
+      return wasm._wl_object_get_translation_world(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    getTranslationWorld(out = new Float32Array(3)) {
+      return this.getPositionWorld(out);
+    }
+    setPositionLocal(v) {
+      return this._engine.wasm._wl_object_set_translation_local(this._id, v[0], v[1], v[2]), this;
+    }
+    setTranslationLocal(v) {
+      return this.setPositionLocal(v);
+    }
+    setPositionWorld(v) {
+      return this._engine.wasm._wl_object_set_translation_world(this._id, v[0], v[1], v[2]), this;
+    }
+    setTranslationWorld(v) {
+      return this.setPositionWorld(v);
+    }
+    getScalingLocal(out = new Float32Array(3)) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_scaling_local(this._id) / 4;
+      return out[0] = wasm.HEAPF32[ptr], out[1] = wasm.HEAPF32[ptr + 1], out[2] = wasm.HEAPF32[ptr + 2], out;
+    }
+    setScalingLocal(v) {
+      return this._engine.wasm._wl_object_set_scaling_local(this._id, v[0], v[1], v[2]), this;
+    }
+    getScalingWorld(out = new Float32Array(3)) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_scaling_world(this._id) / 4;
+      return out[0] = wasm.HEAPF32[ptr], out[1] = wasm.HEAPF32[ptr + 1], out[2] = wasm.HEAPF32[ptr + 2], out;
+    }
+    setScalingWorld(v) {
+      return this._engine.wasm._wl_object_set_scaling_world(this._id, v[0], v[1], v[2]), this;
+    }
+    getRotationLocal(out = new Float32Array(4)) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_trans_local(this._id) / 4;
+      return out[0] = wasm.HEAPF32[ptr], out[1] = wasm.HEAPF32[ptr + 1], out[2] = wasm.HEAPF32[ptr + 2], out[3] = wasm.HEAPF32[ptr + 3], out;
+    }
+    setRotationLocal(v) {
+      return this._engine.wasm._wl_object_set_rotation_local(this._id, v[0], v[1], v[2], v[3]), this;
+    }
+    getRotationWorld(out = new Float32Array(4)) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_trans_world(this._id) / 4;
+      return out[0] = wasm.HEAPF32[ptr], out[1] = wasm.HEAPF32[ptr + 1], out[2] = wasm.HEAPF32[ptr + 2], out[3] = wasm.HEAPF32[ptr + 3], out;
+    }
+    setRotationWorld(v) {
+      return this._engine.wasm._wl_object_set_rotation_world(this._id, v[0], v[1], v[2], v[3]), this;
+    }
+    getTransformLocal(out = new Float32Array(8)) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_trans_local(this._id) / 4;
+      return out[0] = wasm.HEAPF32[ptr], out[1] = wasm.HEAPF32[ptr + 1], out[2] = wasm.HEAPF32[ptr + 2], out[3] = wasm.HEAPF32[ptr + 3], out[4] = wasm.HEAPF32[ptr + 4], out[5] = wasm.HEAPF32[ptr + 5], out[6] = wasm.HEAPF32[ptr + 6], out[7] = wasm.HEAPF32[ptr + 7], out;
+    }
+    setTransformLocal(v) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_trans_local(this._id) / 4;
+      return wasm.HEAPF32[ptr] = v[0], wasm.HEAPF32[ptr + 1] = v[1], wasm.HEAPF32[ptr + 2] = v[2], wasm.HEAPF32[ptr + 3] = v[3], wasm.HEAPF32[ptr + 4] = v[4], wasm.HEAPF32[ptr + 5] = v[5], wasm.HEAPF32[ptr + 6] = v[6], wasm.HEAPF32[ptr + 7] = v[7], this.setDirty(), this;
+    }
+    getTransformWorld(out = new Float32Array(8)) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_trans_world(this._id) / 4;
+      return out[0] = wasm.HEAPF32[ptr], out[1] = wasm.HEAPF32[ptr + 1], out[2] = wasm.HEAPF32[ptr + 2], out[3] = wasm.HEAPF32[ptr + 3], out[4] = wasm.HEAPF32[ptr + 4], out[5] = wasm.HEAPF32[ptr + 5], out[6] = wasm.HEAPF32[ptr + 6], out[7] = wasm.HEAPF32[ptr + 7], out;
+    }
+    setTransformWorld(v) {
+      let wasm = this._engine.wasm, ptr = wasm._wl_object_trans_world(this._id) / 4;
+      return wasm.HEAPF32[ptr] = v[0], wasm.HEAPF32[ptr + 1] = v[1], wasm.HEAPF32[ptr + 2] = v[2], wasm.HEAPF32[ptr + 3] = v[3], wasm.HEAPF32[ptr + 4] = v[4], wasm.HEAPF32[ptr + 5] = v[5], wasm.HEAPF32[ptr + 6] = v[6], wasm.HEAPF32[ptr + 7] = v[7], this._engine.wasm._wl_object_trans_world_to_local(this._id), this;
+    }
+    get transformLocal() {
+      let wasm = this._engine.wasm;
+      return new Float32Array(wasm.HEAPF32.buffer, wasm._wl_object_trans_local(this._id), 8);
+    }
+    set transformLocal(t) {
+      this.transformLocal.set(t), this.setDirty();
+    }
+    get transformWorld() {
+      let wasm = this._engine.wasm;
+      return new Float32Array(wasm.HEAPF32.buffer, wasm._wl_object_trans_world(this._id), 8);
+    }
+    set transformWorld(t) {
+      this.transformWorld.set(t), this._engine.wasm._wl_object_trans_world_to_local(this._id);
+    }
+    get scalingLocal() {
+      let wasm = this._engine.wasm;
+      return new Float32Array(wasm.HEAPF32.buffer, wasm._wl_object_scaling_local(this._id), 3);
+    }
+    set scalingLocal(s) {
+      this.scalingLocal.set(s), this.setDirty();
+    }
+    get scalingWorld() {
+      let wasm = this._engine.wasm;
+      return new Float32Array(wasm.HEAPF32.buffer, wasm._wl_object_scaling_world(this._id), 3);
+    }
+    set scalingWorld(s) {
+      this.scalingWorld.set(s), this._engine.wasm._wl_object_scaling_world_to_local(this._id);
+    }
+    get rotationLocal() {
+      return this.transformLocal.subarray(0, 4);
+    }
+    get rotationWorld() {
+      return this.transformWorld.subarray(0, 4);
+    }
+    set rotationLocal(r) {
+      this._engine.wasm._wl_object_set_rotation_local(this._id, r[0], r[1], r[2], r[3]);
+    }
+    set rotationWorld(r) {
+      this._engine.wasm._wl_object_set_rotation_world(this._id, r[0], r[1], r[2], r[3]);
+    }
+    getForward(out) {
+      return this.getForwardWorld(out);
+    }
+    getForwardWorld(out) {
+      return out[0] = 0, out[1] = 0, out[2] = -1, this.transformVectorWorld(out), out;
+    }
+    getUp(out) {
+      return this.getUpWorld(out);
+    }
+    getUpWorld(out) {
+      return out[0] = 0, out[1] = 1, out[2] = 0, this.transformVectorWorld(out), out;
+    }
+    getRight(out) {
+      return this.getRightWorld(out);
+    }
+    getRightWorld(out) {
+      return out[0] = 1, out[1] = 0, out[2] = 0, this.transformVectorWorld(out), out;
+    }
+    transformVectorWorld(out, v = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat[0] = v[0], wasm._tempMemFloat[1] = v[1], wasm._tempMemFloat[2] = v[2], wasm._wl_object_transformVectorWorld(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    transformVectorLocal(out, v = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat[0] = v[0], wasm._tempMemFloat[1] = v[1], wasm._tempMemFloat[2] = v[2], wasm._wl_object_transformVectorLocal(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    transformPointWorld(out, p = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat[0] = p[0], wasm._tempMemFloat[1] = p[1], wasm._tempMemFloat[2] = p[2], wasm._wl_object_transformPointWorld(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    transformPointLocal(out, p = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat[0] = p[0], wasm._tempMemFloat[1] = p[1], wasm._tempMemFloat[2] = p[2], wasm._wl_object_transformPointLocal(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    transformVectorInverseWorld(out, v = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat[0] = v[0], wasm._tempMemFloat[1] = v[1], wasm._tempMemFloat[2] = v[2], wasm._wl_object_transformVectorInverseWorld(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    transformVectorInverseLocal(out, v = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat[0] = v[0], wasm._tempMemFloat[1] = v[1], wasm._tempMemFloat[2] = v[2], wasm._wl_object_transformVectorInverseLocal(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    transformPointInverseWorld(out, p = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat[0] = p[0], wasm._tempMemFloat[1] = p[1], wasm._tempMemFloat[2] = p[2], wasm._wl_object_transformPointInverseWorld(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    transformPointInverseLocal(out, p = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat.set(p), wasm._wl_object_transformPointInverseLocal(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    toWorldSpaceTransform(out, q = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat.set(q), wasm._wl_object_toWorldSpaceTransform(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out[3] = wasm._tempMemFloat[3], out[4] = wasm._tempMemFloat[4], out[5] = wasm._tempMemFloat[5], out[6] = wasm._tempMemFloat[6], out[7] = wasm._tempMemFloat[7], out;
+    }
+    toLocalSpaceTransform(out, q = out) {
+      let p = this.parent;
+      return p ? (p.toObjectSpaceTransform(out, q), out) : (out !== q && (out[0] = q[0], out[1] = q[1], out[2] = q[2], out[3] = q[3], out[4] = q[4], out[5] = q[5], out[6] = q[6], out[7] = q[7]), out);
+    }
+    toObjectSpaceTransform(out, q = out) {
+      let wasm = this._engine.wasm;
+      return wasm._tempMemFloat.set(q), wasm._wl_object_toObjectSpaceTransform(this._id, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out[3] = wasm._tempMemFloat[3], out[4] = wasm._tempMemFloat[4], out[5] = wasm._tempMemFloat[5], out[6] = wasm._tempMemFloat[6], out[7] = wasm._tempMemFloat[7], out;
+    }
+    lookAt(p, up = UP_VECTOR) {
+      return this._engine.wasm._wl_object_lookAt(this._id, p[0], p[1], p[2], up[0], up[1], up[2]), this;
+    }
+    destroy() {
+      this._id < 0 || this.engine.wasm._wl_object_remove(this._id);
+    }
+    setDirty() {
+      this._engine.wasm._wl_object_set_dirty(this._id);
+    }
+    set active(b) {
+      let comps = this.getComponents();
+      for (let c of comps)
+        c.active = b;
+    }
+    getComponent(typeOrClass, index = 0) {
+      let wasm = this._engine.wasm, type = isString(typeOrClass) ? typeOrClass : typeOrClass.TypeName, scene = this._scene, componentType = wasm._wl_scene_get_component_manager_index(scene._index, wasm.tempUTF8(type));
+      if (componentType < 0) {
+        let typeIndex = wasm._componentTypeIndices[type];
+        if (typeIndex === void 0)
+          return null;
+        let jsIndex = wasm._wl_get_js_component_index(this._id, typeIndex, index);
+        if (jsIndex < 0)
+          return null;
+        let component = this._scene._jsComponents[jsIndex];
+        return component.constructor !== BrokenComponent ? component : null;
+      }
+      let componentId = wasm._wl_get_component_id(this._id, componentType, index);
+      return scene._components.wrapNative(componentType, componentId);
+    }
+    getComponents(typeOrClass) {
+      let wasm = this._engine.wasm, scene = this._scene, manager = null, type = null;
+      if (typeOrClass) {
+        type = isString(typeOrClass) ? typeOrClass : typeOrClass.TypeName;
+        let nativeManager = scene._components.getNativeManager(type);
+        manager = nativeManager !== null ? nativeManager : scene._components.js;
+      }
+      let components = [], maxComps = Math.floor(wasm._tempMemSize / 3 * 2), componentsCount = wasm._wl_object_get_components(this._id, wasm._tempMem, maxComps), offset2 = 2 * componentsCount;
+      wasm._wl_object_get_component_types(this._id, wasm._tempMem + offset2, maxComps);
+      for (let i = 0; i < componentsCount; ++i) {
+        let t = wasm._tempMemUint8[i + offset2], componentId = wasm._tempMemUint16[i];
+        if (manager !== null && t !== manager)
+          continue;
+        let comp = this._scene._components.wrapAny(t, componentId);
+        comp && (type && type !== comp.constructor.TypeName || components.push(comp));
+      }
+      return components;
+    }
+    addComponent(typeOrClass, params) {
+      if (this.markedDestroyed)
+        throw new Error(`Failed to add component. ${this} is marked as destroyed.`);
+      let wasm = this._engine.wasm, type = isString(typeOrClass) ? typeOrClass : typeOrClass.TypeName, nativeManager = this._scene._components.getNativeManager(type), isNative = nativeManager !== null, manager = isNative ? nativeManager : this._scene._components.js, componentId = -1;
+      if (isNative)
+        componentId = wasm._wl_object_add_component(this._id, manager);
+      else {
+        if (!(type in wasm._componentTypeIndices))
+          throw new TypeError("Unknown component type '" + type + "'");
+        componentId = wasm._wl_object_add_js_component(this._id, wasm._componentTypeIndices[type]);
+      }
+      let component = this._scene._components.wrapAny(manager, componentId);
+      return params !== void 0 && component.copy(params), isNative || component._triggerInit(), (!params || !("active" in params && !params.active)) && (component.active = true), component;
+    }
+    findByName(name, recursive = false) {
+      return recursive ? this.findByNameRecursive(name) : this.findByNameDirect(name);
+    }
+    findByNameDirect(name) {
+      let wasm = this._engine.wasm, id = this._id, maxCount = (wasm._tempMemSize >> 2) - 2, buffer = wasm._tempMemUint16;
+      buffer[maxCount] = 0, buffer[maxCount + 1] = 0;
+      let bufferPtr = wasm._tempMem, indexPtr = bufferPtr + maxCount * 2, childCountPtr = bufferPtr + maxCount * 2 + 2, namePtr = wasm.tempUTF8(name, (maxCount + 2) * 2), result = [], read = 0;
+      for (; read = wasm._wl_object_findByName(id, namePtr, indexPtr, childCountPtr, bufferPtr, maxCount); )
+        for (let i = 0; i < read; ++i)
+          result.push(this._scene.wrap(buffer[i]));
+      return result;
+    }
+    findByNameRecursive(name) {
+      let wasm = this._engine.wasm, id = this._id, maxCount = (wasm._tempMemSize >> 2) - 1, buffer = wasm._tempMemUint16;
+      buffer[maxCount] = 0;
+      let bufferPtr = wasm._tempMem, indexPtr = bufferPtr + maxCount * 2, namePtr = wasm.tempUTF8(name, (maxCount + 1) * 2), read = 0, result = [];
+      for (; read = wasm._wl_object_findByNameRecursive(id, namePtr, indexPtr, bufferPtr, maxCount); )
+        for (let i = 0; i < read; ++i)
+          result.push(this._scene.wrap(buffer[i]));
+      return result;
+    }
+    get changed() {
+      return !!this._engine.wasm._wl_object_is_changed(this._id);
+    }
+    get isDestroyed() {
+      return this._id < 0;
+    }
+    get markedDestroyed() {
+      return !!this.engine.wasm._wl_object_markedDestroyed(this._id);
+    }
+    equals(otherObject) {
+      return otherObject ? this._id == otherObject._id : false;
+    }
+    toString() {
+      return this.isDestroyed ? "Object3D(destroyed)" : `Object3D('${this.name}', ${this._localId})`;
+    }
+  };
+  var Skin = class extends SceneResource {
+    get jointCount() {
+      return this.engine.wasm._wl_skin_get_joint_count(this._id);
+    }
+    get jointIds() {
+      let wasm = this.engine.wasm;
+      return new Uint16Array(wasm.HEAPU16.buffer, wasm._wl_skin_joint_ids(this._id), this.jointCount);
+    }
+    get inverseBindTransforms() {
+      let wasm = this.engine.wasm;
+      return new Float32Array(wasm.HEAPF32.buffer, wasm._wl_skin_inverse_bind_transforms(this._id), 8 * this.jointCount);
+    }
+    get inverseBindScalings() {
+      let wasm = this.engine.wasm;
+      return new Float32Array(wasm.HEAPF32.buffer, wasm._wl_skin_inverse_bind_scalings(this._id), 3 * this.jointCount);
+    }
+  };
+  var MorphTargets = class extends Resource {
+    get count() {
+      return this.engine.wasm._wl_morph_targets_get_target_count(this._id);
+    }
+    getTargetName(target) {
+      if (target >= this.count)
+        throw new Error(`Index ${target} is out of bounds for ${this.count} targets`);
+      let wasm = this.engine.wasm;
+      return wasm.UTF8ToString(wasm._wl_morph_targets_get_target_name(this._id, target));
+    }
+    getTargetIndex(name) {
+      let wasm = this.engine.wasm, index = wasm._wl_morph_targets_get_target_index(this._id, wasm.tempUTF8(name));
+      if (index === -1)
+        throw Error(`Missing target '${name}'`);
+      return index;
+    }
+  };
+  var RayHit = class {
+    _scene;
+    _ptr;
+    constructor(scene, ptr) {
+      if (ptr & 3)
+        throw new Error("Misaligned pointer: please report a bug");
+      this._scene = scene, this._ptr = ptr;
+    }
+    getLocations(out) {
+      out = out ?? Array.from({ length: this.hitCount }, () => new Float32Array(3));
+      let wasm = this.engine.wasm, alignedPtr = this._ptr / 4;
+      for (let i = 0; i < this.hitCount; ++i) {
+        let locationPtr = alignedPtr + 3 * i;
+        out[i][0] = wasm.HEAPF32[locationPtr], out[i][1] = wasm.HEAPF32[locationPtr + 1], out[i][2] = wasm.HEAPF32[locationPtr + 2];
+      }
+      return out;
+    }
+    getNormals(out) {
+      out = out ?? Array.from({ length: this.hitCount }, () => new Float32Array(3));
+      let wasm = this.engine.wasm, alignedPtr = (this._ptr + 48) / 4;
+      for (let i = 0; i < this.hitCount; ++i) {
+        let normalPtr = alignedPtr + 3 * i;
+        out[i][0] = wasm.HEAPF32[normalPtr], out[i][1] = wasm.HEAPF32[normalPtr + 1], out[i][2] = wasm.HEAPF32[normalPtr + 2];
+      }
+      return out;
+    }
+    getDistances(out = new Float32Array(this.hitCount)) {
+      let wasm = this.engine.wasm, alignedPtr = (this._ptr + 48 * 2) / 4;
+      for (let i = 0; i < this.hitCount; ++i) {
+        let distancePtr = alignedPtr + i;
+        out[i] = wasm.HEAPF32[distancePtr];
+      }
+      return out;
+    }
+    getObjects(out = new Array(this.hitCount)) {
+      let HEAPU16 = this.engine.wasm.HEAPU16, alignedPtr = this._ptr + (48 * 2 + 16) >> 1;
+      for (let i = 0; i < this.hitCount; ++i)
+        out[i] = this._scene.wrap(HEAPU16[alignedPtr + i]);
+      return out;
+    }
+    get engine() {
+      return this._scene.engine;
+    }
+    get locations() {
+      return this.getLocations();
+    }
+    get normals() {
+      return this.getNormals();
+    }
+    get distances() {
+      return this.getDistances();
+    }
+    get objects() {
+      let objects = [null, null, null, null];
+      return this.getObjects(objects);
+    }
+    get hitCount() {
+      return Math.min(this.engine.wasm.HEAPU32[this._ptr / 4 + 30], 4);
+    }
+  };
+  var I18N = class {
+    onLanguageChanged = new Emitter();
+    _engine;
+    _prevLanguageIndex = -1;
+    constructor(engine) {
+      this._engine = engine;
+    }
+    set language(code) {
+      this.setLanguage(code);
+    }
+    get language() {
+      let wasm = this._engine.wasm, code = wasm._wl_i18n_currentLanguage();
+      return code === 0 ? null : wasm.UTF8ToString(code);
+    }
+    get currentIndex() {
+      return this._engine.wasm._wl_i18n_currentLanguageIndex();
+    }
+    get previousIndex() {
+      return this._prevLanguageIndex;
+    }
+    async setLanguage(code) {
+      if (code == null)
+        return Promise.resolve(this.currentIndex);
+      let wasm = this._engine.wasm;
+      this._prevLanguageIndex = this.currentIndex, wasm._wl_i18n_setLanguage(wasm.tempUTF8(code));
+      let scene = this.engine.scene, filename = wasm.UTF8ToString(wasm._wl_i18n_languageFile(this.currentIndex)), url = `${scene.baseURL}/locale/${filename}`;
+      return await scene._downloadDependency(url), this.onLanguageChanged.notify(this._prevLanguageIndex, this.currentIndex), this.currentIndex;
+    }
+    translate(term) {
+      let wasm = this._engine.wasm, translation = wasm._wl_i18n_translate(wasm.tempUTF8(term));
+      return translation === 0 ? null : wasm.UTF8ToString(translation);
+    }
+    languageCount() {
+      return this._engine.wasm._wl_i18n_languageCount();
+    }
+    languageIndex(code) {
+      let wasm = this._engine.wasm;
+      return wasm._wl_i18n_languageIndex(wasm.tempUTF8(code));
+    }
+    languageCode(index) {
+      let wasm = this._engine.wasm, code = wasm._wl_i18n_languageCode(index);
+      return code === 0 ? null : wasm.UTF8ToString(code);
+    }
+    languageName(index) {
+      let wasm = this._engine.wasm, name = wasm._wl_i18n_languageName(index);
+      return name === 0 ? null : wasm.UTF8ToString(name);
+    }
+    get engine() {
+      return this._engine;
+    }
+  };
+  var Environment = class {
+    _scene;
+    constructor(scene) {
+      this._scene = scene;
+    }
+    get intensity() {
+      return this._scene.engine.wasm._wl_scene_environment_get_intensity(this._scene._index);
+    }
+    set intensity(intensity) {
+      this._scene.engine.wasm._wl_scene_environment_set_intensity(this._scene._index, intensity);
+    }
+    getTint(out = new Float32Array(3)) {
+      let wasm = this._scene.engine.wasm;
+      return wasm._wl_scene_environment_get_tint(this._scene._index, wasm._tempMem), out[0] = wasm._tempMemFloat[0], out[1] = wasm._tempMemFloat[1], out[2] = wasm._tempMemFloat[2], out;
+    }
+    get tint() {
+      return this.getTint();
+    }
+    setTint(v) {
+      this._scene.engine.wasm._wl_scene_environment_set_tint(this._scene._index, v[0], v[1], v[2]);
+    }
+    set tint(v) {
+      this.setTint(v);
+    }
+    getCoefficients(out = new Float32Array(3 * 9)) {
+      let wasm = this._scene.engine.wasm;
+      wasm.requireTempMem(3 * 9 * 4), wasm._wl_scene_environment_get_coefficients(this._scene._index, wasm._tempMem);
+      for (let i = 0; i < 3 * 9; ++i)
+        out[i] = wasm._tempMemFloat[i];
+      return out;
+    }
+    get coefficients() {
+      return this.getCoefficients();
+    }
+    setCoefficients(v) {
+      let count = v.length / 3;
+      count > 9 ? count = 9 : count > 4 && count < 9 ? count = 4 : count > 1 && count < 4 && (count = 1);
+      let wasm = this._scene.engine.wasm;
+      wasm._tempMemFloat.set(v), wasm._wl_scene_environment_set_coefficients(this._scene._index, wasm._tempMem, count);
+    }
+    set coefficients(v) {
+      this.setCoefficients(v);
     }
   };
   var version = "1.4.7";
@@ -2158,7 +3333,1093 @@
   (!matches || matches.length < 4) && console.error(`Invalid version '${version}'. Expected: major.minor.patch[-rc.x]`);
   var APIVersion = { major: Number.parseInt(matches[1]), minor: Number.parseInt(matches[2]), patch: Number.parseInt(matches[3]), rc: matches[4] !== void 0 ? Number.parseInt(matches[4]) : 0 };
   var MaterialParamType = ((MaterialParamType2) => (MaterialParamType2[MaterialParamType2.UnsignedInt = 0] = "UnsignedInt", MaterialParamType2[MaterialParamType2.Int = 1] = "Int", MaterialParamType2[MaterialParamType2.HalfFloat = 2] = "HalfFloat", MaterialParamType2[MaterialParamType2.Float = 3] = "Float", MaterialParamType2[MaterialParamType2.Sampler = 4] = "Sampler", MaterialParamType2[MaterialParamType2.Font = 5] = "Font", MaterialParamType2))(MaterialParamType || {});
+  var Material = class extends Resource {
+    constructor(engine, params) {
+      if (typeof params != "number") {
+        if (!params?.pipeline)
+          throw new Error("Missing parameter 'pipeline'");
+        let template = engine.materials.getTemplate(params.pipeline), material = new template();
+        return super(engine, material._index), material;
+      }
+      super(engine, params);
+    }
+    hasParameter(name) {
+      let parameters = this.constructor.Parameters;
+      return parameters && parameters.has(name);
+    }
+    get shader() {
+      return this.pipeline;
+    }
+    get pipeline() {
+      let wasm = this.engine.wasm;
+      return wasm.UTF8ToString(wasm._wl_material_get_pipeline(this._id));
+    }
+    clone() {
+      let index = this.engine.wasm._wl_material_clone(this._id);
+      return this.engine.materials.wrap(index);
+    }
+    toString() {
+      return this.isDestroyed ? "Material(destroyed)" : `Material('${this.pipeline}', ${this._index})`;
+    }
+    static wrap(engine, index) {
+      return engine.materials.wrap(index);
+    }
+  };
+  var MaterialManager = class extends ResourceManager {
+    _materialTemplates = [];
+    constructor(engine) {
+      super(engine, Material), this._cacheDefinitions();
+    }
+    wrap(index) {
+      if (index <= 0)
+        return null;
+      let cached = this._cache[index];
+      if (cached)
+        return cached;
+      let definition = this.engine.wasm._wl_material_get_definition(index), Template = this._materialTemplates[definition], material = new Template(index);
+      return this._wrapInstance(material);
+    }
+    getTemplate(pipeline) {
+      let wasm = this.engine.wasm, index = wasm._wl_get_material_definition_index(wasm.tempUTF8(pipeline));
+      if (!index)
+        throw new Error(`Pipeline '${pipeline}' doesn't exist in the scene`);
+      return this._materialTemplates[index];
+    }
+    _wrapInstance(instance) {
+      if (this._cache[instance.index] = instance, !this.engine.legacyMaterialSupport)
+        return instance;
+      let proxy = new Proxy(instance, { get(target, prop) {
+        if (!target.hasParameter(prop))
+          return target[prop];
+        let name = `get${capitalizeFirstUTF8(prop)}`;
+        return target[name]();
+      }, set(target, prop, value) {
+        if (!target.hasParameter(prop))
+          return target[prop] = value, true;
+        let name = `set${capitalizeFirstUTF8(prop)}`;
+        return target[name](value), true;
+      } });
+      return this._cache[instance.index] = proxy, proxy;
+    }
+    _cacheDefinitions() {
+      let count = this.engine.wasm._wl_get_material_definition_count();
+      for (let i = 1; i < count; ++i)
+        this._materialTemplates[i] = this._createMaterialTemplate(i);
+    }
+    _createMaterialTemplate(definitionIndex) {
+      let engine = this.engine, template = class extends Material {
+        static Parameters = /* @__PURE__ */ new Set();
+        constructor(index) {
+          return index = index ?? engine.wasm._wl_material_create(definitionIndex), super(engine, index), engine.materials._wrapInstance(this);
+        }
+      }, wasm = this.engine.wasm, nbParams = wasm._wl_material_definition_get_param_count(definitionIndex);
+      for (let index = 0; index < nbParams; ++index) {
+        let name = wasm.UTF8ToString(wasm._wl_material_definition_get_param_name(definitionIndex, index));
+        template.Parameters.add(name);
+        let t = wasm._wl_material_definition_get_param_type(definitionIndex, index), type = t & 255, componentCount = t >> 8 & 255, capitalized = capitalizeFirstUTF8(name), getterId = `get${capitalized}`, setterId = `set${capitalized}`, templateProto = template.prototype;
+        switch (type) {
+          case 0:
+            templateProto[getterId] = uint32Getter(index, componentCount), templateProto[setterId] = uint32Setter(index);
+            break;
+          case 1:
+            templateProto[getterId] = int32Getter(index, componentCount), templateProto[setterId] = uint32Setter(index);
+            break;
+          case 2:
+          case 3:
+            templateProto[getterId] = float32Getter(index, componentCount), templateProto[setterId] = float32Setter(index, componentCount);
+            break;
+          case 4:
+            templateProto[getterId] = samplerGetter(index), templateProto[setterId] = samplerSetter(index);
+            break;
+          case 5:
+            templateProto[getterId] = fontGetter(index);
+            break;
+        }
+      }
+      return template;
+    }
+  };
+  function uint32Getter(index, count) {
+    return count === 1 ? function() {
+      let wasm = this.engine.wasm;
+      return wasm._wl_material_get_param_value(this._id, index, wasm._tempMem), wasm._tempMemUint32[0];
+    } : function(out = new Uint32Array(count)) {
+      let wasm = this.engine.wasm;
+      wasm._wl_material_get_param_value(this._id, index, wasm._tempMem);
+      for (let i = 0; i < out.length; ++i)
+        out[i] = wasm._tempMemUint32[i];
+      return out;
+    };
+  }
+  function uint32Setter(index) {
+    return function(value) {
+      this.engine.wasm._wl_material_set_param_value_uint(this._id, index, value);
+    };
+  }
+  function int32Getter(index, count) {
+    return count === 1 ? function() {
+      let wasm = this.engine.wasm;
+      return wasm._wl_material_get_param_value(this._id, index, wasm._tempMem), wasm._tempMemInt[0];
+    } : function(out = new Int32Array(count)) {
+      let wasm = this.engine.wasm;
+      wasm._wl_material_get_param_value(this._id, index, wasm._tempMem);
+      for (let i = 0; i < out.length; ++i)
+        out[i] = wasm._tempMemInt[i];
+      return out;
+    };
+  }
+  function float32Getter(index, count) {
+    return count === 1 ? function() {
+      let wasm = this.engine.wasm;
+      return wasm._wl_material_get_param_value(this._id, index, wasm._tempMem), wasm._tempMemFloat[0];
+    } : function(out = new Float32Array(count)) {
+      let wasm = this.engine.wasm;
+      wasm._wl_material_get_param_value(this._id, index, wasm._tempMem);
+      for (let i = 0; i < out.length; ++i)
+        out[i] = wasm._tempMemFloat[i];
+      return out;
+    };
+  }
+  function float32Setter(index, count) {
+    return function(value) {
+      let wasm = this.engine.wasm, actualCount = 1;
+      if (typeof value == "number")
+        wasm._tempMemFloat[0] = value;
+      else {
+        actualCount = value.length;
+        for (let i = 0; i < actualCount; ++i)
+          wasm._tempMemFloat[i] = value[i];
+      }
+      if (actualCount < count)
+        throw new Error(`Expected an array ${count} values, got ${actualCount}`);
+      wasm._wl_material_set_param_value_float(this._id, index, wasm._tempMem, count);
+    };
+  }
+  function samplerGetter(index) {
+    return function() {
+      let wasm = this.engine.wasm;
+      return wasm._wl_material_get_param_value(this._id, index, wasm._tempMem), this.engine.textures.wrap(wasm._tempMemInt[0]);
+    };
+  }
+  function samplerSetter(index) {
+    return function(value) {
+      this.engine.wasm._wl_material_set_param_value_uint(this._id, index, value?._id ?? 0);
+    };
+  }
+  function fontGetter(index) {
+    return function() {
+      let wasm = this.engine.wasm;
+      return wasm._wl_material_get_param_value(this._id, index, wasm._tempMem), this.engine.fonts.wrap(wasm._tempMemInt[0]);
+    };
+  }
+  var MeshManager = class extends ResourceManager {
+    constructor(engine) {
+      super(engine, Mesh);
+    }
+    create(params) {
+      if (!params.vertexCount)
+        throw new Error("Missing parameter 'vertexCount'");
+      let wasm = this.engine.wasm, indexData = 0, indexType = 0, indexDataSize = 0;
+      if (params.indexData)
+        switch (indexType = params.indexType || 2, indexDataSize = params.indexData.length * indexType, indexData = wasm._malloc(indexDataSize), indexType) {
+          case 1:
+            wasm.HEAPU8.set(params.indexData, indexData);
+            break;
+          case 2:
+            wasm.HEAPU16.set(params.indexData, indexData >> 1);
+            break;
+          case 4:
+            wasm.HEAPU32.set(params.indexData, indexData >> 2);
+            break;
+        }
+      let { skinningType = 0 } = params, index = wasm._wl_mesh_create(indexData, indexDataSize, indexType, params.vertexCount, skinningType), instance = new Mesh(this._host, index);
+      return this._cache[instance.index] = instance, instance;
+    }
+  };
+  function needsFlipY(image) {
+    return image instanceof ImageBitmap ? 0 : 1;
+  }
+  var TextureManager = class extends ResourceManager {
+    constructor(engine) {
+      super(engine, Texture);
+    }
+    create(image) {
+      let wasm = this.engine.wasm, jsImageIndex = wasm._images.length;
+      if (wasm._images.push(image), image instanceof HTMLImageElement && !image.complete)
+        throw new Error("image must be ready to create a texture");
+      let width = image.videoWidth ?? image.width, height = image.videoHeight ?? image.height, imageIndex = wasm._wl_image_create(jsImageIndex);
+      wasm._wl_image_markReady(imageIndex, width, height, needsFlipY(image));
+      let index = wasm._wl_texture_create(imageIndex), instance = new Texture(this.engine, index);
+      return this._cache[instance.index] = instance, instance;
+    }
+    load(filename, crossOrigin) {
+      let image = new Image();
+      return image.crossOrigin = crossOrigin ?? image.crossOrigin, image.src = filename, new Promise((resolve, reject) => {
+        image.onload = () => {
+          resolve(this.create(image));
+        }, image.onerror = function() {
+          reject("Failed to load image. Not found or no read access");
+        };
+      });
+    }
+  };
+  var XRSessionState = class {
+    #webxr;
+    sessionMode;
+    session;
+    frame = null;
+    constructor(webxr, mode, session) {
+      this.#webxr = webxr, this.sessionMode = mode, this.session = session;
+    }
+    referenceSpaceForType(type) {
+      return this.#webxr.referenceSpaceForType(type);
+    }
+    set currentReferenceSpace(refSpace) {
+      this.#webxr.currentReferenceSpace = refSpace;
+    }
+    get currentReferenceSpace() {
+      return this.#webxr.currentReferenceSpace;
+    }
+    get currentReferenceSpaceType() {
+      return this.#webxr.currentReferenceSpaceType;
+    }
+    get baseLayer() {
+      return this.#webxr.baseLayer;
+    }
+    get framebuffers() {
+      return this.#webxr.framebuffers;
+    }
+  };
+  var WebXR = class {
+    #wasm;
+    engine;
+    sessionState = null;
+    colorFormat = 32856;
+    depthFormat = 35056;
+    textureType = "texture";
+    onSessionEnd = new Emitter();
+    onSessionStart = new RetainEmitter();
+    onSessionFirstFrame = new Emitter();
+    arSupported = false;
+    vrSupported = false;
+    baseLayer = null;
+    framebufferScaleFactor = 1;
+    _webglBinding = null;
+    _initXR = false;
+    _inXR = false;
+    _refSpaces = { viewer: void 0, local: void 0, "local-floor": void 0, "bounded-floor": void 0, unbounded: void 0 };
+    _refSpace = null;
+    _refSpaceType = null;
+    _fbo = 0;
+    _allowLayers = false;
+    _requestAnimationFrameId = null;
+    _initialReferenceSpaceType = null;
+    _tempPosition = new Float32Array(3);
+    _tempRotation = new Float32Array(4);
+    _tempPose(transform) {
+      let p = transform.position;
+      this._tempPosition[0] = p.x, this._tempPosition[1] = p.y, this._tempPosition[2] = p.z;
+      let o = transform.orientation;
+      this._tempRotation[0] = o.x, this._tempRotation[1] = o.y, this._tempRotation[2] = o.z, this._tempRotation[3] = o.w;
+    }
+    constructor(engine) {
+      this.engine = engine, this.#wasm = engine.wasm;
+    }
+    checkXRSupport() {
+      if (typeof navigator > "u")
+        return Promise.resolve(false);
+      if (!navigator.xr) {
+        let isLocalhost = location.hostname === "localhost" || location.hostname === "127.0.0.1", missingHTTPS = location.protocol !== "https:" && !isLocalhost;
+        return console.warn(missingHTTPS ? "WebXR is only supported with HTTPS or on localhost!" : "WebXR unsupported in this browser."), Promise.resolve(false);
+      }
+      let vrPromise = navigator.xr.isSessionSupported("immersive-vr").then((supported) => this.vrSupported = supported).catch(() => this.vrSupported = false), arPromise = navigator.xr.isSessionSupported("immersive-ar").then((supported) => this.arSupported = supported).catch(() => this.arSupported = false);
+      return Promise.all([vrPromise, arPromise]).then(() => this.vrSupported || this.arSupported);
+    }
+    async init(framebufferScaleFactor, offerSessionOptions) {
+      if (!await this.checkXRSupport())
+        return;
+      this.framebufferScaleFactor = framebufferScaleFactor;
+      let onXRStart = () => {
+        this._initialReferenceSpaceType = this.currentReferenceSpaceType;
+        let newSpace = this._refSpaces.local ?? this._refSpaces.viewer;
+        this.currentReferenceSpace = newSpace;
+      };
+      if (this.onSessionStart.add(onXRStart), this.engine.onLoadingScreenEnd.once(() => {
+        this.onSessionStart.remove(onXRStart), this._initialReferenceSpaceType && (this.currentReferenceSpace = this._refSpaces[this._initialReferenceSpaceType] ?? this._refSpaces.viewer, this._initialReferenceSpaceType = null);
+      }), offerSessionOptions !== null) {
+        let mode = offerSessionOptions.mode;
+        mode == "auto" && (this.vrSupported ? mode = "immersive-vr" : this.arSupported ? mode = "immersive-ar" : mode = "inline");
+        let offerSession = () => {
+          this.offerSession(mode, offerSessionOptions.features, offerSessionOptions.optionalFeatures).then((s) => s.addEventListener("end", offerSession)).catch(console.warn);
+        };
+        offerSession();
+      }
+    }
+    referenceSpaceForType(type) {
+      return this._refSpaces[type] ?? null;
+    }
+    set currentReferenceSpace(refSpace) {
+      this._refSpace = refSpace, this._refSpaceType = null;
+      for (let type of Object.keys(this._refSpaces))
+        this._refSpaces[type] === refSpace && (this._refSpaceType = type);
+    }
+    get currentReferenceSpace() {
+      return this._refSpace;
+    }
+    get currentReferenceSpaceType() {
+      return this._refSpaceType;
+    }
+    get framebuffers() {
+      return Array.isArray(this._fbo) ? this._fbo.map((id) => this.#wasm.GL.framebuffers[id]) : [this.#wasm.GL.framebuffers[this._fbo]];
+    }
+    updateViewState(inXR) {
+      let scene = this.engine.scene;
+      inXR = inXR ?? this._inXR, scene.mainView && (scene.mainView.active = !inXR), scene.leftEyeView && scene.rightEyeView && (scene.leftEyeView.active = inXR, scene.rightEyeView.active = inXR);
+    }
+    updateProjectionParams(near, far) {
+      if (!this.sessionState)
+        return;
+      let scene = this.engine.scene;
+      near ??= scene.leftEyeView.near, far ??= scene.leftEyeView.far;
+      let reverseZ = !!this.engine.isReverseZEnabled;
+      this.sessionState.session.updateRenderState({ depthNear: reverseZ ? far : near, depthFar: reverseZ ? near : far });
+    }
+    requestSession(mode, features, optionalFeatures = []) {
+      let options = this.sessionOptions(features, optionalFeatures);
+      return navigator.xr.requestSession(mode, options).then(async (s) => (await this.engine.canvas.getContext("webgl2").makeXRCompatible(), this.startSession(s, mode), s));
+    }
+    offerSession(mode, features, optionalFeatures = []) {
+      if (!navigator.xr.offerSession)
+        return Promise.reject("WebXR offerSession() unsupported in this browser.");
+      let options = this.sessionOptions(features, optionalFeatures);
+      return navigator.xr.offerSession(mode, options).then(async (s) => (await this.engine.canvas.getContext("webgl2").makeXRCompatible(), this.startSession(s, mode), s));
+    }
+    async startSession(session, mode) {
+      if (session == this.sessionState?.session)
+        return;
+      this.sessionState = new XRSessionState(this, mode, session), session.addEventListener("end", () => {
+        this.endSession();
+      });
+      let gl = this.engine.canvas.getContext("webgl2"), binding = null;
+      !("CustomWebXRPolyfill" in window) && "XRWebGLBinding" in window && (binding = this._webglBinding = new XRWebGLBinding(session, gl));
+      let useLayers = this._allowLayers && binding;
+      if (useLayers) {
+        let layer = this.baseLayer = binding.createProjectionLayer({ scaleFactor: this.framebufferScaleFactor, colorFormat: this.colorFormat, depthFormat: this.depthFormat, textureType: this.textureType ? this.textureType : "texture-array" });
+        session.updateRenderState({ layers: [layer] });
+      } else {
+        let layer = this.baseLayer = new XRWebGLLayer(session, gl, { framebufferScaleFactor: this.framebufferScaleFactor });
+        session.updateRenderState({ baseLayer: layer });
+      }
+      let promises = [];
+      for (let type of Object.keys(this._refSpaces))
+        promises.push(session.requestReferenceSpace(type).then((refSpace) => (this._refSpaces[type] = refSpace, refSpace)));
+      await Promise.allSettled(promises).then((results) => {
+        for (let i = results.length - 1; i >= 0; --i) {
+          let result = results[i];
+          if (result.status !== "rejected") {
+            this._refSpaceType = Object.keys(this._refSpaces)[i], this._refSpace = result.value;
+            break;
+          }
+        }
+      });
+      let isVR = mode == "immersive-vr", scene = this.engine.scene;
+      if (isVR && (!scene.leftEyeView || !scene.rightEyeView)) {
+        console.error("sessionStart(): VR sessions require 1 classic view, a left and a right view");
+        return;
+      }
+      this.updateViewState(true), this.updateProjectionParams(void 0, void 0), this.onSessionStart.notify(session, this.sessionState.sessionMode), this.#wasm._wl_reset_context(), console.log(`WebXR ${isVR ? "VR" : "AR"} session started`), this.sessionState.session.addEventListener("visibilitychange", (event) => {
+        switch (event.session.visibilityState) {
+          case "visible":
+            this.#wasm._wl_xr_focus();
+          case "visible-blurred":
+            this.#wasm._wl_xr_blur();
+          case "hidden":
+            this.#wasm._wl_xr_hide();
+        }
+      }), this._initXR = true, this._requestAnimationFrameId = session.requestAnimationFrame(useLayers ? this.nextFrameLayers.bind(this) : this.nextFrameSingle.bind(this));
+    }
+    sessionOptions(requiredFeatures, optionalFeatures = []) {
+      this._allowLayers && !optionalFeatures.includes("layers") && optionalFeatures.push("layers");
+      let params = { requiredFeatures, optionalFeatures };
+      return (requiredFeatures.includes("depth-sensing") || optionalFeatures.includes("depth-sensing")) && (params.depthSensing = { usagePreference: ["gpu-optimized", "cpu-optimized"], dataFormatPreference: ["float32", "luminance-alpha"] }), params;
+    }
+    endSession() {
+      this.sessionState.session.cancelAnimationFrame(this._requestAnimationFrameId), this._requestAnimationFrameId = null, this.sessionState = null, this.#wasm._wl_reset_context(), this.onSessionStart instanceof RetainEmitter && this.onSessionStart.reset(), this.onSessionEnd.notify(), console.log("WebXR session ended"), this._inXR = false, this.updateViewState(false);
+      let scene = this.engine.scene;
+      this.#wasm._wl_xr_exit(), scene.leftEyeView._generateProjectionMatrix(), scene.rightEyeView._generateProjectionMatrix(), this.#wasm._wl_application_redraw();
+    }
+    nextFrame(time, frame) {
+      this.sessionState.frame = frame;
+      let session = frame.session, pose = frame.getViewerPose(this._refSpace);
+      if (!pose)
+        return;
+      let scene = this.engine.scene;
+      this._initXR && (scene.rightEyeView.active = pose.views.length > 1, this.#wasm._wl_xr_init(pose.views.length, !this.baseLayer), this._initXR = false, this._inXR = true, this.onSessionFirstFrame.notify(session, this.sessionState.sessionMode)), this._tempPose(pose.transform), scene._setInputTransformation(0, this._tempPosition, this._tempRotation);
+      for (let i = 0; i < pose.views.length && i < 2; ++i) {
+        let view = pose.views[i], viewIndex = view.eye == "right" ? 1 : 0;
+        this._tempPose(view.transform), scene._setInputTransformation(1 + viewIndex, this._tempPosition, this._tempRotation);
+      }
+      for (let inputSource of session.inputSources) {
+        let handedness = -1;
+        inputSource.handedness == "left" ? handedness = 0 : inputSource.handedness == "right" && (handedness = 1), this._updateInputComponent(frame, inputSource.gripSpace, 3 + handedness), this._updateInputComponent(frame, inputSource.targetRaySpace, 5 + handedness);
+      }
+      this.#wasm._wl_nextFrame(0);
+    }
+    nextFrameSingle(time, frame) {
+      let session = frame.session;
+      this.sessionState != null && (this._requestAnimationFrameId = session.requestAnimationFrame(this.nextFrameSingle.bind(this)));
+      let pose = frame.getViewerPose(this._refSpace);
+      if (!pose)
+        return;
+      let gl = this.engine.canvas.getContext("webgl2"), GL = this.#wasm.GL, glLayer = session.renderState.baseLayer;
+      if (glLayer.framebuffer) {
+        let id = this._fbo || GL.getNewId(GL.framebuffers);
+        glLayer.framebuffer.name = id, GL.framebuffers[id] = glLayer.framebuffer, this._fbo = id, gl.bindFramebuffer(gl.FRAMEBUFFER, GL.framebuffers[id]);
+      }
+      for (let i = 0; i < pose.views.length; ++i) {
+        let view = pose.views[i], viewport = glLayer.getViewport(view), destView;
+        view.eye == "left" ? destView = this.engine.scene.leftEyeView : view.eye == "right" ? destView = this.engine.scene.rightEyeView : destView = this.engine.scene._components.componentAt(ViewComponent, i), destView._setViewport(viewport.x, viewport.y, viewport.width, viewport.height), destView._setProjectionMatrix(view.projectionMatrix), this.#wasm._wl_view_component_remapProjectionMatrix(destView._id, this.engine.isReverseZEnabled, false), this.#wasm._wl_view_component_set_externalFramebuffer(destView._id, this._fbo);
+      }
+      this.nextFrame(time, frame);
+    }
+    nextFrameLayers(time, frame) {
+      let session = frame.session;
+      this.sessionState != null && (this._requestAnimationFrameId = session.requestAnimationFrame(this.nextFrameLayers.bind(this)));
+      let scene = this.engine.scene, pose = frame.getViewerPose(this._refSpace), layer = this.baseLayer, binding = this._webglBinding, gl = this.engine.canvas.getContext("webgl2"), GL = this.#wasm.GL, createFramebuffer = !this._fbo, textureArray = layer.textureArrayLength == 2;
+      if (createFramebuffer) {
+        if (textureArray)
+          this._fbo = [GL.getNewId(GL.framebuffers), GL.getNewId(GL.framebuffers)];
+        else {
+          let id = GL.getNewId(GL.framebuffers);
+          this._fbo = [id, id];
+        }
+        this._fbo.forEach((id) => {
+          let framebuffer = gl.createFramebuffer();
+          GL.framebuffers[id] = framebuffer, framebuffer.name = id;
+        });
+      }
+      let ids = this._fbo;
+      pose.views.forEach((view) => {
+        let viewIndex = view.eye == "right" ? 1 : 0, subImage = binding.getViewSubImage(layer, view), viewport = subImage.viewport, destView;
+        if (view.eye == "right" ? destView = this.engine.scene.rightEyeView : destView = this.engine.scene.leftEyeView, destView._setViewport(viewport.x, viewport.y, viewport.width, viewport.height), destView._setProjectionMatrix(view.projectionMatrix), this.#wasm._wl_view_component_remapProjectionMatrix(destView._id, this.engine.isReverseZEnabled, false), this.#wasm._wl_view_component_set_externalFramebuffer(destView._id, ids[viewIndex]), !createFramebuffer || !textureArray && viewIndex != 0)
+          return;
+        let colorTexture = subImage.colorTexture, colorImageId = colorTexture.name = colorTexture.name || GL.getNewId(GL.textures);
+        GL.textures[colorImageId] = colorTexture;
+        let depthStencilTexture = subImage.depthStencilTexture, depthStencilImageId = depthStencilTexture.name = depthStencilTexture.name || GL.getNewId(GL.textures);
+        GL.textures[depthStencilImageId] = depthStencilTexture, gl.bindFramebuffer(gl.FRAMEBUFFER, GL.framebuffers[ids[viewIndex]]), textureArray ? (gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, subImage.colorTexture, 0, subImage.imageIndex), gl.framebufferTextureLayer(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, subImage.depthStencilTexture, 0, subImage.imageIndex)) : (gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, subImage.colorTexture, 0), gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_STENCIL_ATTACHMENT, gl.TEXTURE_2D, subImage.depthStencilTexture, 0)), gl.checkFramebufferStatus(gl.FRAMEBUFFER) || console.error("Target framebuffer for", view.eye, "eye is incomplete.");
+      }), this.nextFrame(time, frame);
+    }
+    _updateInputComponent(frame, space, inputType) {
+      if (!space)
+        return;
+      let pose = frame.getPose(space, this._refSpace);
+      !pose || Number.isNaN(pose.transform.matrix[0]) || (this._tempPose(pose.transform), this.engine.scene._setInputTransformation(inputType, this._tempPosition, this._tempRotation));
+    }
+  };
+  var GLTFExtensions = class {
+    objectCount;
+    root = {};
+    mesh = {};
+    node = {};
+    constructor(count) {
+      this.objectCount = count;
+    }
+  };
+  var PrefabGLTF = class extends Prefab {
+    extensions = null;
+    constructor(engine, index) {
+      super(engine, index), this.extensions = this._readExtensions();
+    }
+    _processInstantiaton(dest, root, result) {
+      if (!this.extensions)
+        return null;
+      let wasm = this.engine.wasm, count = this.extensions.objectCount, idMapping = new Array(count), activeRootIndex = wasm._wl_object_index(root._id);
+      for (let i = 0; i < count; ++i) {
+        let mappedId = wasm._wl_glTF_scene_extensions_gltfIndex_to_id(this._index, dest._index, activeRootIndex, i);
+        idMapping[i] = mappedId;
+      }
+      let remapped = { mesh: {}, node: {}, idMapping };
+      for (let gltfIndex in this.extensions.mesh) {
+        let id = idMapping[gltfIndex];
+        remapped.mesh[id] = this.extensions.mesh[gltfIndex];
+      }
+      for (let gltfIndex in this.extensions.node) {
+        let id = idMapping[gltfIndex];
+        remapped.node[id] = this.extensions.node[gltfIndex];
+      }
+      result.extensions = remapped;
+    }
+    _readExtensions() {
+      let wasm = this.engine.wasm, ptr = wasm._wl_glTF_scene_get_extensions(this._index);
+      if (!ptr)
+        return null;
+      let index = ptr / 4, data = wasm.HEAPU32, readString = () => {
+        let strPtr = data[index++], strLen = data[index++];
+        return wasm.UTF8ViewToString(strPtr, strPtr + strLen);
+      }, objectCount = data[index++], extensions = new GLTFExtensions(objectCount), meshExtensionsSize = data[index++];
+      for (let i = 0; i < meshExtensionsSize; ++i) {
+        let objectId = data[index++];
+        extensions.mesh[objectId] = JSON.parse(readString());
+      }
+      let nodeExtensionsSize = data[index++];
+      for (let i = 0; i < nodeExtensionsSize; ++i) {
+        let objectId = data[index++];
+        extensions.node[objectId] = JSON.parse(readString());
+      }
+      let rootExtensionsStr = readString();
+      return rootExtensionsStr && (extensions.root = JSON.parse(rootExtensionsStr)), extensions;
+    }
+  };
+  var MAGIC_BIN = "WLEV";
   var SceneType = ((SceneType2) => (SceneType2[SceneType2.Prefab = 0] = "Prefab", SceneType2[SceneType2.Main = 1] = "Main", SceneType2[SceneType2.Dependency = 2] = "Dependency", SceneType2))(SceneType || {});
+  var ChunkedSceneLoadSink = class {
+    #wasm;
+    #type;
+    #closeParameters;
+    #offset = 0;
+    #requested = 0;
+    #firstChunk = true;
+    _loadIndex = -1;
+    sceneIndex = -1;
+    #ptr = 0;
+    #bufferSize = 0;
+    constructor(engine, type, url, ...closeParameters) {
+      this.#wasm = engine.wasm, this.#type = type, this.#closeParameters = closeParameters, this._loadIndex = this.#wasm._wl_scene_create_chunked_start(this.#wasm.tempUTF8(url)), this.#requested = this.#wasm._wl_scene_create_chunked_buffer_size(this._loadIndex), this._resizeBuffer(this.#requested);
+    }
+    _resizeBuffer(size) {
+      this.#bufferSize > 0 && this.#wasm._free(this.#ptr), this.#bufferSize = size, this.#ptr = size ? this.#wasm._malloc(size) : 0;
+    }
+    _throwError(reason) {
+      throw this.abort(), new Error(reason);
+    }
+    write(blob) {
+      let read = 0;
+      for (; read < blob.length; ) {
+        let toRead = Math.min(blob.length - read, this.#bufferSize - this.#offset);
+        if (this.#wasm.HEAPU8.set(blob.subarray(read, read + toRead), this.#ptr + this.#offset), this.#offset += toRead, read += toRead, this.#requested > this.#offset)
+          continue;
+        let readSizePtr = this.#wasm._tempMem, requestedPtr = this.#wasm._tempMem + 4, success;
+        try {
+          success = this.#wasm._wl_scene_create_chunked_next(this._loadIndex, this.#ptr, this.#offset, readSizePtr, requestedPtr);
+        } catch {
+          success = false;
+        }
+        success || this._throwError("Chunk parsing failed");
+        let sentSize = this.#offset, readSize = this.#wasm._tempMemUint32[0];
+        this.#requested = this.#wasm._tempMemUint32[1];
+        let extraSize = sentSize - readSize;
+        extraSize > this.#requested && this._throwError("Unexpected extra data"), readSize && (extraSize > 0 && this.#wasm.HEAPU8.copyWithin(this.#ptr, this.#ptr + readSize, this.#ptr + sentSize), this.#offset = extraSize, this.#firstChunk && (this._resizeBuffer(this.#wasm._wl_scene_create_chunked_buffer_size(this._loadIndex)), this.#firstChunk = false));
+      }
+    }
+    close() {
+      switch (this.#requested > 0 && this._throwError("Unexpected end of data"), this._resizeBuffer(0), this.#type) {
+        case 0:
+          this.sceneIndex = this.#wasm._wl_scene_create_chunked_end_prefab(this._loadIndex);
+          break;
+        case 1:
+          this.#wasm._wl_scene_create_chunked_end_main(this._loadIndex), this.sceneIndex = 0;
+          break;
+        case 2:
+          [this.sceneIndex] = this.#closeParameters, this.#wasm._wl_scene_create_chunked_end_queued(this._loadIndex, this.sceneIndex);
+          break;
+        default:
+          this.#wasm._wl_scene_create_chunked_abort(this._loadIndex);
+          break;
+      }
+      this._loadIndex = -1;
+    }
+    abort() {
+      this._loadIndex !== -1 && (this.#wasm._wl_scene_create_chunked_abort(this._loadIndex), this._loadIndex = -1, this._resizeBuffer(0));
+    }
+    get size() {
+      return this.#bufferSize;
+    }
+  };
+  var Scene = class _Scene extends Prefab {
+    onPreRender = new Emitter();
+    onPostRender = new Emitter();
+    _rayHit;
+    _hit;
+    _environment;
+    constructor(engine, index) {
+      super(engine, index), this._rayHit = this.engine?.wasm._malloc(4 * (3 * 4 + 3 * 4 + 4 + 2) + 4), this._hit = new RayHit(this, this._rayHit), this._environment = new Environment(this);
+    }
+    instantiate(prefab) {
+      if (prefab._index === this._index)
+        throw new Error("Can't instantiate scene into itself");
+      let id = this.engine.wasm._wl_scene_instantiate(prefab._index, this._index), result = { root: this.wrap(id) };
+      if (prefab instanceof PrefabGLTF) {
+        let obj = this.wrap(id);
+        prefab._processInstantiaton(this, obj, result);
+      }
+      return result;
+    }
+    destroy() {
+      if (this.isActive)
+        throw new Error(`Attempt to destroy ${this}, but destroying the active scene is not supported`);
+      let wasm = this.engine.wasm, rayPtr = this._rayHit;
+      super.destroy(), wasm._free(rayPtr);
+    }
+    get views() {
+      return this._components.components(ViewComponent, false);
+    }
+    get activeViews() {
+      return this._components.components(ViewComponent, true);
+    }
+    get mainView() {
+      let id = this.engine.wasm._wl_scene_get_mainView(this._index);
+      return this._components.wrapView(id);
+    }
+    set mainView(view) {
+      view && (this.assertOrigin(view), this.engine.wasm._wl_scene_set_mainView(view._id));
+    }
+    get leftEyeView() {
+      let id = this.engine.wasm._wl_scene_get_leftView(this._index);
+      return this._components.wrapView(id);
+    }
+    get rightEyeView() {
+      let id = this.engine.wasm._wl_scene_get_rightView(this._index);
+      return this._components.wrapView(id);
+    }
+    _setInputTransformation(type, position, orientation) {
+      let wasm = this.engine.wasm;
+      wasm.requireTempMem(4 * 2 * 4), wasm._tempMemFloat.set(position), wasm._tempMemFloat.set(orientation, 4), wasm._wl_input_set_transformation(this._index, type, wasm._tempMem);
+    }
+    rayCast(o, d, groupMask, maxDistance = 100) {
+      return this.engine.wasm._wl_scene_ray_cast(this._index, o[0], o[1], o[2], d[0], d[1], d[2], groupMask, this._rayHit, maxDistance), this._hit;
+    }
+    set clearColor(color) {
+      this.engine.wasm._wl_scene_set_clearColor(color[0], color[1], color[2], color[3]);
+    }
+    set colorClearEnabled(b) {
+      this.engine.wasm._wl_scene_enableColorClear(b);
+    }
+    async load(options) {
+      let engine = this.engine, dispatchReadyEvent = false, opts;
+      isString(options) ? opts = await _Scene.loadBuffer(options, (bytes, size) => {
+        this.engine.log.info(1, `Scene downloading: ${bytes} / ${size}`), this.engine.setLoadingProgress(bytes / size);
+      }) : (opts = options, dispatchReadyEvent = options.dispatchReadyEvent ?? false);
+      let scene = await engine.loadMainSceneFromBuffer({ ...opts, dispatchReadyEvent });
+      return engine.onSceneLoaded.notify(), scene;
+    }
+    async append(file, options = {}) {
+      let { baseURL = isString(file) ? getBaseUrl(file) : this.baseURL } = options, buffer = isString(file) ? await fetchWithProgress(file) : file, data = new Uint8Array(buffer), scene = data.byteLength > MAGIC_BIN.length && data.subarray(0, MAGIC_BIN.length).every((value, i) => value === MAGIC_BIN.charCodeAt(i)) ? this.engine.loadPrefabFromBuffer({ buffer, baseURL }) : this.engine.loadGLTFFromBuffer({ buffer, baseURL, extensions: options.loadGltfExtensions }), result = this.instantiate(scene);
+      return scene instanceof PrefabGLTF ? scene.extensions ? { root: result.root, extensions: { ...result.extensions, root: scene.extensions.root } } : result.root : (scene.destroy(), result.root);
+    }
+    setLoadingProgress(percentage) {
+      this.engine.setLoadingProgress(percentage);
+    }
+    dispatchReadyEvent() {
+      document.dispatchEvent(new CustomEvent("wle-scene-ready", { detail: { filename: this.filename } }));
+    }
+    set skyMaterial(material) {
+      this.engine.wasm._wl_scene_set_sky_material(this._index, material?._id ?? 0);
+    }
+    get skyMaterial() {
+      let index = this.engine.wasm._wl_scene_get_sky_material(this._index);
+      return this.engine.materials.wrap(index);
+    }
+    get environment() {
+      return this._environment;
+    }
+    get componentsBundle() {
+      let wasm = this.engine.wasm, ptr = wasm._wl_scene_get_componentsBundle(this._index);
+      return ptr ? wasm.UTF8ToString(ptr) : null;
+    }
+    reset() {
+    }
+    async _downloadDependency(url) {
+      let sink = new ChunkedSceneLoadSink(this.engine, 2, url, this._index);
+      return (await fetchStreamWithProgress(url)).pipeTo(new WritableStream(sink));
+    }
+    async _downloadDependencies() {
+      let wasm = this.engine.wasm, count = wasm._wl_scene_queued_bin_count(this._index);
+      if (!count)
+        return Promise.resolve();
+      let urls = new Array(count).fill(0).map((_, i) => {
+        let ptr = wasm._wl_scene_queued_bin_path(this._index, i);
+        return wasm.UTF8ToString(ptr);
+      });
+      return wasm._wl_scene_clear_queued_bin_list(this._index), Promise.all(urls.map((url) => this._downloadDependency(url)));
+    }
+  };
+  function checkRuntimeCompatibility(version2) {
+    let { major, minor } = version2, majorDiff = major - APIVersion.major, minorDiff = minor - APIVersion.minor;
+    if (!majorDiff && !minorDiff)
+      return;
+    let error = `checkRuntimeCompatibility(): Version compatibility mismatch:
+	\u2192 API and runtime compatibility is enforced on a patch level (versions x.y.*)
+`;
+    throw majorDiff < 0 || !majorDiff && minorDiff < 0 ? new Error(`${error}	\u2192 Please use a Wonderland Engine editor version >= ${APIVersion.major}.${APIVersion.minor}.*`) : new Error(`${error}	\u2192 Please use a new API version >= ${version2.major}.${version2.minor}.*`);
+  }
+  function reloadPage(engine) {
+    let session = engine.xr?.session ?? null;
+    if (!session) {
+      location.reload();
+      return;
+    }
+    session.end().then(() => location.reload());
+  }
+  var WonderlandEngine = class {
+    get onXRSessionEnd() {
+      return this.#webxr.onSessionEnd;
+    }
+    get onXRSessionStart() {
+      return this.#webxr.onSessionStart;
+    }
+    onResize = new Emitter();
+    get arSupported() {
+      return this.#webxr.arSupported;
+    }
+    get vrSupported() {
+      return this.#webxr.vrSupported;
+    }
+    onLoadingScreenEnd = new RetainEmitter();
+    onSceneLoaded = new Emitter();
+    onSceneActivated = new Emitter();
+    onHotReloadRequest = new Emitter();
+    i18n = new I18N(this);
+    get xr() {
+      return this.#webxr.sessionState;
+    }
+    erasePrototypeOnDestroy = false;
+    legacyMaterialSupport = true;
+    autoHotReload = true;
+    loadUncompressedImagesAsBitmap = false;
+    _scenes = [];
+    _scene;
+    _mainSceneVersion = 0;
+    _textures;
+    _materials;
+    _meshes;
+    _morphTargets;
+    _fonts;
+    _particleEffects;
+    _uncompressedPromises = [];
+    #wasm;
+    #physics = null;
+    #webxr;
+    #resizeObserver = null;
+    #bundleCache = /* @__PURE__ */ new Set();
+    constructor(wasm, loadingScreen, withRenderer) {
+      this.#wasm = wasm, this.#wasm._setEngine(this), this.#wasm._loadingScreen = loadingScreen;
+      let version2 = this.runtimeVersion, versionString = `${version2.major}.${version2.minor}.${version2.patch}`;
+      version2.rc > 0 && (versionString += `-rc${version2.rc}`), this.log.info(0, "Wonderland Engine runtime version:", versionString), this.#webxr = new WebXR(this), checkRuntimeCompatibility(this.#wasm.runtimeVersion), this.#wasm._wl_set_error_callback(this.#wasm.addFunction((messagePtr) => {
+        throw new Error(this.#wasm.UTF8ToString(messagePtr));
+      }, "vi")), this.#wasm._wl_application_create(), this.#physics = null, this.#wasm.withPhysX && (this.#physics = new Physics(this)), this._init(withRenderer), this._scene = this._reload(0), this.canvas.addEventListener("webglcontextlost", (e) => this.log.error(0, "Context lost:", e), false);
+    }
+    start() {
+      this.wasm._wl_application_start();
+    }
+    destroy() {
+      this.wasm._wl_application_exit(), requestAnimationFrame(() => {
+        this.wasm._wl_application_destroy();
+      });
+    }
+    registerComponent(...classes) {
+      for (let arg of classes)
+        this.wasm._registerComponent(arg);
+    }
+    async registerBundle(url, nocache = false) {
+      if (!nocache && this.#bundleCache.has(url))
+        return;
+      this.#bundleCache.add(url), nocache && (url += `?t=${Date.now()}`);
+      let register = (await import(url)).default;
+      if (typeof register != "function")
+        throw new Error(`The bundle '${url}' doesn't have a default exported registration function`);
+      register(this);
+    }
+    setLoadingProgress(percentage) {
+      this.wasm._wl_set_loading_screen_progress(clamp(percentage, 0, 1));
+    }
+    async switchTo(scene, opts = {}) {
+      this.wasm._wl_deactivate_activeScene();
+      let previous = this.scene;
+      this._preactivate(scene), this.wasm._wl_scene_activate(scene._index), this.#webxr.updateViewState(void 0), this.#webxr.updateProjectionParams(void 0, void 0), this.onLoadingScreenEnd.isDataRetained || this.onLoadingScreenEnd.notify();
+      let promise = scene._downloadDependencies();
+      await this.i18n.setLanguage(this.i18n.languageCode(0));
+      let { dispatchReadyEvent = false, waitForDependencies = false } = opts;
+      waitForDependencies && await promise, this.onSceneActivated.notify(previous, scene), dispatchReadyEvent && scene.dispatchReadyEvent();
+    }
+    async loadMainScene(options, progress) {
+      progress ??= (bytes, size) => {
+        this.log.info(1, `Scene downloading: ${bytes} / ${size}`), this.setLoadingProgress(bytes / size);
+      };
+      let opts = Prefab.makeUrlLoadOptions(options), { streamed = true, nocache = false } = opts;
+      if (streamed) {
+        let options2 = await Scene.loadStream(opts, progress), { stream, url } = Prefab.validateStreamOptions(options2);
+        return this._loadMainScene(stream, url, nocache, options2);
+      } else {
+        let options2 = await Scene.loadBuffer(opts, progress);
+        return this.loadMainSceneFromBuffer(options2);
+      }
+    }
+    async loadMainSceneFromBuffer(options) {
+      let { nocache = false } = options, { buffer, url } = Prefab.validateBufferOptions(options);
+      return this._loadMainScene(buffer, url, nocache, options);
+    }
+    async loadPrefab(options, progress) {
+      let opts = Prefab.makeUrlLoadOptions(options), { streamed = true } = opts;
+      if (streamed) {
+        let options2 = await Scene.loadStream(opts, progress), scene = await this._loadSceneFromStream(Prefab, options2);
+        return this._validateLoadedPrefab(scene), scene._initialize(), scene;
+      } else {
+        let options2 = await Scene.loadBuffer(opts, progress);
+        return this.loadPrefabFromBuffer(options2);
+      }
+    }
+    loadPrefabFromBuffer(options) {
+      let scene = this._loadSceneFromBuffer(Prefab, options);
+      return this._validateLoadedPrefab(scene), scene._initialize(), scene;
+    }
+    async loadScene(options, progress) {
+      let opts = Prefab.makeUrlLoadOptions(options), { streamed = true } = opts;
+      if (streamed) {
+        let options2 = await Scene.loadStream(opts, progress), scene = await this._loadSceneFromStream(Scene, options2);
+        return this._validateLoadedScene(scene), scene._initialize(), scene;
+      } else {
+        let options2 = await Scene.loadBuffer(opts, progress);
+        return this.loadSceneFromBuffer(options2);
+      }
+    }
+    async loadGLTF(opts, progress) {
+      let memOptions = await Scene.loadBuffer(opts, progress), options = isString(opts) ? memOptions : { ...opts, ...memOptions };
+      return this.loadGLTFFromBuffer(options);
+    }
+    loadSceneFromBuffer(options) {
+      let scene = this._loadSceneFromBuffer(Scene, options);
+      return this._validateLoadedScene(scene), scene._initialize(), scene;
+    }
+    loadGLTFFromBuffer(options) {
+      Scene.validateBufferOptions(options);
+      let { buffer, extensions = false } = options, wasm = this.wasm;
+      if (!wasm._wl_glTF_scene_create)
+        throw new Error("Loading .gltf files requires `enableRuntimeGltf` to be checked in the editor Project Settings.");
+      let ptr = wasm.copyBufferToHeap(buffer);
+      try {
+        let index = wasm._wl_glTF_scene_create(extensions, ptr, buffer.byteLength), scene = new PrefabGLTF(this, index);
+        return this._scenes[scene._index] = scene, this.runtimeVersion.patch && this._loadUncompressedImages(scene._index), scene;
+      } finally {
+        wasm._free(ptr);
+      }
+    }
+    isRegistered(typeOrClass) {
+      return this.#wasm.isRegistered(isString(typeOrClass) ? typeOrClass : typeOrClass.TypeName);
+    }
+    getComponentClass(typename) {
+      let index = this.wasm._componentTypeIndices[typename];
+      return index === void 0 ? null : this.wasm._componentTypes[index];
+    }
+    resize(width, height, devicePixelRatio = window.devicePixelRatio) {
+      width = width * devicePixelRatio, height = height * devicePixelRatio, this.canvas.width = width, this.canvas.height = height, this.wasm._wl_application_resize(width, height), this.onResize.notify();
+    }
+    nextFrame(fixedDelta = 0) {
+      this.#wasm._wl_nextFrame(fixedDelta);
+    }
+    requestXRSession(mode, features, optionalFeatures = []) {
+      return this.#webxr.requestSession(mode, features, optionalFeatures);
+    }
+    offerXRSession(mode, features, optionalFeatures = []) {
+      return this.#webxr.offerSession(mode, features, optionalFeatures);
+    }
+    wrapObject(objectId) {
+      return this.scene.wrap(objectId);
+    }
+    toString() {
+      return "engine";
+    }
+    get scene() {
+      return this._scene;
+    }
+    get wasm() {
+      return this.#wasm;
+    }
+    get webxr() {
+      return this.#webxr;
+    }
+    get canvas() {
+      return this.#wasm.canvas;
+    }
+    get xrSession() {
+      return this.xr?.session ?? null;
+    }
+    get xrFrame() {
+      return this.xr?.frame ?? null;
+    }
+    get xrBaseLayer() {
+      return this.xr?.baseLayer ?? null;
+    }
+    get xrFramebuffer() {
+      return this.xr?.framebuffers[0] ?? null;
+    }
+    get xrFramebufferScaleFactor() {
+      return this.#webxr.framebufferScaleFactor;
+    }
+    set xrFramebufferScaleFactor(value) {
+      this.#webxr.framebufferScaleFactor = value;
+    }
+    get physics() {
+      return this.#physics;
+    }
+    get textures() {
+      return this._textures;
+    }
+    get materials() {
+      return this._materials;
+    }
+    get meshes() {
+      return this._meshes;
+    }
+    get morphTargets() {
+      return this._morphTargets;
+    }
+    get fonts() {
+      return this._fonts;
+    }
+    get particleEffects() {
+      return this._particleEffects;
+    }
+    get images() {
+      let wasm = this.wasm, max2 = wasm._tempMemSize >> 1, count = wasm._wl_get_images(wasm._tempMem, max2), result = new Array(count);
+      for (let i = 0; i < count; ++i) {
+        let index = wasm._tempMemUint16[i];
+        result[i] = wasm._images[index];
+      }
+      return result;
+    }
+    get imagesPromise() {
+      let wasm = this.wasm, max2 = wasm._tempMemSize >> 1, count = wasm._wl_get_images(wasm._tempMem, max2), result = new Array(count);
+      for (let i = 0; i < count; ++i) {
+        let index = wasm._tempMemUint16[i], loading = this._uncompressedPromises[index];
+        result[i] = (loading ?? Promise.resolve()).then(() => wasm._images[index]);
+      }
+      return Promise.all(result);
+    }
+    get isTextureStreamingIdle() {
+      return !!this.wasm._wl_renderer_streaming_idle();
+    }
+    get isReverseZEnabled() {
+      return !!this.wasm._wl_renderer_isReverseZEnabled();
+    }
+    set autoResizeCanvas(flag) {
+      if (!!this.#resizeObserver !== flag) {
+        if (!flag) {
+          this.#resizeObserver?.unobserve(this.canvas), this.#resizeObserver = null;
+          return;
+        }
+        this.#resizeObserver = new ResizeObserver((entries) => {
+          for (let entry of entries)
+            entry.target === this.canvas && this.resize(entry.contentRect.width, entry.contentRect.height);
+        }), this.#resizeObserver.observe(this.canvas);
+      }
+    }
+    get autoResizeCanvas() {
+      return this.#resizeObserver !== null;
+    }
+    get runtimeVersion() {
+      return this.#wasm.runtimeVersion;
+    }
+    get log() {
+      return this.#wasm._log;
+    }
+    _init(withRenderer) {
+      if (!this.#wasm._wl_application_init(withRenderer))
+        throw new Error("Failed to initializing Wonderland runtime");
+      return this.resize(this.canvas.clientWidth, this.canvas.clientHeight), true;
+    }
+    _reset() {
+      return this.wasm.reset(), this._scenes.length = 0, this._scene = this._reload(0), this.#bundleCache.clear(), this.switchTo(this._scene);
+    }
+    async _reloadRequest(filename) {
+      if (filename === null) {
+        reloadPage(this);
+        return;
+      }
+      try {
+        this.autoHotReload && await this.loadMainScene({ url: filename, nocache: true });
+      } catch (e) {
+        console.error("Hot reload request failed to load main scene, reason:", e), setTimeout(() => reloadPage(this), 1e3);
+        return;
+      }
+      this.onHotReloadRequest.notify(filename);
+    }
+    _createEmpty() {
+      let index = this.wasm._wl_scene_create_empty(), scene = new Scene(this, index);
+      return this._scenes[index] = scene, scene;
+    }
+    _destroyScene(instance) {
+      this.wasm._wl_scene_destroy(instance._index);
+      let index = instance._index;
+      instance._index = -1, this.erasePrototypeOnDestroy && Object.setPrototypeOf(instance, DestroyedPrefabInstance), this._scenes[index] = null;
+    }
+    _reload(index) {
+      let scene = new Scene(this, index);
+      return this._scenes[index] = scene, this._textures = new TextureManager(this), this._materials = new MaterialManager(this), this._meshes = new MeshManager(this), this._morphTargets = new ResourceManager(this, MorphTargets), this._fonts = new ResourceManager(this, Font), this._particleEffects = new ResourceManager(this, ParticleEffect), this._uncompressedPromises.length = 0, scene;
+    }
+    async _loadMainScene(data, url, nocache, options) {
+      nocache && (url += `?t=${Date.now()}`);
+      let wasm = this.#wasm, isLoadingScreen = this._mainSceneVersion === 0;
+      ++this._mainSceneVersion;
+      let version2 = this.runtimeVersion;
+      if (version2.minor === 4 && version2.patch < 6 || !isLoadingScreen) {
+        wasm._wl_deactivate_activeScene();
+        for (let i = this._scenes.length - 1; i >= 0; --i) {
+          let scene = this._scenes[i];
+          scene && scene.destroy();
+        }
+      }
+      this._textures._clear(), this._materials._clear(), this._meshes._clear(), this._morphTargets._clear(), this._uncompressedPromises.length = 0;
+      let stream = data instanceof ReadableStream ? data : new ReadableStream(new ArrayBufferSource(data)), sink = new ChunkedSceneLoadSink(this, 1, url);
+      await stream.pipeTo(new WritableStream(sink));
+      let mainScene = this._reload(sink.sceneIndex);
+      this._loadUncompressedImages(mainScene._index), this._preactivate(mainScene);
+      let componentsBundle = mainScene.componentsBundle;
+      if (componentsBundle) {
+        let bundleURL = new URL(componentsBundle, document.baseURI), url2 = nocache ? bundleURL.href.split("?")[0] : bundleURL.href;
+        await this.registerBundle(url2, nocache);
+      }
+      return mainScene._initialize(), await this.switchTo(mainScene, options), mainScene;
+    }
+    _loadSceneFromBuffer(PrefabClass, options) {
+      let { buffer, url } = Scene.validateBufferOptions(options), sink = new ChunkedSceneLoadSink(this, 0, url);
+      sink.write(new Uint8Array(buffer)), sink.close();
+      let index = sink.sceneIndex, scene = new PrefabClass(this, index);
+      return this._scenes[index] = scene, this._loadUncompressedImages(scene._index), scene;
+    }
+    async _loadSceneFromStream(PrefabClass, options) {
+      let { stream, url } = Scene.validateStreamOptions(options), sink = new ChunkedSceneLoadSink(this, 0, url);
+      await stream.pipeTo(new WritableStream(sink));
+      let index = sink.sceneIndex, scene = new PrefabClass(this, index);
+      return this._scenes[index] = scene, this._loadUncompressedImages(scene._index), scene;
+    }
+    _validateLoadedPrefab(scene) {
+      if (this.wasm._wl_scene_activatable(scene._index))
+        throw this.wasm._wl_scene_destroy(scene._index), new Error("File is not a prefab. To load a scene, use loadScene() instead");
+    }
+    _validateLoadedScene(scene) {
+      if (!this.wasm._wl_scene_activatable(scene._index))
+        throw this.wasm._wl_scene_destroy(scene._index), new Error("File is not a scene. To load a prefab, use loadPrefab() instead");
+    }
+    _preactivate(scene) {
+      this._scene = scene, this.physics && (this.physics._hit._scene = scene);
+    }
+    _loadUncompressedImages(sceneIndex) {
+      let mainSceneVersion = this._mainSceneVersion, wasm = this.wasm, bitmapOptions = { colorSpaceConversion: "none" }, imageCount = wasm._wl_image_count();
+      for (let i = 0; i < imageCount; ++i) {
+        if (wasm._wl_image_originalScene(i) !== sceneIndex)
+          continue;
+        let jsImageIndex = wasm._wl_image_get_jsImage_index(i), image = wasm._images[jsImageIndex];
+        if (!image)
+          continue;
+        let promise = onImageReady(image);
+        this.loadUncompressedImagesAsBitmap && (promise = promise.then((img) => createImageBitmap(img, bitmapOptions))), this._uncompressedPromises[jsImageIndex] = promise.then((img) => {
+          this._mainSceneVersion === mainSceneVersion && wasm._wl_image_markReady(i, img.width, img.height, needsFlipY(img));
+        }).catch((e) => {
+          this._mainSceneVersion === mainSceneVersion && this.log.error(1, "Failed to load uncompressed image", e);
+        });
+      }
+    }
+  };
   function assert(bit) {
     if (bit >= 32)
       throw new Error(`BitSet.enable(): Value ${bit} is over 31`);
@@ -2390,6 +4651,43 @@
   WASM.prototype._wl_animation_component_set_animationGraph = requireRuntime1_4_6;
   WASM.prototype._wl_application_exit = requireRuntime1_4_6;
   WASM.prototype._wl_application_destroy = requireRuntime1_4_6;
+  var LOADING_SCREEN_PATH = "WonderlandRuntime-LoadingScreen.bin";
+  function loadScript(scriptURL) {
+    return new Promise((resolve, reject) => {
+      let s = document.createElement("script"), node = document.body.appendChild(s);
+      s.onload = () => {
+        document.body.removeChild(node), resolve();
+      }, s.onerror = (e) => {
+        document.body.removeChild(node), reject(e);
+      }, s.src = scriptURL;
+    });
+  }
+  async function detectFeatures() {
+    let threadsSupported = await threads();
+    return threadsSupported ? self.crossOriginIsolated ? console.log("WASM Threads is supported") : console.warn("WASM Threads is supported, but the page is not crossOriginIsolated, therefore thread support is disabled.") : console.warn("WASM Threads is not supported"), threadsSupported = threadsSupported && self.crossOriginIsolated, { threadsSupported };
+  }
+  async function loadRuntime(runtime, options = {}) {
+    let baseURL = getBaseUrl(runtime), { threadsSupported } = await detectFeatures(), { threads: threads2 = threadsSupported, webgpu = false, physx = false, loader = false, renderer = true, xrFramebufferScaleFactor = 1, xrOfferSession = null, loadingScreen = baseURL ? `${baseURL}/${LOADING_SCREEN_PATH}` : LOADING_SCREEN_PATH, canvas: canvas2 = "canvas", logs = [0, 1, 2] } = options, variant = [];
+    loader && variant.push("loader"), physx && variant.push("physx"), threads2 && variant.push("threads"), webgpu && variant.push("webgpu");
+    let variantStr = variant.join("-"), filename = runtime;
+    variantStr && (filename = `${filename}-${variantStr}`);
+    let download = function(filename2, errorMessage) {
+      return fetch(filename2).then((r) => r.ok ? r.arrayBuffer() : Promise.reject(errorMessage)).catch((_) => Promise.reject(errorMessage));
+    }, [wasmData, loadingScreenData] = await Promise.all([download(`${filename}.wasm`, `Failed to fetch runtime .wasm file: ${filename}`), download(loadingScreen, "Failed to fetch loading screen file")]), canvasElement = document.getElementById(canvas2);
+    if (!canvasElement)
+      throw new Error(`loadRuntime(): Failed to find canvas with id '${canvas2}'`);
+    if (!(canvasElement instanceof HTMLCanvasElement))
+      throw new Error(`loadRuntime(): HTML element '${canvas2}' must be a canvas`);
+    let wasm = new WASM(threads2);
+    wasm.wasm = wasmData, wasm.canvas = canvasElement, wasm._log.levels.enable(...logs), window._WL || (window._WL = { runtimes: {} });
+    let runtimes = window._WL.runtimes, runtimeGlobalId = variantStr || "default";
+    if (runtimes[runtimeGlobalId] || (await loadScript(`${filename}.js`), runtimes[runtimeGlobalId] = window.instantiateWonderlandRuntime, window.instantiateWonderlandRuntime = void 0), await runtimes[runtimeGlobalId](wasm), webgpu) {
+      let WebGPU = wasm.WebGPU, adapter = await navigator.gpu.requestAdapter(), adapterId = WebGPU.mgrAdapter.create(adapter), desc = { requiredFeatures: ["texture-compression-bc", "depth32float-stencil8"] }, device = await adapter.requestDevice(desc), deviceId = WebGPU.mgrDevice.create(adapter);
+      wasm.preinitializedWebGPUDevice = device, canvasElement.getContext("webgpu").configure({ device, format: navigator.gpu.getPreferredCanvasFormat(), alphaMode: "premultiplied" });
+    }
+    let engine = new WonderlandEngine(wasm, loadingScreenData, renderer);
+    return await engine.webxr.init(xrFramebufferScaleFactor, xrOfferSession), engine.autoResizeCanvas = true, engine.start(), engine;
+  }
 
   // node_modules/@wonderlandengine/components/dist/8thwall-camera.js
   var __decorate = function(decorators, target, key, desc) {
@@ -7834,7 +10132,7 @@
   ], Trail.prototype, "resetThreshold", void 0);
 
   // node_modules/@wonderlandengine/components/dist/two-joint-ik-solver.js
-  function clamp(v, a, b) {
+  function clamp2(v, a, b) {
     return Math.max(a, Math.min(v, b));
   }
   var rootScaling = new Float32Array(3);
@@ -7854,7 +10152,7 @@
       vec3_exports.sub(ta, b, c);
       const lcb = vec3_exports.length(ta);
       ta.set(targetPos);
-      const lat = clamp(vec3_exports.length(ta), eps, lab + lcb - eps);
+      const lat = clamp2(vec3_exports.length(ta), eps, lab + lcb - eps);
       ca.set(c);
       vec3_exports.scale(ab, b, -1);
       vec3_exports.sub(cb, c, b);
@@ -7863,11 +10161,11 @@
       vec3_exports.normalize(ab, ab);
       vec3_exports.normalize(cb, cb);
       vec3_exports.normalize(ta, ta);
-      const ac_ab_0 = Math.acos(clamp(vec3_exports.dot(ca, ba), -1, 1));
-      const ba_bc_0 = Math.acos(clamp(vec3_exports.dot(ab, cb), -1, 1));
-      const ac_at_0 = Math.acos(clamp(vec3_exports.dot(ca, ta), -1, 1));
-      const ac_ab_1 = Math.acos(clamp((lcb * lcb - lab * lab - lat * lat) / (-2 * lab * lat), -1, 1));
-      const ba_bc_1 = Math.acos(clamp((lat * lat - lab * lab - lcb * lcb) / (-2 * lab * lcb), -1, 1));
+      const ac_ab_0 = Math.acos(clamp2(vec3_exports.dot(ca, ba), -1, 1));
+      const ba_bc_0 = Math.acos(clamp2(vec3_exports.dot(ab, cb), -1, 1));
+      const ac_at_0 = Math.acos(clamp2(vec3_exports.dot(ca, ta), -1, 1));
+      const ac_ab_1 = Math.acos(clamp2((lcb * lcb - lab * lab - lat * lat) / (-2 * lab * lat), -1, 1));
+      const ba_bc_1 = Math.acos(clamp2((lat * lat - lab * lab - lcb * lcb) / (-2 * lab * lcb), -1, 1));
       if (helper) {
         vec3_exports.sub(ba, helper, b);
         vec3_exports.normalize(ba, ba);
@@ -9502,6 +11800,129 @@
     property.float(0.9)
   ], OrbitalCamera.prototype, "damping", void 0);
 
+  // js/app.js
+  var app_exports = {};
+  loadRuntime("WonderlandRuntime-physx-threads", { threads: false }).then((runtime) => {
+    runtime.start();
+  });
+
+  // js/button-3d.js
+  var button_3d_exports = {};
+  __export(button_3d_exports, {
+    Button3D: () => Button3D
+  });
+  var Button3D = class extends Component3 {
+    start() {
+      this.leftController = this.engine.scene.findByName("ControllerLeft")[0];
+      this.rightController = this.engine.scene.findByName("ControllerRight")[0];
+      if (this.usePlayerForDesktop && (!this.leftController || !this.rightController)) {
+        this.playerObject = this.engine.scene.findByName("Player")[0];
+        if (!this.playerObject) {
+          this.playerObject = this.engine.scene.findByName("NonVrCamera")[0];
+        }
+        if (this.debugMode) {
+          if (this.playerObject) {
+            console.log(`Button3D: Using desktop mode with ${this.playerObject.name}`);
+          } else {
+            console.warn("Button3D: No controllers or Player/Camera found!");
+          }
+        }
+      }
+      this.isHovered = false;
+      this.isPressed = false;
+      this.cooldownTimer = 0;
+      this.originalScale = vec3_exports.create();
+      this.object.getScalingLocal(this.originalScale);
+      this.buttonPos = vec3_exports.create();
+      this.controllerPos = vec3_exports.create();
+      this.tempScale = vec3_exports.create();
+      if (this.debugMode) {
+        console.log(`Button3D: Initialized on ${this.object.name}`);
+        console.log(`  Trigger Distance: ${this.triggerDistance}`);
+        console.log(`  Hover Distance: ${this.triggerDistance * 2}`);
+        console.log(`  Original Scale: [${this.originalScale[0].toFixed(2)}, ${this.originalScale[1].toFixed(2)}, ${this.originalScale[2].toFixed(2)}]`);
+      }
+      this.controllersWarningShown = false;
+    }
+    update(dt) {
+      if (this.cooldownTimer > 0) {
+        this.cooldownTimer -= dt;
+      }
+      this.object.getPositionWorld(this.buttonPos);
+      let closestDistance = Infinity;
+      let closestControllerName = "";
+      const objectsToCheck = [];
+      if (this.leftController)
+        objectsToCheck.push(this.leftController);
+      if (this.rightController)
+        objectsToCheck.push(this.rightController);
+      if (this.playerObject && objectsToCheck.length === 0) {
+        objectsToCheck.push(this.playerObject);
+      }
+      if (objectsToCheck.length === 0) {
+        if (this.debugMode && !this.controllersWarningShown) {
+          console.warn("Button3D: No controllers or player object found!");
+          this.controllersWarningShown = true;
+        }
+        return;
+      }
+      for (const obj of objectsToCheck) {
+        if (!obj)
+          continue;
+        obj.getPositionWorld(this.controllerPos);
+        const distance2 = vec3_exports.distance(this.buttonPos, this.controllerPos);
+        if (distance2 < closestDistance) {
+          closestDistance = distance2;
+          closestControllerName = obj.name;
+        }
+      }
+      const wasHovered = this.isHovered;
+      const wasPressed = this.isPressed;
+      this.isHovered = closestDistance < this.triggerDistance * 2;
+      this.isPressed = closestDistance < this.triggerDistance;
+      if (this.debugMode) {
+        if (this.isHovered && !wasHovered) {
+          console.log(`Button3D: HOVER ENTER - Distance: ${closestDistance.toFixed(3)}m (${closestControllerName})`);
+        }
+        if (!this.isHovered && wasHovered) {
+          console.log(`Button3D: HOVER EXIT - Distance: ${closestDistance.toFixed(3)}m`);
+        }
+        if (this.isPressed && !wasPressed) {
+          console.log(`Button3D: PRESS - Distance: ${closestDistance.toFixed(3)}m (${closestControllerName})`);
+        }
+      }
+      if (this.isPressed && !wasPressed && this.cooldownTimer <= 0) {
+        this.onPress();
+        this.cooldownTimer = this.cooldownTime;
+      }
+      this.updateVisuals();
+    }
+    updateVisuals() {
+      if (this.isPressed) {
+        vec3_exports.scale(this.tempScale, this.originalScale, this.pressScaleMultiplier);
+      } else if (this.isHovered) {
+        vec3_exports.scale(this.tempScale, this.originalScale, this.hoverScaleMultiplier);
+      } else {
+        vec3_exports.copy(this.tempScale, this.originalScale);
+      }
+      this.object.setScalingLocal(this.tempScale);
+    }
+    onPress() {
+      if (this.debugMode) {
+        console.log("Button3D: Button pressed!");
+      }
+    }
+  };
+  __publicField(Button3D, "TypeName", "button-3d");
+  __publicField(Button3D, "Properties", {
+    triggerDistance: Property.float(0.5),
+    cooldownTime: Property.float(0.5),
+    hoverScaleMultiplier: Property.float(1.2),
+    pressScaleMultiplier: Property.float(0.85),
+    debugMode: Property.bool(true),
+    usePlayerForDesktop: Property.bool(true)
+  });
+
   // js/button.js
   var button_exports = {};
   __export(button_exports, {
@@ -9586,7 +12007,63 @@
     hoverMaterial: Property.material()
   });
 
+  // js/scripts/head-bob.js
+  var head_bob_exports = {};
+  __export(head_bob_exports, {
+    HeadBob: () => HeadBob
+  });
+  var HeadBob = class extends Component3 {
+    start() {
+      this.initialLocalPosition = vec3_exports.create();
+      this.object.getTranslationLocal(this.initialLocalPosition);
+      this.lastPlayerPosition = vec3_exports.create();
+      if (this.playerObject) {
+        this.playerObject.getTranslationWorld(this.lastPlayerPosition);
+      }
+      this.bobTime = 0;
+    }
+    update(dt) {
+      if (!this.playerObject) {
+        if (this.engine.frame % 60 === 0) {
+          console.warn('HeadBob: "Player Object" property is not set.');
+        }
+        return;
+      }
+      const currentPlayerPosition = vec3_exports.create();
+      this.playerObject.getTranslationWorld(currentPlayerPosition);
+      const deltaX = this.lastPlayerPosition[0] - currentPlayerPosition[0];
+      const deltaZ = this.lastPlayerPosition[2] - currentPlayerPosition[2];
+      const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+      let bobOffset = 0;
+      if (distanceMoved > this.epsilon) {
+        this.bobTime += dt * this.bobFrequency;
+        bobOffset = Math.sin(this.bobTime) * this.bobAmount;
+      } else {
+        this.bobTime = 0;
+      }
+      const newLocalPosition = vec3_exports.create();
+      vec3_exports.copy(newLocalPosition, this.initialLocalPosition);
+      newLocalPosition[1] += bobOffset;
+      this.object.setTranslationLocal(newLocalPosition);
+      vec3_exports.copy(this.lastPlayerPosition, currentPlayerPosition);
+    }
+  };
+  __publicField(HeadBob, "TypeName", "head-bob");
+  __publicField(HeadBob, "Properties", {
+    /** The Player object that has the wasd-controls component */
+    playerObject: Property.object(),
+    /** How fast the bobbing effect is (e.g., 10.0) */
+    bobFrequency: Property.float(10),
+    /** How much the camera bobs up and down (e.g., 0.03) */
+    bobAmount: Property.float(0.03),
+    /** A small value to ignore tiny movements and stop bobbing */
+    epsilon: Property.float(1e-3)
+  });
+
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
+  _registerEditor(app_exports);
+  _registerEditor(button_3d_exports);
   _registerEditor(button_exports);
+  _registerEditor(head_bob_exports);
 })();

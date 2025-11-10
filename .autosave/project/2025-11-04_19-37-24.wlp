@@ -30,13 +30,6 @@
                     "type": "mouse-look"
                 },
                 {
-                    "type": "cursor",
-                    "cursor": {
-                        "collisionGroup": 0,
-                        "handedness": "none"
-                    }
-                },
-                {
                     "type": "audio-listener"
                 },
                 {
@@ -44,12 +37,19 @@
                     "vr-mode-active-switch": {
                         "activateComponents": "in non-VR"
                     }
+                },
+                {
+                    "type": "head-bob",
+                    "head-bob": {
+                        "playerObject": "237",
+                        "bobAmount": 0.15
+                    }
                 }
             ],
             "translation": [
-                -2.5,
-                1.75,
-                1.1575535
+                0.000351,
+                1.2780845,
+                -0.2608584
             ],
             "rotation": [
                 0.0,
@@ -131,14 +131,14 @@
                 {
                     "type": "light",
                     "light": {
-                        "intensity": 3.3329999
+                        "intensity": 100000.0
                     }
                 }
             ],
             "translation": [
                 0.0,
-                3.0,
-                2.0
+                13.0916452,
+                -11.235898
             ],
             "rotation": [
                 0.0,
@@ -147,9 +147,9 @@
                 1.0
             ],
             "scaling": [
-                1.0,
-                1.0,
-                1.0
+                50.0,
+                50.0,
+                50.0
             ],
             "parent": "235"
         },
@@ -159,13 +159,13 @@
                 {
                     "type": "light",
                     "light": {
-                        "intensity": 3.3329999
+                        "intensity": 1000.0
                     }
                 }
             ],
             "translation": [
                 -1.0,
-                3.0,
+                14.1643886,
                 -1.0
             ],
             "rotation": [
@@ -175,9 +175,9 @@
                 1.0
             ],
             "scaling": [
-                1.0,
-                1.0,
-                1.0
+                50.0,
+                50.0,
+                50.0
             ],
             "parent": "235"
         },
@@ -1605,8 +1605,8 @@
             ],
             "translation": [
                 0.0,
-                1.4495368,
-                0.0
+                3.875,
+                0.9792991
             ],
             "rotation": [
                 0.0,
@@ -1660,12 +1660,16 @@
             "name": "WebPlayer",
             "components": [
                 {
-                    "type": "wasd-controls"
+                    "type": "wasd-controls",
+                    "wasd-controls": {
+                        "headObject": "17",
+                        "lockY": true
+                    }
                 },
                 {
                     "type": "player-height",
                     "player-height": {
-                        "height": 0.2
+                        "height": 1.3999999
                     }
                 },
                 {
@@ -1675,23 +1679,17 @@
                         "box": {
                             "extents": [
                                 0.2,
-                                0.4,
+                                1.3999999,
                                 0.2
                             ]
                         }
                     }
                 }
-            ]
-        },
-        "238": {
-            "link": {
-                "name": "tileLarge_forest",
-                "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
-            },
+            ],
             "translation": [
                 0.0,
-                -1.0,
-                0.0
+                1.7405011,
+                1.6482918
             ],
             "rotation": [
                 0.0,
@@ -1720,41 +1718,809 @@
                 }
             ],
             "translation": [
-                3.827186390026327e-8,
-                3.764741407508154e-8,
-                4.775837325610155e-8
-            ],
-            "rotation": [
-                0.0848168,
-                -0.0486703,
-                -0.6907656,
-                0.7164356
+                0.0,
+                0.4487664,
+                4.7758533128217096e-8
             ],
             "scaling": [
-                0.9999972,
-                0.9999971,
-                0.9999983
+                0.999997,
+                0.9999978,
+                1.0000019
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.70728,
+                0.7069334
             ]
         },
         "240": {
-            "name": "Mesh",
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "scaling": [
+                50.0,
+                50.0,
+                50.0
+            ],
+            "name": "TennisCourt",
+            "hiddenForLightBaking": false
+        },
+        "243": {
+            "link": {
+                "name": "d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "240"
+        },
+        "244": {
+            "link": {
+                "name": "RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "243"
+        },
+        "245": {
+            "link": {
+                "name": "pPlane1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "246": {
+            "link": {
+                "name": "pPlane1_lambert3_0<pPlane1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "247": {
+            "link": {
+                "name": "pPlane1_green_carpet_0<pPlane1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "248": {
+            "link": {
+                "name": "pPlane1_lambert6_0<pPlane1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "249": {
+            "link": {
+                "name": "pCylinder1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "250": {
+            "link": {
+                "name": "pCylinder1_lambert4_0<pCylinder1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "249"
+        },
+        "251": {
+            "link": {
+                "name": "pCylinder2<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "252": {
+            "link": {
+                "name": "pCylinder2_lambert4_0<pCylinder2<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "251"
+        },
+        "253": {
+            "link": {
+                "name": "pCylinder3<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "254": {
+            "link": {
+                "name": "pCylinder3_lambert3_0<pCylinder3<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "253"
+        },
+        "268": {
+            "link": {
+                "name": "pCylinder4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "269": {
+            "link": {
+                "name": "pCylinder4_lambert3_0<pCylinder4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "268"
+        },
+        "270": {
+            "link": {
+                "name": "pCylinder5<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "271": {
+            "link": {
+                "name": "pCylinder5_lambert3_0<pCylinder5<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "270"
+        },
+        "272": {
+            "link": {
+                "name": "pCylinder6<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "273": {
+            "link": {
+                "name": "pCylinder6_lambert3_0<pCylinder6<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "272"
+        },
+        "274": {
+            "link": {
+                "name": "pCylinder7<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "275": {
+            "link": {
+                "name": "pCylinder7_lambert3_0<pCylinder7<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "274"
+        },
+        "276": {
+            "link": {
+                "name": "pCylinder8<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "277": {
+            "link": {
+                "name": "pCylinder8_lambert3_0<pCylinder8<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "276"
+        },
+        "278": {
+            "link": {
+                "name": "pCylinder9<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "279": {
+            "link": {
+                "name": "pCylinder9_lambert4_0<pCylinder9<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "278"
+        },
+        "280": {
+            "link": {
+                "name": "pCylinder10<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "281": {
+            "link": {
+                "name": "pCylinder10_lambert4_0<pCylinder10<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "280"
+        },
+        "282": {
+            "link": {
+                "name": "pPlane2<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "283": {
+            "link": {
+                "name": "pPlane2_net_0<pPlane2<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "282",
+            "components": [
+                {
+                    "originalIndex": 0,
+                    "mesh": {
+                        "material": "216"
+                    }
+                }
+            ]
+        },
+        "284": {
+            "link": {
+                "name": "pPlane3<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "285": {
+            "link": {
+                "name": "pPlane3_lambert3_0<pPlane3<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "284"
+        },
+        "286": {
+            "link": {
+                "name": "pPlane4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "287": {
+            "link": {
+                "name": "pPlane4_lambert3_0<pPlane4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "286"
+        },
+        "288": {
+            "link": {
+                "name": "pPlane5<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "289": {
+            "link": {
+                "name": "pPlane5_lambert3_0<pPlane5<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "288"
+        },
+        "290": {
+            "link": {
+                "name": "pCube1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "291": {
+            "link": {
+                "name": "pCube1_pole_0<pCube1<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "290"
+        },
+        "292": {
+            "link": {
+                "name": "pCube2<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "293": {
+            "link": {
+                "name": "pCube2_pole_0<pCube2<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "292"
+        },
+        "294": {
+            "link": {
+                "name": "pCube3<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "295": {
+            "link": {
+                "name": "pCube3_pole_0<pCube3<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "294"
+        },
+        "296": {
+            "link": {
+                "name": "pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "297": {
+            "link": {
+                "name": "polySurface1<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "298": {
+            "link": {
+                "name": "polySurface1_pole_0<polySurface1<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "297"
+        },
+        "299": {
+            "link": {
+                "name": "polySurface2<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "300": {
+            "link": {
+                "name": "polySurface2_pole_0<polySurface2<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "299"
+        },
+        "301": {
+            "link": {
+                "name": "polySurface3<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "302": {
+            "link": {
+                "name": "polySurface3_pole_0<polySurface3<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "301"
+        },
+        "303": {
+            "link": {
+                "name": "polySurface4<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "304": {
+            "link": {
+                "name": "polySurface4_pole_0<polySurface4<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "303"
+        },
+        "305": {
+            "link": {
+                "name": "polySurface5<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "306": {
+            "link": {
+                "name": "polySurface5_pole_0<polySurface5<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "305"
+        },
+        "307": {
+            "link": {
+                "name": "polySurface6<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "308": {
+            "link": {
+                "name": "polySurface6_pole_0<polySurface6<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "307"
+        },
+        "309": {
+            "link": {
+                "name": "polySurface7<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "310": {
+            "link": {
+                "name": "polySurface7_pole_0<polySurface7<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "309"
+        },
+        "311": {
+            "link": {
+                "name": "polySurface8<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "296"
+        },
+        "312": {
+            "link": {
+                "name": "polySurface8_pole_0<polySurface8<pCube4<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "311"
+        },
+        "313": {
+            "link": {
+                "name": "pCube5<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "314": {
+            "link": {
+                "name": "pCube5_blinn1_0<pCube5<RootNode<d147d74c1bb54c4c9b768918cae79206.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "parent": "313"
+        },
+        "315": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "name": "FootballField",
+            "scaling": [
+                0.0799999,
+                0.0799999,
+                0.0799999
+            ],
+            "translation": [
+                0.0,
+                -3.9,
+                0.0
+            ]
+        },
+        "316": {
+            "link": {
+                "name": "3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "315"
+        },
+        "317": {
+            "link": {
+                "name": "RootNode<3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "316"
+        },
+        "318": {
+            "link": {
+                "name": "Cube<RootNode<3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "317"
+        },
+        "319": {
+            "link": {
+                "name": "Cube_grass_dark_football_field_0<Cube<RootNode<3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "318"
+        },
+        "320": {
+            "link": {
+                "name": "Cube_base_football_field_0<Cube<RootNode<3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "318"
+        },
+        "321": {
+            "link": {
+                "name": "Cube_football_field_0<Cube<RootNode<3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "318"
+        },
+        "322": {
+            "link": {
+                "name": "Cube_ground_dark_football_field_0<Cube<RootNode<3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "318"
+        },
+        "323": {
+            "link": {
+                "name": "Cube_ground_light_football_field_0<Cube<RootNode<3c92378fb6dc4f0c8b41171ce6a1a9c9.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "parent": "318"
+        },
+        "324": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "name": "GymFloor",
+            "scaling": [
+                10.0,
+                10.0,
+                10.0
+            ],
+            "translation": [
+                0.0,
+                -0.3,
+                0.0
+            ]
+        },
+        "325": {
+            "link": {
+                "name": "760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "324",
+            "scaling": [
+                1.0,
+                0.2481927,
+                0.9999999
+            ],
+            "translation": [
+                0.0,
+                2.0,
+                0.0
+            ],
+            "rotation": [
+                0.7071068,
+                0.0,
+                0.0,
+                0.7071066
+            ]
+        },
+        "326": {
+            "link": {
+                "name": "RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "325"
+        },
+        "327": {
+            "link": {
+                "name": "Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "326"
+        },
+        "328": {
+            "link": {
+                "name": "Group1<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "327"
+        },
+        "329": {
+            "link": {
+                "name": "Mesh1<Group1<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "328"
+        },
+        "330": {
+            "link": {
+                "name": "Mesh1_Material4_0<Mesh1<Group1<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "329"
+        },
+        "331": {
+            "link": {
+                "name": "Group2<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "327"
+        },
+        "332": {
+            "link": {
+                "name": "Mesh2<Group2<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "331"
+        },
+        "333": {
+            "link": {
+                "name": "Mesh2_Tatami_black_0<Mesh2<Group2<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "332"
+        },
+        "334": {
+            "link": {
+                "name": "Group3<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "327"
+        },
+        "335": {
+            "link": {
+                "name": "Mesh3<Group3<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "334"
+        },
+        "336": {
+            "link": {
+                "name": "Mesh3_Material4_0<Mesh3<Group3<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "parent": "335"
+        },
+        "337": {
+            "name": "EnvironmentManager",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "environment-switcher",
+                    "environment-switcher": {
+                        "footballField": "315",
+                        "tennisCourt": "240",
+                        "gymFloor": "324",
+                        "defaultEnvironment": "football"
+                    }
+                }
+            ]
+        },
+        "342": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "scaling": [
+                0.0099999,
+                0.0099997,
+                0.0099997
+            ],
+            "translation": [
+                0.0,
+                1.5143206,
+                -4.4442167
+            ],
+            "rotation": [
+                -0.7071023,
+                0.0,
+                0.0,
+                0.7071111
+            ],
+            "name": "Beam",
+            "components": [
+                {
+                    "type": "beam-walk-manager",
+                    "beam-walk-manager": {
+                        "playerObject": 140,
+                        "beamWidth": 33.0,
+                        "startPosition": 229,
+                        "endPosition": 233
+                    }
+                }
+            ]
+        },
+        "343": {
+            "link": {
+                "name": "Collada visual scene group<Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "parent": "342"
+        },
+        "344": {
+            "link": {
+                "name": "Cube<Collada visual scene group<Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "parent": "343"
+        },
+        "345": {
+            "link": {
+                "name": "defaultMaterial<Cube<Collada visual scene group<Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "parent": "344",
+            "translation": [
+                1638.265625,
+                0.0005969,
+                -0.00885
+            ],
+            "rotation": [
+                1.0677015893634234e-7,
+                -0.7071068,
+                -1.0677015893634234e-7,
+                -0.7071068
+            ],
+            "scaling": [
+                0.9999982,
+                1.0,
+                0.9999993
+            ]
+        },
+        "346": {
+            "name": "BeamStart",
             "components": [
                 {
                     "type": "mesh",
                     "mesh": {
-                        "mesh": "9",
-                        "morphTargets": null,
-                        "material": "20"
+                        "mesh": "8",
+                        "material": "22"
                     }
                 },
                 {
-                    "type": "physx"
+                    "type": "cursor-target"
+                },
+                {
+                    "type": "beam-start-button-cursor",
+                    "beam-start-button-cursor": {
+                        "buttonText": 231,
+                        "beamWalkManager": 225
+                    }
+                }
+            ],
+            "parent": "347",
+            "translation": [
+                19.2573776,
+                4.9456453,
+                -3.3275871
+            ],
+            "rotation": [
+                -1.5723627200259216e-7,
+                0.7071059,
+                1.4066998232920014e-7,
+                0.7071076
+            ],
+            "scaling": [
+                2.1999905,
+                0.3009999,
+                0.1999993
+            ]
+        },
+        "347": {
+            "name": "Controllers"
+        },
+        "348": {
+            "name": "BeamStartText",
+            "parent": "346",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Beam Drill"
+                    }
                 }
             ],
             "translation": [
-                0.0,
-                1.6,
-                0.0
+                -7.586074275423016e-7,
+                -0.0000991,
+                -1.0218505
+            ],
+            "rotation": [
+                1.9797826666945184e-7,
+                1.0,
+                3.580892382615275e-8,
+                -0.0000049
+            ],
+            "scaling": [
+                2.2727136,
+                16.6113109,
+                4.9999723
+            ]
+        },
+        "349": {
+            "name": "BeamStart",
+            "parent": "342",
+            "translation": [
+                1645.2108154,
+                501.6091003,
+                -72.7650604
             ],
             "rotation": [
                 0.0,
@@ -1763,9 +2529,29 @@
                 1.0
             ],
             "scaling": [
-                -0.2989999,
-                -0.2989999,
-                -0.2989999
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "350": {
+            "name": "BeamEnd",
+            "parent": "342",
+            "translation": [
+                1645.192749,
+                -533.1409912,
+                -72.7661895
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
             ]
         }
     },
@@ -1916,6 +2702,318 @@
                 "name": "Cube.1605.0",
                 "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
             }
+        },
+        "210": {
+            "link": {
+                "name": "Mesh1_Material4_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "211": {
+            "link": {
+                "name": "Mesh1_Material4_0-uv1",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "212": {
+            "link": {
+                "name": "Mesh2_Tatami_black_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "213": {
+            "link": {
+                "name": "Mesh2_Tatami_black_0-uv1",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "214": {
+            "link": {
+                "name": "Mesh3_Material4_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "215": {
+            "link": {
+                "name": "Mesh3_Material4_0-uv1",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "216": {
+            "link": {
+                "name": "pPlane1_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "217": {
+            "link": {
+                "name": "pPlane1_green_carpet_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "218": {
+            "link": {
+                "name": "pPlane1_lambert6_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "219": {
+            "link": {
+                "name": "pCylinder1_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "220": {
+            "link": {
+                "name": "pCylinder2_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "221": {
+            "link": {
+                "name": "pCylinder3_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "222": {
+            "link": {
+                "name": "pCylinder4_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "223": {
+            "link": {
+                "name": "pCylinder5_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "224": {
+            "link": {
+                "name": "pCylinder6_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "225": {
+            "link": {
+                "name": "pCylinder7_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "226": {
+            "link": {
+                "name": "pCylinder8_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "227": {
+            "link": {
+                "name": "pCylinder9_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "228": {
+            "link": {
+                "name": "pCylinder10_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "229": {
+            "link": {
+                "name": "pPlane2_net_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "230": {
+            "link": {
+                "name": "pPlane3_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "231": {
+            "link": {
+                "name": "pPlane4_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "232": {
+            "link": {
+                "name": "pPlane5_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "233": {
+            "link": {
+                "name": "pCube1_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "234": {
+            "link": {
+                "name": "pCube2_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "235": {
+            "link": {
+                "name": "pCube3_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "236": {
+            "link": {
+                "name": "polySurface1_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "237": {
+            "link": {
+                "name": "polySurface2_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "238": {
+            "link": {
+                "name": "polySurface3_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "239": {
+            "link": {
+                "name": "polySurface4_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "240": {
+            "link": {
+                "name": "polySurface5_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "241": {
+            "link": {
+                "name": "polySurface6_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "242": {
+            "link": {
+                "name": "polySurface7_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "243": {
+            "link": {
+                "name": "polySurface8_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "244": {
+            "link": {
+                "name": "pCube5_blinn1_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "245": {
+            "link": {
+                "name": "Cube_grass_dark_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "246": {
+            "link": {
+                "name": "Cube_base_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "247": {
+            "link": {
+                "name": "Cube_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "248": {
+            "link": {
+                "name": "Cube_ground_dark_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "249": {
+            "link": {
+                "name": "Cube_ground_light_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "250": {
+            "link": {
+                "name": "Main Bar_Aluminum - Satin_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "251": {
+            "link": {
+                "name": "Bottom Bar_Aluminum - Satin_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "252": {
+            "link": {
+                "name": "String_PEEK_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "253": {
+            "link": {
+                "name": "Ring_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "254": {
+            "link": {
+                "name": "End Cap 1_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "255": {
+            "link": {
+                "name": "End Cap 2_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "256": {
+            "link": {
+                "name": "Screen_Rilsan Invent Natural - PA 11_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "257": {
+            "link": {
+                "name": "Hook Hold 1_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "258": {
+            "link": {
+                "name": "Hook Hold 2_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "259": {
+            "link": {
+                "name": "Hook 1_Brass - Polished_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "260": {
+            "link": {
+                "name": "Hook 2_Brass - Polished_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "261": {
+            "link": {
+                "name": "defaultMaterial",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
         }
     },
     "textures": {
@@ -1941,6 +3039,54 @@
             "link": {
                 "name": "texture_1",
                 "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "88": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "89": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "90": {
+            "link": {
+                "name": "texture_1",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "91": {
+            "link": {
+                "name": "texture_2",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "92": {
+            "link": {
+                "name": "material_baseColor.png",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\textures\\material_baseColor.png"
+            }
+        },
+        "93": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "94": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "95": {
+            "link": {
+                "name": "texture_1",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
             }
         }
     },
@@ -1984,6 +3130,54 @@
                 256,
                 256
             ]
+        },
+        "86": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "87": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "88": {
+            "link": {
+                "name": "image_1",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "89": {
+            "link": {
+                "name": "image_2",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "90": {
+            "link": {
+                "name": "material_baseColor.png",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\textures\\material_baseColor.png"
+            }
+        },
+        "91": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "92": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "93": {
+            "link": {
+                "name": "image_1",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
         }
     },
     "materials": {
@@ -2234,6 +3428,132 @@
             "link": {
                 "name": "BrownDark",
                 "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
+            }
+        },
+        "210": {
+            "link": {
+                "name": "Material4",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "211": {
+            "link": {
+                "name": "Tatami_black",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "212": {
+            "link": {
+                "name": "lambert3",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "213": {
+            "link": {
+                "name": "green_carpet",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "214": {
+            "link": {
+                "name": "lambert6",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "215": {
+            "link": {
+                "name": "lambert4",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "216": {
+            "link": {
+                "name": "material",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "pipeline": "38",
+            "Phong": {
+                "diffuseTexture": "91",
+                "emissiveTexture": null
+            }
+        },
+        "217": {
+            "link": {
+                "name": "pole",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "218": {
+            "link": {
+                "name": "blinn1",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "pipeline": "38"
+        },
+        "219": {
+            "link": {
+                "name": "grass_dark_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "220": {
+            "link": {
+                "name": "base_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "221": {
+            "link": {
+                "name": "football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "222": {
+            "link": {
+                "name": "ground_dark_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "223": {
+            "link": {
+                "name": "ground_light_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "224": {
+            "link": {
+                "name": "Aluminum_-_Satin",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "225": {
+            "link": {
+                "name": "PEEK",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "226": {
+            "link": {
+                "name": "Coating_-_Black_Oxide",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "227": {
+            "link": {
+                "name": "Rilsan_Invent_Natural_-_PA_11",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "228": {
+            "link": {
+                "name": "Brass_-_Polished",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "229": {
+            "link": {
+                "name": "Material",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
             }
         }
     },
@@ -2692,6 +4012,38 @@
                 "name": "AtmosphericSky",
                 "file": "default"
             }
+        },
+        "900": {
+            "link": {
+                "name": "Phong (alpha mask)",
+                "file": "default"
+            },
+            "defines": {
+                "WITH_TEXTURE": true,
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "ALPHA_MASK": true
+            }
+        },
+        "901": {
+            "link": {
+                "name": "Phong (transparent)",
+                "file": "default"
+            },
+            "defines": {
+                "WITH_TEXTURE": true,
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "ALPHA_BLEND": true
+            },
+            "customStates": {
+                "blend": true,
+                "blendFunc": [
+                    770,
+                    771,
+                    770,
+                    771
+                ],
+                "depthMask": false
+            }
         }
     },
     "files": {
@@ -2721,6 +4073,50 @@
         },
         "256": {
             "fileName": "assets/models/gltf/tileLarge_forest.gltf.glb",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "257": {
+            "fileName": "assets/OurModels/training environment 3 - gym floor/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "258": {
+            "fileName": "assets/OurModels/training environment 2 - tennis court/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "259": {
+            "fileName": "assets/OurModels/training environment 2 - tennis court/scene.bin",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "260": {
+            "fileName": "assets/OurModels/training environment 2 - tennis court/textures/material_baseColor.png",
+            "importerName": ""
+        },
+        "261": {
+            "fileName": "assets/OurModels/training environment 1 - football field",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "262": {
+            "fileName": "assets/OurModels/training environment 1 - football field/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "263": {
+            "fileName": "assets/OurModels/ui panel/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "264": {
+            "fileName": "assets/OurModels/balance beam model/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "265": {
+            "fileName": "assets/OurModels/balance beam model/scene.bin",
             "importerName": "",
             "importPhysicalAsPhongMaterials": true
         }
