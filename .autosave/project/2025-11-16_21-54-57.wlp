@@ -1594,20 +1594,20 @@
                 }
             ]
         },
-        "234": {
+        "239": {
             "name": "TargetGameManager",
             "components": [
                 {
                     "type": "target-manager",
                     "target-manager": {
-                        "targetPrefab": "27"
-                    },
-                    "active": false
+                        "targetPrefab": "237"
+                    }
                 }
             ]
         },
-        "27": {
+        "237": {
             "name": "TargetPrefab",
+            "parent": "239",
             "components": [
                 {
                     "type": "mesh",
@@ -1620,106 +1620,51 @@
                 {
                     "type": "target-behavior",
                     "target-behavior": {
-                        "manager": "234"
-                    },
-                    "active": false
-                }
-            ],
-            "scaling": [
-                0.201,
-                0.201,
-                0.201
-            ],
-            "parent": "234",
-            "translation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ]
-        },
-        "237": {
-            "name": "BallGameManager",
-            "components": [
-                {
-                    "type": "ball-manager",
-                    "active": false,
-                    "ball-manager": {
-                        "ballPrefab": "238"
-                    }
-                }
-            ]
-        },
-        "238": {
-            "name": "BallPrefab",
-            "components": [
-                {
-                    "type": "mesh",
-                    "active": false,
-                    "mesh": {
-                        "mesh": "9",
-                        "material": "25"
-                    }
-                },
-                {
-                    "type": "ball-physics",
-                    "ball-physics": {
                         "manager": "237"
-                    },
-                    "active": false
+                    }
                 }
             ],
             "scaling": [
                 0.101,
                 0.101,
                 0.101
-            ],
-            "parent": "237",
-            "translation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
             ]
         },
-        "239": {
-            "name": "GameController",
+        "238": {
+            "name": "BallGameManager",
             "components": [
                 {
-                    "type": "game-controller",
-                    "game-controller": {
-                        "targetManagerObject": "234",
-                        "ballManagerObject": "237",
-                        "autoStartGame": "Target"
+                    "type": "ball-manager",
+                    "ball-manager": {
+                        "ballPrefab": "234"
                     }
                 }
-            ],
-            "parent": null,
-            "translation": [
-                0.0,
-                0.0,
-                0.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
+            ]
+        },
+        "234": {
+            "name": "BallPrefab",
+            "parent": "238",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "25"
+                    },
+                    "active": false
+                },
+                {
+                    "type": "ball-physics",
+                    "ball-physics": {
+                        "manager": "238"
+                    },
+                    "active": true
+                }
             ],
             "scaling": [
-                1.0,
-                1.0,
-                1.0
+                0.101,
+                0.101,
+                0.101
             ]
         }
     },
