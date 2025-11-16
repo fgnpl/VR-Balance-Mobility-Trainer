@@ -17,9 +17,10 @@ import {MouseLookComponent} from '@wonderlandengine/components';
 import {PlayerHeight} from '@wonderlandengine/components';
 import {TeleportComponent} from '@wonderlandengine/components';
 import {VrModeActiveSwitch} from '@wonderlandengine/components';
-import {ControllerHit} from './scripts/controller-hit.js';
-import {TargetCollision} from './scripts/target-collision.js';
-import {TargetManager} from './scripts/target-manager.js';
+import {BallManager} from './ball-manager.js';
+import {BallPhysics} from './ball-physics.js';
+import {TargetBehavior} from './target-behavior.js';
+import {TargetManager} from './target-manager.js';
 /* wle:auto-imports:end */
 
 export default function(engine) {
@@ -32,8 +33,9 @@ engine.registerComponent(MouseLookComponent);
 engine.registerComponent(PlayerHeight);
 engine.registerComponent(TeleportComponent);
 engine.registerComponent(VrModeActiveSwitch);
-engine.registerComponent(ControllerHit);
-engine.registerComponent(TargetCollision);
+engine.registerComponent(BallManager);
+engine.registerComponent(BallPhysics);
+engine.registerComponent(TargetBehavior);
 engine.registerComponent(TargetManager);
 /* wle:auto-register:end */
 }

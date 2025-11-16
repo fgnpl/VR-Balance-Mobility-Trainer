@@ -29,6 +29,9 @@
                         "material": "20"
                     },
                     "active": true
+                },
+                {
+                    "type": "target-manager"
                 }
             ],
             "translation": [
@@ -1589,44 +1592,6 @@
                 {
                     "type": "input"
                 }
-            ]
-        },
-        "27": {
-            "name": "TargetSphere",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "9",
-                        "material": "22"
-                    },
-                    "active": true
-                },
-                {
-                    "type": "collision",
-                    "collision": {
-                        "sphere": {
-                            "radius": 0.2
-                        }
-                    },
-                    "active": true
-                }
-            ],
-            "scaling": [
-                0.2,
-                0.2,
-                0.2
-            ],
-            "translation": [
-                0.0,
-                1.4495368,
-                0.0
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
             ]
         }
     },
