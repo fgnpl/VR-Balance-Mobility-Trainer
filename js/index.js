@@ -11,7 +11,6 @@
 /* wle:auto-imports:start */
 import {AudioListener} from '@wonderlandengine/components';
 import {Cursor} from '@wonderlandengine/components';
-import {CursorTarget} from '@wonderlandengine/components';
 import {FingerCursor} from '@wonderlandengine/components';
 import {HandTracking} from '@wonderlandengine/components';
 import {MouseLookComponent} from '@wonderlandengine/components';
@@ -21,16 +20,17 @@ import {VrModeActiveSwitch} from '@wonderlandengine/components';
 import {WasdControlsComponent} from '@wonderlandengine/components';
 import {BeamWalkManager} from './beam-walk-manager.js';
 import {ControllerHit} from './controller-hit.js';
+import {DataManager} from './data-manager.js';
 import {GameSelector} from './game-selector.js';
 import {HeadBob} from './head-bob.js';
 import {TargetCollision} from './target-collision.js';
+import {TargetManager} from './target-manager.js';
 /* wle:auto-imports:end */
 
 export default function(engine) {
 /* wle:auto-register:start */
 engine.registerComponent(AudioListener);
 engine.registerComponent(Cursor);
-engine.registerComponent(CursorTarget);
 engine.registerComponent(FingerCursor);
 engine.registerComponent(HandTracking);
 engine.registerComponent(MouseLookComponent);
@@ -40,9 +40,11 @@ engine.registerComponent(VrModeActiveSwitch);
 engine.registerComponent(WasdControlsComponent);
 engine.registerComponent(BeamWalkManager);
 engine.registerComponent(ControllerHit);
+engine.registerComponent(DataManager);
 engine.registerComponent(GameSelector);
 engine.registerComponent(HeadBob);
 engine.registerComponent(TargetCollision);
+engine.registerComponent(TargetManager);
 /* wle:auto-register:end */
 
 

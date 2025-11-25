@@ -7682,16 +7682,64 @@ __publicField(ControllerHit, "Properties", {
   hand: Property3.string("right")
 });
 
+// js/data-manager.js
+import { Component as Component31 } from "@wonderlandengine/api";
+var DataManager = class extends Component31 {
+  start() {
+    this.resetSession();
+  }
+  resetSession() {
+    this.session = {
+      target: { reactionTimes: [], accuracy: { correct: 0, total: 0 } },
+      beam: { runs: [], bestDuration: 0 }
+    };
+  }
+  // Target drill
+  addReactionTime(sec) {
+    this.session.target.reactionTimes.push(sec);
+  }
+  addAccuracySample(isCorrect) {
+    this.session.target.accuracy.total += 1;
+    if (isCorrect)
+      this.session.target.accuracy.correct += 1;
+  }
+  // Beam walk drill
+  addBeamRun(durationSec) {
+    this.session.beam.runs.push(durationSec);
+    if (durationSec > this.session.beam.bestDuration)
+      this.session.beam.bestDuration = durationSec;
+  }
+  // Aggregates
+  getReport() {
+    const rts = this.session.target.reactionTimes;
+    const avg = rts.length ? rts.reduce((a, b) => a + b, 0) / rts.length : 0;
+    const fastest = rts.length ? Math.min(...rts) : 0;
+    const slowest = rts.length ? Math.max(...rts) : 0;
+    const acc = this.session.target.accuracy;
+    const accPct = acc.total ? acc.correct / acc.total * 100 : 0;
+    return {
+      reaction: { average: avg, fastest, slowest, total: rts.length },
+      accuracy: { correct: acc.correct, total: acc.total, percent: accPct },
+      beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() }
+    };
+  }
+};
+__publicField(DataManager, "TypeName", "data-manager");
+
 // js/game-selector.js
-import { Component as Component31, Property as Property4 } from "@wonderlandengine/api";
-var GameSelector = class extends Component31 {
+import { Component as Component32, Property as Property4 } from "@wonderlandengine/api";
+var GameSelector = class extends Component32 {
   start() {
     this.currentDrill = null;
+    this._lastStatus = void 0;
     this.updateStatus("Select a drill");
     this._storeOriginalScales();
     this._applyDefaultEnvironment();
   }
   updateStatus(text) {
+    if (this._lastStatus === text)
+      return;
+    this._lastStatus = text;
     if (this.uiStatusText) {
       const textComp = this.uiStatusText.getComponent("text");
       if (textComp)
@@ -7807,8 +7855,8 @@ __publicField(GameSelector, "Properties", {
 });
 
 // js/head-bob.js
-import { Component as Component32, Object as Object2, Property as Property5 } from "@wonderlandengine/api";
-var HeadBob = class extends Component32 {
+import { Component as Component33, Object as Object2, Property as Property5 } from "@wonderlandengine/api";
+var HeadBob = class extends Component33 {
   start() {
     this.initialLocalPosition = vec3_exports.create();
     this.object.getTranslationLocal(this.initialLocalPosition);
@@ -7857,55 +7905,127 @@ __publicField(HeadBob, "Properties", {
 });
 
 // js/target-collision.js
-import { Component as Component33, Property as Property6 } from "@wonderlandengine/api";
-var TargetCollision = class extends Component33 {
+import { Component as Component34, Property as Property6 } from "@wonderlandengine/api";
+var TargetCollision = class extends Component34 {
   start() {
     this.hit = false;
+    if (!this.object.startTime)
+      this.object.startTime = performance.now();
   }
-  update() {
-    if (this.hit) {
-      return;
-    }
-    const spherePos = this.object.getPositionWorld();
-    const sticks = [
-      this.engine.scene.getObjectByName("ControllerRight"),
-      this.engine.scene.getObjectByName("ControllerLeft")
-    ];
-    for (let stick of sticks) {
-      if (!stick) {
-        continue;
-      }
-      const stickPos = stick.getPositionWorld();
-      const dx = spherePos[0] - stickPos[0];
-      const dy = spherePos[1] - stickPos[1];
-      const dz = spherePos[2] - stickPos[2];
-      const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      const radiusSphere = 0.2;
-      const radiusStick = 0.15;
-      const tolerance = 0.05;
-      if (distance2 < radiusSphere + radiusStick + tolerance) {
-        this.hit = true;
-        const reactionTime = (performance.now() - this.object.startTime) / 1e3;
-        this.manager.onTargetHit(this.object, reactionTime);
-      }
-    }
-  }
+  // Called by ControllerHit OR direct collision events if enabled
   onHit(controllerObject) {
-    console.log("Target was hit by: ", controllerObject.name);
-    this.object.active = false;
+    if (this.hit)
+      return;
+    this.hit = true;
+    const reactionTime = (performance.now() - this.object.startTime) / 1e3;
+    this.manager?.onTargetHit(this.object, reactionTime);
+  }
+  // Optional direct collision handling (if controller objects collide with sphere)
+  onCollisionEnter(other) {
+    if (this.hit)
+      return;
+    const name = other.object?.name || "";
+    if (name.startsWith("Controller")) {
+      this.onHit(other.object);
+    }
   }
 };
 __publicField(TargetCollision, "TypeName", "target-collision");
-/* Properties that are configurable in the editor */
 __publicField(TargetCollision, "Properties", {
   manager: Property6.object()
+});
+
+// js/target-manager.js
+import { Component as Component35, Property as Property7 } from "@wonderlandengine/api";
+console.log("target-manager.js loaded");
+var TargetManager = class extends Component35 {
+  start() {
+    this.hitCount = 0;
+    this.reactionTimes = [];
+    this.activeTarget = null;
+    this.spherePrefab.active = false;
+    this.colors = ["red", "green"];
+    this.currentCue = null;
+    this.spawnTarget();
+  }
+  spawnTarget() {
+    if (this.hitCount >= this.maxTargets) {
+      this.endGame();
+      return;
+    }
+    const sphere = this.spherePrefab.clone(this.object);
+    sphere.active = true;
+    this.activeTarget = sphere;
+    const x = (Math.random() - 0.5) * 1.5;
+    const y = 1.5 + Math.random() * 0.5;
+    const z = -1.5 - Math.pow(x, 2) / 2;
+    console.log("Target position:", x, y, z);
+    sphere.setPositionWorld([x, y, z]);
+    sphere.startTime = performance.now();
+    if (this.useColorMode) {
+      const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+      sphere.colorTag = color;
+      this.currentCue = this.colors[Math.floor(Math.random() * this.colors.length)];
+      const textComp = this.uiCueText?.getComponent("text");
+      if (textComp)
+        textComp.text = `Hit ${this.currentCue.toUpperCase()}`;
+      const matComp = sphere.getComponent("mesh");
+      const mat = matComp?.material;
+      if (mat && mat.setColor) {
+        if (color === "red")
+          mat.setColor([1, 0, 0, 1]);
+        else
+          mat.setColor([0, 1, 0, 1]);
+      }
+    }
+    let tc = sphere.getComponent("target-collision");
+    if (!tc)
+      tc = sphere.addComponent("target-collision");
+    tc.manager = this;
+    console.log("Spawned at:", sphere.getPositionWorld());
+  }
+  onTargetHit(sphere, reactionTime) {
+    this.hitCount++;
+    this.reactionTimes.push(reactionTime);
+    const dm = this.dataManager?.getComponent("data-manager");
+    dm?.addReactionTime(reactionTime);
+    if (this.useColorMode) {
+      const correct = sphere.colorTag === this.currentCue;
+      dm?.addAccuracySample(!!correct);
+    }
+    sphere.destroy();
+    setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
+  }
+  endGame() {
+    console.log("Game over! Reaction times: ", this.reactionTimes);
+    const dm = this.dataManager?.getComponent("data-manager");
+    const report = dm?.getReport();
+    if (report)
+      console.log("[TargetManager] Report summary:", report);
+  }
+  startGame() {
+    this.hitCount = 0;
+    this.reactionTimes = [];
+    this.activeTarget = null;
+    this.spawnTarget();
+  }
+};
+__publicField(TargetManager, "TypeName", "target-manager");
+/* Properties that are configurable in the editor */
+__publicField(TargetManager, "Properties", {
+  spherePrefab: Property7.object(),
+  maxTargets: Property7.int(20),
+  spawnInterval: Property7.float(1),
+  // seconds
+  useColorMode: Property7.bool(false),
+  uiCueText: Property7.object(),
+  dataManager: Property7.object()
 });
 
 // js/index.js
 function js_default(engine) {
   engine.registerComponent(AudioListener);
   engine.registerComponent(Cursor);
-  engine.registerComponent(CursorTarget);
   engine.registerComponent(FingerCursor);
   engine.registerComponent(HandTracking);
   engine.registerComponent(MouseLookComponent);
@@ -7915,9 +8035,11 @@ function js_default(engine) {
   engine.registerComponent(WasdControlsComponent);
   engine.registerComponent(BeamWalkManager);
   engine.registerComponent(ControllerHit);
+  engine.registerComponent(DataManager);
   engine.registerComponent(GameSelector);
   engine.registerComponent(HeadBob);
   engine.registerComponent(TargetCollision);
+  engine.registerComponent(TargetManager);
 }
 export {
   js_default as default

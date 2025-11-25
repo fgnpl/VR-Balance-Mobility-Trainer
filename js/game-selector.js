@@ -23,12 +23,15 @@ export class GameSelector extends Component {
 
     start() {
         this.currentDrill = null; // 'target' | 'beam' | null
+    this._lastStatus = undefined;
         this.updateStatus('Select a drill');
         this._storeOriginalScales();
         this._applyDefaultEnvironment();
     }
 
     updateStatus(text) {
+    if (this._lastStatus === text) return;
+    this._lastStatus = text;
         if (this.uiStatusText) {
             const textComp = this.uiStatusText.getComponent('text');
             if (textComp) textComp.text = text; else console.log('[GameSelector] status:', text);

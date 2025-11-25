@@ -1624,6 +1624,39 @@
                         "mesh": null,
                         "material": null
                     }
+                },
+                {
+                    "type": "game-selector",
+                    "game-selector": {
+                        "footballField": "315",
+                        "tennisCourt": "240",
+                        "gymFloor": "324",
+                        "targetManager": "234",
+                        "beamWalkManager": "234",
+                        "dataManager": "234",
+                        "uiStatusText": "347"
+                    }
+                },
+                {
+                    "type": "data-manager"
+                },
+                {
+                    "type": "beam-walk-manager",
+                    "beam-walk-manager": {
+                        "playerObject": "237",
+                        "startPosition": "349",
+                        "endPosition": "350",
+                        "dataManager": "234"
+                    }
+                },
+                {
+                    "type": "target-manager",
+                    "target-manager": {
+                        "spherePrefab": "27",
+                        "useColorMode": true,
+                        "dataManager": "234",
+                        "uiCueText": "346"
+                    }
                 }
             ]
         },
@@ -2383,10 +2416,10 @@
                 {
                     "type": "beam-walk-manager",
                     "beam-walk-manager": {
-                        "playerObject": "237",
+                        "playerObject": null,
                         "beamWidth": 33.0,
-                        "startPosition": "346",
-                        "endPosition": "350"
+                        "startPosition": null,
+                        "endPosition": null
                     }
                 }
             ]
@@ -2426,76 +2459,6 @@
                 0.9999982,
                 1.0,
                 0.9999993
-            ]
-        },
-        "346": {
-            "name": "BeamStart",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "8",
-                        "material": "22"
-                    }
-                },
-                {
-                    "type": "cursor-target"
-                },
-                {
-                    "type": "beam-start-button-cursor",
-                    "beam-start-button-cursor": {
-                        "buttonText": 231,
-                        "beamWalkManager": 225
-                    }
-                }
-            ],
-            "parent": "347",
-            "translation": [
-                19.2573776,
-                4.9456453,
-                -3.3275871
-            ],
-            "rotation": [
-                -1.572362720025922e-7,
-                0.7071059,
-                1.4066998232920016e-7,
-                0.7071076
-            ],
-            "scaling": [
-                2.1999905,
-                0.3009999,
-                0.1999993
-            ]
-        },
-        "347": {
-            "name": "Controllers"
-        },
-        "348": {
-            "name": "BeamStartText",
-            "parent": "346",
-            "components": [
-                {
-                    "type": "text",
-                    "text": {
-                        "text": "Start Beam Drill"
-                    }
-                }
-            ],
-            "translation": [
-                -7.586074275423016e-7,
-                -0.0000991,
-                -1.0218505
-            ],
-            "rotation": [
-                1.979782666694519e-7,
-                1.0,
-                3.580892382615275e-8,
-                -0.0000049
-            ],
-            "scaling": [
-                2.2727136,
-                16.6113109,
-                4.9999723
             ]
         },
         "349": {
@@ -2538,8 +2501,58 @@
                 1.0
             ]
         },
-        "351": {
-            "name": "Manager"
+        "347": {
+            "name": "uiStatus",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "text"
+                }
+            ],
+            "translation": [
+                0.0,
+                2.8906078,
+                -16.3583908
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                20.7000007,
+                20.7000007,
+                20.7000007
+            ]
+        },
+        "346": {
+            "name": "uiCue",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Wonderland Engine 2"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                6.1630482,
+                -16.3583908
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                20.7000007,
+                20.7000007,
+                20.7000007
+            ]
         }
     },
     "meshes": {
@@ -3180,7 +3193,13 @@
                     1.0,
                     1.0
                 ],
-                "font": "230"
+                "font": "230",
+                "color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                ]
             }
         },
         "20": {
@@ -4104,6 +4123,71 @@
         },
         "265": {
             "fileName": "assets/OurModels/balance beam model/scene.bin",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "266": {
+            "fileName": "js/scripts/beam-walk-manager.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "267": {
+            "fileName": "js/scripts/button-env-football.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "268": {
+            "fileName": "js/scripts/button-env-gym.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "269": {
+            "fileName": "js/scripts/button-env-tennis.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "270": {
+            "fileName": "js/scripts/button-show-report.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "271": {
+            "fileName": "js/scripts/button-start-beam.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "272": {
+            "fileName": "js/scripts/button-start-target.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "273": {
+            "fileName": "js/scripts/button-stop-drills.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "274": {
+            "fileName": "js/scripts/controller-hit.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "275": {
+            "fileName": "js/scripts/data-manager.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "276": {
+            "fileName": "js/scripts/environment-switcher.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "277": {
+            "fileName": "js/scripts/game-selector.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "278": {
+            "fileName": "js/scripts/head-bob.js",
             "importerName": "",
             "importPhysicalAsPhongMaterials": true
         }

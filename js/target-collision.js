@@ -2,59 +2,36 @@ import {Component, Property} from '@wonderlandengine/api';
 
 /**
  * target-collision
+ * Simplified: rely on engine collision callbacks instead of manual per-frame distance checks.
  */
 export class TargetCollision extends Component {
     static TypeName = 'target-collision';
-    /* Properties that are configurable in the editor */
     static Properties = {
         manager: Property.object()
     };
 
     start() {
         this.hit = false;
+        // Cache start time if prefab didn't get it yet; TargetManager sets it on spawn.
+        if (!this.object.startTime) this.object.startTime = performance.now();
     }
 
-    update() {
-        if (this.hit) {
-            return;
-        }
-
-        const spherePos = this.object.getPositionWorld();
-
-        // VR Sticks
-        const sticks = [
-            this.engine.scene.getObjectByName("ControllerRight"),
-            this.engine.scene.getObjectByName("ControllerLeft")
-        ];
-
-        // Checking if either stick is close enough to the target
-        for (let stick of sticks) {
-            if (!stick) {
-                continue;
-            }
-
-            const stickPos = stick.getPositionWorld();
-            const dx = spherePos[0] - stickPos[0];
-            const dy = spherePos[1] - stickPos[1];
-            const dz = spherePos[2] - stickPos[2];
-            const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
-
-            const radiusSphere = 0.2;
-            const radiusStick = 0.15;
-            const tolerance = 0.05;
-
-            if (distance < radiusSphere + radiusStick + tolerance) {
-                this.hit = true;
-                const reactionTime = (performance.now() - this.object.startTime) / 1000;
-                this.manager.onTargetHit(this.object, reactionTime)
-            }
-
-        }
-    }
-
+    // Called by ControllerHit OR direct collision events if enabled
     onHit(controllerObject) {
-        console.log("Target was hit by: ", controllerObject.name);
-        this.object.active = false;
+        if (this.hit) return;
+        this.hit = true;
+        const reactionTime = (performance.now() - this.object.startTime) / 1000;
+        this.manager?.onTargetHit(this.object, reactionTime);
+    }
+
+    // Optional direct collision handling (if controller objects collide with sphere)
+    onCollisionEnter(other) {
+        if (this.hit) return;
+        // Accept collisions from controllers only
+        const name = other.object?.name || '';
+        if (name.startsWith('Controller')) {
+            this.onHit(other.object);
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 {
     "views": {
         "console": {
-            "showInfo": true,
+            "showInfo": false,
             "showWarnings": false,
             "showErrors": true
         },

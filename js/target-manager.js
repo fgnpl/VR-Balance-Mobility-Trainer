@@ -67,10 +67,11 @@ export class TargetManager extends Component {
             }
         }
 
-        // Add collision component
-        const collisionComp = sphere.addComponent('target-collision');
-        collisionComp.manager = this;
-        console.log("Spawned at:", sphere.getPositionWorld());
+    // Attach / reuse target-collision component
+    let tc = sphere.getComponent('target-collision');
+    if (!tc) tc = sphere.addComponent('target-collision');
+    tc.manager = this;
+    console.log("Spawned at:", sphere.getPositionWorld());
     }
 
     onTargetHit(sphere, reactionTime) {

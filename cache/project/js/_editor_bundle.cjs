@@ -12374,11 +12374,15 @@
   var GameSelector = class extends Component3 {
     start() {
       this.currentDrill = null;
+      this._lastStatus = void 0;
       this.updateStatus("Select a drill");
       this._storeOriginalScales();
       this._applyDefaultEnvironment();
     }
     updateStatus(text) {
+      if (this._lastStatus === text)
+        return;
+      this._lastStatus = text;
       if (this.uiStatusText) {
         const textComp = this.uiStatusText.getComponent("text");
         if (textComp)
@@ -12554,42 +12558,28 @@
   var TargetCollision = class extends Component3 {
     start() {
       this.hit = false;
+      if (!this.object.startTime)
+        this.object.startTime = performance.now();
     }
-    update() {
-      if (this.hit) {
-        return;
-      }
-      const spherePos = this.object.getPositionWorld();
-      const sticks = [
-        this.engine.scene.getObjectByName("ControllerRight"),
-        this.engine.scene.getObjectByName("ControllerLeft")
-      ];
-      for (let stick of sticks) {
-        if (!stick) {
-          continue;
-        }
-        const stickPos = stick.getPositionWorld();
-        const dx = spherePos[0] - stickPos[0];
-        const dy = spherePos[1] - stickPos[1];
-        const dz = spherePos[2] - stickPos[2];
-        const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        const radiusSphere = 0.2;
-        const radiusStick = 0.15;
-        const tolerance = 0.05;
-        if (distance2 < radiusSphere + radiusStick + tolerance) {
-          this.hit = true;
-          const reactionTime = (performance.now() - this.object.startTime) / 1e3;
-          this.manager.onTargetHit(this.object, reactionTime);
-        }
-      }
-    }
+    // Called by ControllerHit OR direct collision events if enabled
     onHit(controllerObject) {
-      console.log("Target was hit by: ", controllerObject.name);
-      this.object.active = false;
+      if (this.hit)
+        return;
+      this.hit = true;
+      const reactionTime = (performance.now() - this.object.startTime) / 1e3;
+      this.manager?.onTargetHit(this.object, reactionTime);
+    }
+    // Optional direct collision handling (if controller objects collide with sphere)
+    onCollisionEnter(other) {
+      if (this.hit)
+        return;
+      const name = other.object?.name || "";
+      if (name.startsWith("Controller")) {
+        this.onHit(other.object);
+      }
     }
   };
   __publicField(TargetCollision, "TypeName", "target-collision");
-  /* Properties that are configurable in the editor */
   __publicField(TargetCollision, "Properties", {
     manager: Property.object()
   });
@@ -12640,8 +12630,10 @@
             mat.setColor([0, 1, 0, 1]);
         }
       }
-      const collisionComp = sphere.addComponent("target-collision");
-      collisionComp.manager = this;
+      let tc = sphere.getComponent("target-collision");
+      if (!tc)
+        tc = sphere.addComponent("target-collision");
+      tc.manager = this;
       console.log("Spawned at:", sphere.getPositionWorld());
     }
     onTargetHit(sphere, reactionTime) {
