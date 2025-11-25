@@ -1564,8 +1564,20 @@
                 }
             ]
         },
-        "27": {
-            "name": "TargetSphere",
+        "239": {
+            "name": "TargetGameManager",
+            "components": [
+                {
+                    "type": "target-manager",
+                    "target-manager": {
+                        "targetPrefab": "237"
+                    }
+                }
+            ]
+        },
+        "237": {
+            "name": "TargetPrefab",
+            "parent": "239",
             "components": [
                 {
                     "type": "mesh",
@@ -1573,21 +1585,12 @@
                         "mesh": "9",
                         "material": "22"
                     },
-                    "active": true
+                    "active": false
                 },
                 {
-                    "type": "collision",
-                    "collision": {
-                        "sphere": {
-                            "radius": 0.2
-                        }
-                    },
-                    "active": true
-                },
-                {
-                    "type": "target-collision",
-                    "target-collision": {
-                        "manager": "234"
+                    "type": "target-behavior",
+                    "target-behavior": {
+                        "manager": "237"
                     }
                 },
                 {
@@ -1599,6 +1602,7 @@
                 }
             ],
             "scaling": [
+<<<<<<< HEAD
                 0.2,
                 0.2,
                 0.2
@@ -1613,24 +1617,48 @@
                 0.0,
                 0.0,
                 1.0
+=======
+                0.101,
+                0.101,
+                0.101
+            ]
+        },
+        "238": {
+            "name": "BallGameManager",
+            "components": [
+                {
+                    "type": "ball-manager",
+                    "ball-manager": {
+                        "ballPrefab": "234"
+                    }
+                }
+>>>>>>> dev
             ]
         },
         "234": {
-            "name": "Manager",
+            "name": "BallPrefab",
+            "parent": "238",
             "components": [
                 {
                     "type": "mesh",
                     "mesh": {
-                        "mesh": null,
-                        "material": null
-                    }
+                        "mesh": "9",
+                        "material": "25"
+                    },
+                    "active": false
                 },
                 {
-                    "type": "target-manager",
-                    "target-manager": {
-                        "spherePrefab": "27"
-                    }
+                    "type": "ball-physics",
+                    "ball-physics": {
+                        "manager": "238"
+                    },
+                    "active": true
                 }
+            ],
+            "scaling": [
+                0.101,
+                0.101,
+                0.101
             ]
         },
         "235": {

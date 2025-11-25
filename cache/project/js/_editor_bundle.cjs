@@ -11806,6 +11806,239 @@
     runtime.start();
   });
 
+  // js/ball-manager.js
+  var ball_manager_exports = {};
+  __export(ball_manager_exports, {
+    BallManager: () => BallManager
+  });
+
+  // js/ball-physics.js
+  var ball_physics_exports = {};
+  __export(ball_physics_exports, {
+    BallPhysics: () => BallPhysics
+  });
+  var BallPhysics = class extends Component3 {
+    start() {
+      this.velocity = [this.velocityX, this.velocityY, this.velocityZ];
+      this.caught = false;
+      this.deflected = false;
+      this.controllers = [
+        this.engine.scene.findByName("ControllerRight")[0],
+        this.engine.scene.findByName("ControllerLeft")[0]
+      ];
+      this.prevControllerPositions = [null, null];
+    }
+    update(dt) {
+      if (this.caught || this.deflected) {
+        return;
+      }
+      this.velocity[1] += this.gravity * dt;
+      const pos = this.object.getPositionWorld();
+      for (let i = 0; i < this.controllers.length; i++) {
+        const controller = this.controllers[i];
+        if (!controller)
+          continue;
+        const controllerPos = controller.getPositionWorld();
+        const dx = pos[0] - controllerPos[0];
+        const dy = pos[1] - controllerPos[1];
+        const dz = pos[2] - controllerPos[2];
+        const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (distance2 < this.ballRadius + this.controllerRadius + 0.05) {
+          this.handleCollision(controller, i, controllerPos);
+          return;
+        }
+        this.prevControllerPositions[i] = [...controllerPos];
+      }
+      const newPos = [
+        pos[0] + this.velocity[0] * dt,
+        pos[1] + this.velocity[1] * dt,
+        pos[2] + this.velocity[2] * dt
+      ];
+      this.object.setPositionWorld(newPos);
+    }
+    handleCollision(controller, controllerIndex, controllerPos) {
+      let controllerVelocity = [0, 0, 0];
+      if (this.prevControllerPositions[controllerIndex]) {
+        const prev = this.prevControllerPositions[controllerIndex];
+        const dt = 1 / 60;
+        controllerVelocity = [
+          (controllerPos[0] - prev[0]) / dt,
+          (controllerPos[1] - prev[1]) / dt,
+          (controllerPos[2] - prev[2]) / dt
+        ];
+      }
+      const controllerSpeed = Math.sqrt(
+        controllerVelocity[0] ** 2 + controllerVelocity[1] ** 2 + controllerVelocity[2] ** 2
+      );
+      const ballSpeed = Math.sqrt(
+        this.velocity[0] ** 2 + this.velocity[1] ** 2 + this.velocity[2] ** 2
+      );
+      const relativeSpeed = Math.abs(ballSpeed - controllerSpeed);
+      if (relativeSpeed < this.catchThreshold) {
+        this.caught = true;
+        this.manager.onBallCaught(this.object);
+        console.log("Ball caught with relative speed:", relativeSpeed.toFixed(2));
+      } else {
+        this.deflected = true;
+        if (this.bounceEnabled) {
+          const ballPos = this.object.getPositionWorld();
+          const normalX = ballPos[0] - controllerPos[0];
+          const normalY = ballPos[1] - controllerPos[1];
+          const normalZ = ballPos[2] - controllerPos[2];
+          const normalLength = Math.sqrt(normalX ** 2 + normalY ** 2 + normalZ ** 2);
+          const dotProduct = (this.velocity[0] * normalX + this.velocity[1] * normalY + this.velocity[2] * normalZ) / normalLength;
+          this.velocity[0] = this.velocity[0] - 2 * dotProduct * normalX / normalLength;
+          this.velocity[1] = this.velocity[1] - 2 * dotProduct * normalY / normalLength;
+          this.velocity[2] = this.velocity[2] - 2 * dotProduct * normalZ / normalLength;
+          this.velocity[0] += controllerVelocity[0] * 0.5;
+          this.velocity[1] += controllerVelocity[1] * 0.5;
+          this.velocity[2] += controllerVelocity[2] * 0.5;
+          setTimeout(() => {
+            this.manager.onBallDeflected(this.object);
+          }, 1e3);
+        } else {
+          this.manager.onBallDeflected(this.object);
+        }
+        console.log("Ball deflected with relative speed:", relativeSpeed.toFixed(2));
+      }
+    }
+  };
+  __publicField(BallPhysics, "TypeName", "ball-physics");
+  __publicField(BallPhysics, "Properties", {
+    manager: Property.object(),
+    velocityX: Property.float(0),
+    velocityY: Property.float(0),
+    velocityZ: Property.float(0),
+    gravity: Property.float(-9.8),
+    ballRadius: Property.float(0.1),
+    controllerRadius: Property.float(0.1),
+    catchThreshold: Property.float(1.5),
+    // max velocity to catch vs deflect
+    bounceEnabled: Property.bool(false)
+    // whether balls bounce off controllers
+  });
+
+  // js/ball-manager.js
+  console.log("ball-manager.js loaded");
+  var BallManager = class extends Component3 {
+    start() {
+      this.ballsSpawned = 0;
+      this.ballsCaught = 0;
+      this.ballsDeflected = 0;
+      this.ballsMissed = 0;
+      this.activeBalls = [];
+      this.ballPrefab.active = false;
+      this.scheduleNextBall();
+      console.log("Ball Manager started");
+    }
+    scheduleNextBall() {
+      if (this.ballsSpawned >= this.maxBalls) {
+        this.checkGameEnd();
+        return;
+      }
+      setTimeout(() => {
+        this.spawnBall();
+        this.scheduleNextBall();
+      }, this.spawnInterval * 1e3);
+    }
+    spawnBall() {
+      this.ballsSpawned++;
+      const ball = this.ballPrefab.clone(this.object);
+      ball.active = true;
+      this.activeBalls.push(ball);
+      const angleVariation = (Math.random() - 0.5) * Math.PI / 3;
+      const heightVariation = (Math.random() - 0.5) * 1;
+      const spawnX = Math.sin(angleVariation) * this.spawnDistance;
+      const spawnY = this.spawnHeight + heightVariation;
+      const spawnZ = -Math.cos(angleVariation) * this.spawnDistance;
+      ball.setPositionWorld([spawnX, spawnY, spawnZ]);
+      const speed = this.minSpeed + Math.random() * (this.maxSpeed - this.minSpeed);
+      const targetX = (Math.random() - 0.5) * 2;
+      const targetY = 1.2 + (Math.random() - 0.5) * 0.8;
+      const targetZ = -0.5;
+      const dirX = targetX - spawnX;
+      const dirY = targetY - spawnY;
+      const dirZ = targetZ - spawnZ;
+      const length5 = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
+      const velocityX = dirX / length5 * speed;
+      const velocityY = dirY / length5 * speed;
+      const velocityZ = dirZ / length5 * speed;
+      const physicsComp = ball.addComponent(BallPhysics, {
+        manager: this,
+        velocityX,
+        velocityY,
+        velocityZ
+      });
+      console.log(
+        `Ball ${this.ballsSpawned} spawned at:`,
+        [spawnX, spawnY, spawnZ],
+        "velocity:",
+        [velocityX, velocityY, velocityZ]
+      );
+    }
+    onBallCaught(ball) {
+      this.ballsCaught++;
+      this.removeBall(ball);
+      console.log(`Ball caught! Total caught: ${this.ballsCaught}`);
+    }
+    onBallDeflected(ball) {
+      this.ballsDeflected++;
+      this.removeBall(ball);
+      console.log(`Ball deflected! Total deflected: ${this.ballsDeflected}`);
+    }
+    onBallMissed(ball) {
+      this.ballsMissed++;
+      this.removeBall(ball);
+      console.log(`Ball missed! Total missed: ${this.ballsMissed}`);
+    }
+    removeBall(ball) {
+      const index = this.activeBalls.indexOf(ball);
+      if (index > -1) {
+        this.activeBalls.splice(index, 1);
+      }
+      ball.destroy();
+      this.checkGameEnd();
+    }
+    checkGameEnd() {
+      if (this.ballsSpawned >= this.maxBalls && this.activeBalls.length === 0) {
+        this.endGame();
+      }
+    }
+    endGame() {
+      const total = this.ballsCaught + this.ballsDeflected + this.ballsMissed;
+      const catchRate = (this.ballsCaught / total * 100).toFixed(1);
+      const deflectRate = (this.ballsDeflected / total * 100).toFixed(1);
+      const missRate = (this.ballsMissed / total * 100).toFixed(1);
+      console.log("GAME OVER");
+      console.log(`Total balls: ${total}`);
+      console.log(`Caught: ${this.ballsCaught} (${catchRate}%)`);
+      console.log(`Deflected: ${this.ballsDeflected} (${deflectRate}%)`);
+      console.log(`Missed: ${this.ballsMissed} (${missRate}%)`);
+    }
+    update(dt) {
+      for (let i = this.activeBalls.length - 1; i >= 0; i--) {
+        const ball = this.activeBalls[i];
+        const pos = ball.getPositionWorld();
+        if (pos[1] < -1 || Math.abs(pos[2]) > 10) {
+          this.onBallMissed(ball);
+        }
+      }
+    }
+  };
+  __publicField(BallManager, "TypeName", "ball-manager");
+  __publicField(BallManager, "Properties", {
+    ballPrefab: Property.object(),
+    maxBalls: Property.int(30),
+    spawnInterval: Property.float(2),
+    // seconds between spawns
+    minSpeed: Property.float(2),
+    maxSpeed: Property.float(6),
+    spawnDistance: Property.float(5),
+    // distance from player
+    spawnHeight: Property.float(1.5)
+    // average spawn height
+  });
+
   // js/button-3d.js
   var button_3d_exports = {};
   __export(button_3d_exports, {
@@ -11923,93 +12156,192 @@
     usePlayerForDesktop: Property.bool(true)
   });
 
-  // js/button.js
-  var button_exports = {};
-  __export(button_exports, {
-    ButtonComponent: () => ButtonComponent,
-    hapticFeedback: () => hapticFeedback
+  // js/target-behavior.js
+  var target_behavior_exports = {};
+  __export(target_behavior_exports, {
+    TargetBehavior: () => TargetBehavior
   });
-  function hapticFeedback(object, strength, duration) {
-    const input = object.getComponent(InputComponent);
-    if (input && input.xrInputSource) {
-      const gamepad = input.xrInputSource.gamepad;
-      if (gamepad && gamepad.hapticActuators)
-        gamepad.hapticActuators[0].pulse(strength, duration);
+  var TargetBehavior = class extends Component3 {
+    init() {
+      console.log("TargetBehavior initialized");
     }
-  }
-  var ButtonComponent = class extends Component3 {
-    static onRegister(engine) {
-      engine.registerComponent(AudioSource);
-      engine.registerComponent(CursorTarget);
-    }
-    /* Position to return to when "unpressing" the button */
-    returnPos = new Float32Array(3);
     start() {
-      this.mesh = this.buttonMeshObject.getComponent(MeshComponent);
-      this.defaultMaterial = this.mesh.material;
-      this.buttonMeshObject.getTranslationLocal(this.returnPos);
-      this.target = this.object.getComponent(CursorTarget) || this.object.addComponent(CursorTarget);
-      this.soundClick = this.object.addComponent(AudioSource, {
-        src: "sfx/click.wav",
-        hrtf: true
-      });
-      this.soundUnClick = this.object.addComponent(AudioSource, {
-        src: "sfx/unclick.wav",
-        hrtf: true
-      });
-    }
-    onActivate() {
-      this.target.onHover.add(this.onHover);
-      this.target.onUnhover.add(this.onUnhover);
-      this.target.onDown.add(this.onDown);
-      this.target.onUp.add(this.onUp);
-    }
-    onDeactivate() {
-      this.target.onHover.remove(this.onHover);
-      this.target.onUnhover.remove(this.onUnhover);
-      this.target.onDown.remove(this.onDown);
-      this.target.onUp.remove(this.onUp);
-    }
-    /* Called by 'cursor-target' */
-    onHover = (_, cursor) => {
-      this.mesh.material = this.hoverMaterial;
-      if (cursor.type === "finger-cursor") {
-        this.onDown(_, cursor);
+      this.isHit = false;
+      this.controllers = this.findControllers();
+      if (this.controllers.length === 0) {
+        console.warn("WARNING: No VR controllers found in scene");
+        console.warn("Expected objects named 'ControllerLeft' or 'ControllerRight'");
       }
-      hapticFeedback(cursor.object, 0.5, 50);
-    };
-    /* Called by 'cursor-target' */
-    onDown = (_, cursor) => {
-      this.soundClick.play();
-      this.buttonMeshObject.translate([0, -0.1, 0]);
-      hapticFeedback(cursor.object, 1, 20);
-    };
-    /* Called by 'cursor-target' */
-    onUp = (_, cursor) => {
-      this.soundUnClick.play();
-      this.buttonMeshObject.setTranslationLocal(this.returnPos);
-      hapticFeedback(cursor.object, 0.7, 20);
-    };
-    /* Called by 'cursor-target' */
-    onUnhover = (_, cursor) => {
-      this.mesh.material = this.defaultMaterial;
-      if (cursor.type === "finger-cursor") {
-        this.onUp(_, cursor);
+    }
+    findControllers() {
+      const leftController = this.engine.scene.findByName("ControllerLeft")[0];
+      const rightController = this.engine.scene.findByName("ControllerRight")[0];
+      console.log(
+        "Controllers found:",
+        leftController ? "Left found" : "Left not found",
+        rightController ? "Right found" : "Right not found"
+      );
+      return [leftController, rightController].filter((c) => c);
+    }
+    update(dt) {
+      if (this.isHit) {
+        return;
       }
-      hapticFeedback(cursor.object, 0.3, 50);
-    };
+      const targetPos = this.object.getPositionWorld();
+      for (const controller of this.controllers) {
+        if (!controller || !controller.active) {
+          continue;
+        }
+        const controllerPos = controller.getPositionWorld();
+        const dx = targetPos[0] - controllerPos[0];
+        const dy = targetPos[1] - controllerPos[1];
+        const dz = targetPos[2] - controllerPos[2];
+        const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const collisionDistance = this.targetRadius + this.controllerRadius + this.hitTolerance;
+        if (distance2 < collisionDistance) {
+          this.handleHit();
+          return;
+        }
+      }
+    }
+    handleHit() {
+      this.isHit = true;
+      const reactionTime = (performance.now() - this.object.spawnTime) / 1e3;
+      if (this.manager && this.manager.onTargetHit) {
+        this.manager.onTargetHit(this.object, reactionTime);
+      } else {
+        console.error("ERROR: Manager not set or onTargetHit not found");
+      }
+    }
   };
-  __publicField(ButtonComponent, "TypeName", "button");
-  __publicField(ButtonComponent, "Properties", {
-    /** Object that has the button's mesh attached */
-    buttonMeshObject: Property.object(),
-    /** Material to apply when the user hovers the button */
-    hoverMaterial: Property.material()
+  __publicField(TargetBehavior, "TypeName", "target-behavior");
+  __publicField(TargetBehavior, "Properties", {
+    manager: Property.object(),
+    targetRadius: Property.float(0.15),
+    // radius of target sphere
+    controllerRadius: Property.float(0.08),
+    // radius of controller tip
+    hitTolerance: Property.float(0.05)
+    // extra collision buffer
+  });
+
+  // js/target-manager.js
+  var target_manager_exports = {};
+  __export(target_manager_exports, {
+    TargetManager: () => TargetManager
+  });
+  var TargetManager = class extends Component3 {
+    init() {
+      console.log("TargetManager initialized");
+    }
+    start() {
+      console.log("TargetManager started");
+      this.targetsSpawned = 0;
+      this.targetsHit = 0;
+      this.reactionTimes = [];
+      this.currentTarget = null;
+      if (this.targetPrefab) {
+        this.targetPrefab.active = false;
+        console.log("Target prefab hidden");
+      } else {
+        console.error("ERROR: No target prefab assigned!");
+        return;
+      }
+      this.spawnNextTarget();
+    }
+    spawnNextTarget() {
+      if (this.targetsSpawned >= this.totalTargets) {
+        console.log("All targets spawned, waiting for final hit...");
+        return;
+      }
+      this.targetsSpawned++;
+      const target = this.targetPrefab.clone(this.object);
+      target.active = true;
+      this.currentTarget = target;
+      const x = (Math.random() - 0.5) * this.surfaceWidth;
+      const y = this.surfaceCenterY + (Math.random() - 0.5) * this.surfaceHeight;
+      const curveFactor = 0.3;
+      const z = -this.surfaceDistance - x * x * curveFactor;
+      target.setPositionWorld([x, y, z]);
+      target.spawnTime = performance.now();
+      const behavior = target.addComponent(TargetBehavior);
+      behavior.manager = this;
+      console.log(`Target ${this.targetsSpawned}/${this.totalTargets} spawned at [${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}]`);
+    }
+    onTargetHit(target, reactionTime) {
+      this.targetsHit++;
+      this.reactionTimes.push(reactionTime);
+      console.log(`Target hit! Reaction time: ${reactionTime.toFixed(3)}s`);
+      console.log(`Progress: ${this.targetsHit}/${this.targetsSpawned} hit`);
+      target.destroy();
+      this.currentTarget = null;
+      if (this.targetsSpawned >= this.totalTargets) {
+        this.endGame();
+      } else {
+        setTimeout(() => {
+          this.spawnNextTarget();
+        }, this.spawnDelay * 1e3);
+      }
+    }
+    endGame() {
+      console.log("\nGAME COMPLETE");
+      console.log(`Total targets: ${this.totalTargets}`);
+      console.log(`Targets hit: ${this.targetsHit}`);
+      console.log(`Accuracy: ${(this.targetsHit / this.totalTargets * 100).toFixed(1)}%`);
+      if (this.reactionTimes.length > 0) {
+        const sum = this.reactionTimes.reduce((a, b) => a + b, 0);
+        const avg = sum / this.reactionTimes.length;
+        const min2 = Math.min(...this.reactionTimes);
+        const max2 = Math.max(...this.reactionTimes);
+        console.log(`
+Reaction Times:`);
+        console.log(`Average: ${avg.toFixed(3)}s`);
+        console.log(`Fastest: ${min2.toFixed(3)}s`);
+        console.log(`Slowest: ${max2.toFixed(3)}s`);
+        console.log(`All times:`, this.reactionTimes.map((t) => t.toFixed(3)));
+      }
+    }
+    update(dt) {
+      if (this.currentTarget) {
+        const target = this.currentTarget;
+        const timeAlive = (performance.now() - target.spawnTime) / 1e3;
+        if (timeAlive > 10) {
+          console.log("Target missed (timeout)");
+          target.destroy();
+          this.currentTarget = null;
+          if (this.targetsSpawned >= this.totalTargets) {
+            this.endGame();
+          } else {
+            setTimeout(() => {
+              this.spawnNextTarget();
+            }, this.spawnDelay * 1e3);
+          }
+        }
+      }
+    }
+  };
+  __publicField(TargetManager, "TypeName", "target-manager");
+  __publicField(TargetManager, "Properties", {
+    targetPrefab: Property.object(),
+    totalTargets: Property.int(20),
+    spawnDelay: Property.float(1.5),
+    // seconds between targets
+    surfaceWidth: Property.float(2),
+    // width of spawn area
+    surfaceHeight: Property.float(1),
+    // height of spawn area
+    surfaceCenterY: Property.float(1.5),
+    // center height
+    surfaceDistance: Property.float(2)
+    // distance from player
   });
 
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
+  _registerEditor(ball_manager_exports);
+  _registerEditor(ball_physics_exports);
   _registerEditor(button_3d_exports);
-  _registerEditor(button_exports);
+  _registerEditor(target_behavior_exports);
+  _registerEditor(target_manager_exports);
 })();
