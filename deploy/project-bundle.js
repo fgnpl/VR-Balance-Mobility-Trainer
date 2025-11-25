@@ -7593,178 +7593,12 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
-// js/scripts/environment-switcher.js
-import { Component as Component29, Object as Object2, Property as Property2 } from "@wonderlandengine/api";
-var HIDDEN_SCALE = [1e-7, 1e-7, 1e-7];
-var EnvironmentSwitcher = class extends Component29 {
-  /** Store the original scales of the environments */
-  originalScales = {
-    football: vec3_exports.create(),
-    tennis: vec3_exports.create(),
-    gym: vec3_exports.create()
-  };
-  start() {
-    if (this.footballField) {
-      vec3_exports.copy(this.originalScales.football, this.footballField.scalingLocal);
-    } else {
-      console.warn('EnvironmentSwitcher: "Football Field" object is not linked in the editor properties.');
-      vec3_exports.set(this.originalScales.football, 1, 1, 1);
-    }
-    if (this.tennisCourt) {
-      vec3_exports.copy(this.originalScales.tennis, this.tennisCourt.scalingLocal);
-    } else {
-      console.warn('EnvironmentSwitcher: "Tennis Court" object is not linked in the editor properties.');
-      vec3_exports.set(this.originalScales.tennis, 1, 1, 1);
-    }
-    if (this.gymFloor) {
-      vec3_exports.copy(this.originalScales.gym, this.gymFloor.scalingLocal);
-    } else {
-      console.warn('EnvironmentSwitcher: "Gym Floor" object is not linked in the editor properties.');
-      vec3_exports.set(this.originalScales.gym, 1, 1, 1);
-    }
-    if (this.defaultEnvironment === 0) {
-      this.showFootballField();
-    } else if (this.defaultEnvironment === 1) {
-      this.showTennisCourt();
-    } else if (this.defaultEnvironment === 2) {
-      this.showGymFloor();
-    }
-  }
-  /**
-   * Activates the Football Field and deactivates the others.
-   */
-  showFootballField() {
-    console.log("Attempting to show Football Field...");
-    if (this.footballField) {
-      this.footballField.setScalingLocal(this.originalScales.football);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot show "Football Field", object is not linked.');
-    }
-    if (this.tennisCourt) {
-      this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
-    }
-    if (this.gymFloor) {
-      this.gymFloor.setScalingLocal(HIDDEN_SCALE);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
-    }
-  }
-  /**
-   * Activates the Tennis Court and deactivates the others.
-   */
-  showTennisCourt() {
-    console.log("Attempting to show Tennis Court...");
-    if (this.footballField) {
-      this.footballField.setScalingLocal(HIDDEN_SCALE);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
-    }
-    if (this.tennisCourt) {
-      this.tennisCourt.setScalingLocal(this.originalScales.tennis);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot show "Tennis Court", object is not linked.');
-    }
-    if (this.gymFloor) {
-      this.gymFloor.setScalingLocal(HIDDEN_SCALE);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
-    }
-  }
-  /**
-   * Activates the Gym Floor and deactivates the others.
-   */
-  showGymFloor() {
-    console.log("Attempting to show Gym Floor...");
-    if (this.footballField) {
-      this.footballField.setScalingLocal(HIDDEN_SCALE);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
-    }
-    if (this.tennisCourt) {
-      this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
-    }
-    if (this.gymFloor) {
-      this.gymFloor.setScalingLocal(this.originalScales.gym);
-    } else {
-      console.error('EnvironmentSwitcher: Cannot show "Gym Floor", object is not linked.');
-    }
-  }
-};
-__publicField(EnvironmentSwitcher, "TypeName", "environment-switcher");
-__publicField(EnvironmentSwitcher, "Properties", {
-  /** The parent object for the Football Field environment */
-  footballField: Property2.object(null),
-  // Default to null
-  /** The parent object for the Tennis Court environment */
-  tennisCourt: Property2.object(null),
-  // Default to null
-  /** The parent object for the Gym Floor environment */
-  gymFloor: Property2.object(null),
-  // Default to null
-  /** Which environment to show by default when the scene loads */
-  defaultEnvironment: Property2.enum(["football", "tennis", "gym"], "football")
-});
-
-// js/scripts/head-bob.js
-import { Component as Component30, Object as Object3, Property as Property3 } from "@wonderlandengine/api";
-var HeadBob = class extends Component30 {
-  start() {
-    this.initialLocalPosition = vec3_exports.create();
-    this.object.getTranslationLocal(this.initialLocalPosition);
-    this.lastPlayerPosition = vec3_exports.create();
-    if (this.playerObject) {
-      this.playerObject.getTranslationWorld(this.lastPlayerPosition);
-    }
-    this.bobTime = 0;
-  }
-  update(dt) {
-    if (!this.playerObject) {
-      if (this.engine.frame % 60 === 0) {
-        console.warn('HeadBob: "Player Object" property is not set.');
-      }
-      return;
-    }
-    const currentPlayerPosition = vec3_exports.create();
-    this.playerObject.getTranslationWorld(currentPlayerPosition);
-    const deltaX = this.lastPlayerPosition[0] - currentPlayerPosition[0];
-    const deltaZ = this.lastPlayerPosition[2] - currentPlayerPosition[2];
-    const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-    let bobOffset = 0;
-    if (distanceMoved > this.epsilon) {
-      this.bobTime += dt * this.bobFrequency;
-      bobOffset = Math.sin(this.bobTime) * this.bobAmount;
-    } else {
-      this.bobTime = 0;
-    }
-    const newLocalPosition = vec3_exports.create();
-    vec3_exports.copy(newLocalPosition, this.initialLocalPosition);
-    newLocalPosition[1] += bobOffset;
-    this.object.setTranslationLocal(newLocalPosition);
-    vec3_exports.copy(this.lastPlayerPosition, currentPlayerPosition);
-  }
-};
-__publicField(HeadBob, "TypeName", "head-bob");
-__publicField(HeadBob, "Properties", {
-  /** The Player object that has the wasd-controls component */
-  playerObject: Property3.object(),
-  /** How fast the bobbing effect is (e.g., 10.0) */
-  bobFrequency: Property3.float(10),
-  /** How much the camera bobs up and down (e.g., 0.03) */
-  bobAmount: Property3.float(0.03),
-  /** A small value to ignore tiny movements and stop bobbing */
-  epsilon: Property3.float(1e-3)
-});
-
 // js/target-manager.js
-import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
+import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
 
 // js/target-behavior.js
-import { Component as Component31, Property as Property4 } from "@wonderlandengine/api";
-var TargetBehavior = class extends Component31 {
+import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
+var TargetBehavior = class extends Component29 {
   init() {
     console.log("TargetBehavior initialized");
   }
@@ -7819,17 +7653,17 @@ var TargetBehavior = class extends Component31 {
 };
 __publicField(TargetBehavior, "TypeName", "target-behavior");
 __publicField(TargetBehavior, "Properties", {
-  manager: Property4.object(),
-  targetRadius: Property4.float(0.15),
+  manager: Property2.object(),
+  targetRadius: Property2.float(0.15),
   // radius of target sphere
-  controllerRadius: Property4.float(0.08),
+  controllerRadius: Property2.float(0.08),
   // radius of controller tip
-  hitTolerance: Property4.float(0.05)
+  hitTolerance: Property2.float(0.05)
   // extra collision buffer
 });
 
 // js/target-manager.js
-var TargetManager = class extends Component32 {
+var TargetManager = class extends Component30 {
   init() {
     console.log("TargetManager initialized");
   }
@@ -7921,17 +7755,17 @@ Reaction Times:`);
 };
 __publicField(TargetManager, "TypeName", "target-manager");
 __publicField(TargetManager, "Properties", {
-  targetPrefab: Property5.object(),
-  totalTargets: Property5.int(20),
-  spawnDelay: Property5.float(1.5),
+  targetPrefab: Property3.object(),
+  totalTargets: Property3.int(20),
+  spawnDelay: Property3.float(1.5),
   // seconds between targets
-  surfaceWidth: Property5.float(2),
+  surfaceWidth: Property3.float(2),
   // width of spawn area
-  surfaceHeight: Property5.float(1),
+  surfaceHeight: Property3.float(1),
   // height of spawn area
-  surfaceCenterY: Property5.float(1.5),
+  surfaceCenterY: Property3.float(1.5),
   // center height
-  surfaceDistance: Property5.float(2)
+  surfaceDistance: Property3.float(2)
   // distance from player
 });
 
@@ -7947,8 +7781,6 @@ function js_default(engine) {
   engine.registerComponent(TeleportComponent);
   engine.registerComponent(VrModeActiveSwitch);
   engine.registerComponent(WasdControlsComponent);
-  engine.registerComponent(EnvironmentSwitcher);
-  engine.registerComponent(HeadBob);
   engine.registerComponent(TargetManager);
 }
 export {

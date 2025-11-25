@@ -19,8 +19,6 @@ import {PlayerHeight} from '@wonderlandengine/components';
 import {TeleportComponent} from '@wonderlandengine/components';
 import {VrModeActiveSwitch} from '@wonderlandengine/components';
 import {WasdControlsComponent} from '@wonderlandengine/components';
-import {EnvironmentSwitcher} from './scripts/environment-switcher.js';
-import {HeadBob} from './scripts/head-bob.js';
 import {TargetManager} from './target-manager.js';
 /* wle:auto-imports:end */
 
@@ -36,8 +34,6 @@ engine.registerComponent(PlayerHeight);
 engine.registerComponent(TeleportComponent);
 engine.registerComponent(VrModeActiveSwitch);
 engine.registerComponent(WasdControlsComponent);
-engine.registerComponent(EnvironmentSwitcher);
-engine.registerComponent(HeadBob);
 engine.registerComponent(TargetManager);
 /* wle:auto-register:end */
 }
