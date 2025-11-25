@@ -7594,6 +7594,7 @@ __decorate19([
 ], OrbitalCamera.prototype, "damping", void 0);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 // js/ball-manager.js
 import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
 
@@ -8027,9 +8028,11 @@ __publicField(EnvironmentSwitcher, "Properties", {
   defaultEnvironment: Property3.enum(["football", "tennis", "gym"], "football")
 });
 
+=======
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
 // js/scripts/head-bob.js
-import { Component as Component31, Object as Object3, Property as Property4 } from "@wonderlandengine/api";
-var HeadBob = class extends Component31 {
+import { Component as Component29, Object as Object2, Property as Property2 } from "@wonderlandengine/api";
+var HeadBob = class extends Component29 {
   start() {
     this.initialLocalPosition = vec3_exports.create();
     this.object.getTranslationLocal(this.initialLocalPosition);
@@ -8068,12 +8071,13 @@ var HeadBob = class extends Component31 {
 __publicField(HeadBob, "TypeName", "head-bob");
 __publicField(HeadBob, "Properties", {
   /** The Player object that has the wasd-controls component */
-  playerObject: Property4.object(),
+  playerObject: Property2.object(),
   /** How fast the bobbing effect is (e.g., 10.0) */
-  bobFrequency: Property4.float(10),
+  bobFrequency: Property2.float(10),
   /** How much the camera bobs up and down (e.g., 0.03) */
-  bobAmount: Property4.float(0.03),
+  bobAmount: Property2.float(0.03),
   /** A small value to ignore tiny movements and stop bobbing */
+<<<<<<< HEAD
   epsilon: Property4.float(1e-3)
 });
 
@@ -8183,6 +8187,9 @@ __publicField(TargetManager, "Properties", {
   spawnInterval: Property6.float(1)
   // seconds
 >>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
+  epsilon: Property2.float(1e-3)
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
 });
 
 // js/index.js
@@ -8201,12 +8208,13 @@ function js_default(engine) {
   engine.registerComponent(TargetBehavior);
 =======
   engine.registerComponent(WasdControlsComponent);
-  engine.registerComponent(ControllerHit);
-  engine.registerComponent(EnvironmentSwitcher);
   engine.registerComponent(HeadBob);
+<<<<<<< HEAD
   engine.registerComponent(TargetCollision);
 >>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
   engine.registerComponent(TargetManager);
+=======
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
 }
 export {
   js_default as default

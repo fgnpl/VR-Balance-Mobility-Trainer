@@ -24,12 +24,13 @@ import {TargetBehavior} from './target-behavior.js';
 import {TargetManager} from './target-manager.js';
 =======
 import {WasdControlsComponent} from '@wonderlandengine/components';
-import {ControllerHit} from './scripts/controller-hit.js';
-import {EnvironmentSwitcher} from './scripts/environment-switcher.js';
 import {HeadBob} from './scripts/head-bob.js';
+<<<<<<< HEAD
 import {TargetCollision} from './scripts/target-collision.js';
 import {TargetManager} from './scripts/target-manager.js';
 >>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
 /* wle:auto-imports:end */
 
 export default function(engine) {
@@ -48,11 +49,12 @@ engine.registerComponent(BallPhysics);
 engine.registerComponent(TargetBehavior);
 =======
 engine.registerComponent(WasdControlsComponent);
-engine.registerComponent(ControllerHit);
-engine.registerComponent(EnvironmentSwitcher);
 engine.registerComponent(HeadBob);
+<<<<<<< HEAD
 engine.registerComponent(TargetCollision);
 >>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
 engine.registerComponent(TargetManager);
+=======
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
 /* wle:auto-register:end */
 }
