@@ -9502,6 +9502,7 @@
     property.float(0.9)
   ], OrbitalCamera.prototype, "damping", void 0);
 
+<<<<<<< HEAD
   // js/ball-manager.js
   var ball_manager_exports = {};
   __export(ball_manager_exports, {
@@ -9739,186 +9740,225 @@
   var target_behavior_exports = {};
   __export(target_behavior_exports, {
     TargetBehavior: () => TargetBehavior
-  });
-  var TargetBehavior = class extends Component3 {
-    init() {
-      console.log("TargetBehavior initialized");
-    }
-    start() {
-      this.isHit = false;
-      this.controllers = this.findControllers();
-      if (this.controllers.length === 0) {
-        console.warn("WARNING: No VR controllers found in scene");
-        console.warn("Expected objects named 'ControllerLeft' or 'ControllerRight'");
-      }
-    }
-    findControllers() {
-      const leftController = this.engine.scene.findByName("ControllerLeft")[0];
-      const rightController = this.engine.scene.findByName("ControllerRight")[0];
-      console.log(
-        "Controllers found:",
-        leftController ? "Left found" : "Left not found",
-        rightController ? "Right found" : "Right not found"
-      );
-      return [leftController, rightController].filter((c) => c);
-    }
-    update(dt) {
-      if (this.isHit) {
-        return;
-      }
-      const targetPos = this.object.getPositionWorld();
-      for (const controller of this.controllers) {
-        if (!controller || !controller.active) {
-          continue;
-        }
-        const controllerPos = controller.getPositionWorld();
-        const dx = targetPos[0] - controllerPos[0];
-        const dy = targetPos[1] - controllerPos[1];
-        const dz = targetPos[2] - controllerPos[2];
-        const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
-        const collisionDistance = this.targetRadius + this.controllerRadius + this.hitTolerance;
-        if (distance2 < collisionDistance) {
-          this.handleHit();
-          return;
-        }
-      }
-    }
-    handleHit() {
-      this.isHit = true;
-      const reactionTime = (performance.now() - this.object.spawnTime) / 1e3;
-      if (this.manager && this.manager.onTargetHit) {
-        this.manager.onTargetHit(this.object, reactionTime);
-      } else {
-        console.error("ERROR: Manager not set or onTargetHit not found");
-      }
-    }
-  };
-  __publicField(TargetBehavior, "TypeName", "target-behavior");
-  __publicField(TargetBehavior, "Properties", {
-    manager: Property.object(),
-    targetRadius: Property.float(0.15),
-    // radius of target sphere
-    controllerRadius: Property.float(0.08),
-    // radius of controller tip
-    hitTolerance: Property.float(0.05)
-    // extra collision buffer
+=======
+  // js/app.js
+  var app_exports = {};
+  loadRuntime("WonderlandRuntime-physx-threads", { threads: false }).then((runtime) => {
+    runtime.start();
   });
 
-  // js/target-manager.js
-  var target_manager_exports = {};
-  __export(target_manager_exports, {
-    TargetManager: () => TargetManager
+  // js/button-3d.js
+  var button_3d_exports = {};
+  __export(button_3d_exports, {
+    Button3D: () => Button3D
   });
-  var TargetManager = class extends Component3 {
-    init() {
-      console.log("TargetManager initialized");
-    }
+  var Button3D = class extends Component3 {
     start() {
-      console.log("TargetManager started");
-      this.targetsSpawned = 0;
-      this.targetsHit = 0;
-      this.reactionTimes = [];
-      this.currentTarget = null;
-      if (this.targetPrefab) {
-        this.targetPrefab.active = false;
-        console.log("Target prefab hidden");
-      } else {
-        console.error("ERROR: No target prefab assigned!");
-        return;
-      }
-      this.spawnNextTarget();
-    }
-    spawnNextTarget() {
-      if (this.targetsSpawned >= this.totalTargets) {
-        console.log("All targets spawned, waiting for final hit...");
-        return;
-      }
-      this.targetsSpawned++;
-      const target = this.targetPrefab.clone(this.object);
-      target.active = true;
-      this.currentTarget = target;
-      const x = (Math.random() - 0.5) * this.surfaceWidth;
-      const y = this.surfaceCenterY + (Math.random() - 0.5) * this.surfaceHeight;
-      const curveFactor = 0.3;
-      const z = -this.surfaceDistance - x * x * curveFactor;
-      target.setPositionWorld([x, y, z]);
-      target.spawnTime = performance.now();
-      const behavior = target.addComponent(TargetBehavior);
-      behavior.manager = this;
-      console.log(`Target ${this.targetsSpawned}/${this.totalTargets} spawned at [${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}]`);
-    }
-    onTargetHit(target, reactionTime) {
-      this.targetsHit++;
-      this.reactionTimes.push(reactionTime);
-      console.log(`Target hit! Reaction time: ${reactionTime.toFixed(3)}s`);
-      console.log(`Progress: ${this.targetsHit}/${this.targetsSpawned} hit`);
-      target.destroy();
-      this.currentTarget = null;
-      if (this.targetsSpawned >= this.totalTargets) {
-        this.endGame();
-      } else {
-        setTimeout(() => {
-          this.spawnNextTarget();
-        }, this.spawnDelay * 1e3);
-      }
-    }
-    endGame() {
-      console.log("\nGAME COMPLETE");
-      console.log(`Total targets: ${this.totalTargets}`);
-      console.log(`Targets hit: ${this.targetsHit}`);
-      console.log(`Accuracy: ${(this.targetsHit / this.totalTargets * 100).toFixed(1)}%`);
-      if (this.reactionTimes.length > 0) {
-        const sum = this.reactionTimes.reduce((a, b) => a + b, 0);
-        const avg = sum / this.reactionTimes.length;
-        const min2 = Math.min(...this.reactionTimes);
-        const max2 = Math.max(...this.reactionTimes);
-        console.log(`
-Reaction Times:`);
-        console.log(`Average: ${avg.toFixed(3)}s`);
-        console.log(`Fastest: ${min2.toFixed(3)}s`);
-        console.log(`Slowest: ${max2.toFixed(3)}s`);
-        console.log(`All times:`, this.reactionTimes.map((t) => t.toFixed(3)));
-      }
-    }
-    update(dt) {
-      if (this.currentTarget) {
-        const target = this.currentTarget;
-        const timeAlive = (performance.now() - target.spawnTime) / 1e3;
-        if (timeAlive > 10) {
-          console.log("Target missed (timeout)");
-          target.destroy();
-          this.currentTarget = null;
-          if (this.targetsSpawned >= this.totalTargets) {
-            this.endGame();
+      this.leftController = this.engine.scene.findByName("ControllerLeft")[0];
+      this.rightController = this.engine.scene.findByName("ControllerRight")[0];
+      if (this.usePlayerForDesktop && (!this.leftController || !this.rightController)) {
+        this.playerObject = this.engine.scene.findByName("Player")[0];
+        if (!this.playerObject) {
+          this.playerObject = this.engine.scene.findByName("NonVrCamera")[0];
+        }
+        if (this.debugMode) {
+          if (this.playerObject) {
+            console.log(`Button3D: Using desktop mode with ${this.playerObject.name}`);
           } else {
-            setTimeout(() => {
-              this.spawnNextTarget();
-            }, this.spawnDelay * 1e3);
+            console.warn("Button3D: No controllers or Player/Camera found!");
           }
         }
       }
+      this.isHovered = false;
+      this.isPressed = false;
+      this.cooldownTimer = 0;
+      this.originalScale = vec3_exports.create();
+      this.object.getScalingLocal(this.originalScale);
+      this.buttonPos = vec3_exports.create();
+      this.controllerPos = vec3_exports.create();
+      this.tempScale = vec3_exports.create();
+      if (this.debugMode) {
+        console.log(`Button3D: Initialized on ${this.object.name}`);
+        console.log(`  Trigger Distance: ${this.triggerDistance}`);
+        console.log(`  Hover Distance: ${this.triggerDistance * 2}`);
+        console.log(`  Original Scale: [${this.originalScale[0].toFixed(2)}, ${this.originalScale[1].toFixed(2)}, ${this.originalScale[2].toFixed(2)}]`);
+      }
+      this.controllersWarningShown = false;
+    }
+    update(dt) {
+      if (this.cooldownTimer > 0) {
+        this.cooldownTimer -= dt;
+      }
+      this.object.getPositionWorld(this.buttonPos);
+      let closestDistance = Infinity;
+      let closestControllerName = "";
+      const objectsToCheck = [];
+      if (this.leftController)
+        objectsToCheck.push(this.leftController);
+      if (this.rightController)
+        objectsToCheck.push(this.rightController);
+      if (this.playerObject && objectsToCheck.length === 0) {
+        objectsToCheck.push(this.playerObject);
+      }
+      if (objectsToCheck.length === 0) {
+        if (this.debugMode && !this.controllersWarningShown) {
+          console.warn("Button3D: No controllers or player object found!");
+          this.controllersWarningShown = true;
+        }
+        return;
+      }
+      for (const obj of objectsToCheck) {
+        if (!obj)
+          continue;
+        obj.getPositionWorld(this.controllerPos);
+        const distance2 = vec3_exports.distance(this.buttonPos, this.controllerPos);
+        if (distance2 < closestDistance) {
+          closestDistance = distance2;
+          closestControllerName = obj.name;
+        }
+      }
+      const wasHovered = this.isHovered;
+      const wasPressed = this.isPressed;
+      this.isHovered = closestDistance < this.triggerDistance * 2;
+      this.isPressed = closestDistance < this.triggerDistance;
+      if (this.debugMode) {
+        if (this.isHovered && !wasHovered) {
+          console.log(`Button3D: HOVER ENTER - Distance: ${closestDistance.toFixed(3)}m (${closestControllerName})`);
+        }
+        if (!this.isHovered && wasHovered) {
+          console.log(`Button3D: HOVER EXIT - Distance: ${closestDistance.toFixed(3)}m`);
+        }
+        if (this.isPressed && !wasPressed) {
+          console.log(`Button3D: PRESS - Distance: ${closestDistance.toFixed(3)}m (${closestControllerName})`);
+        }
+      }
+      if (this.isPressed && !wasPressed && this.cooldownTimer <= 0) {
+        this.onPress();
+        this.cooldownTimer = this.cooldownTime;
+      }
+      this.updateVisuals();
+    }
+    updateVisuals() {
+      if (this.isPressed) {
+        vec3_exports.scale(this.tempScale, this.originalScale, this.pressScaleMultiplier);
+      } else if (this.isHovered) {
+        vec3_exports.scale(this.tempScale, this.originalScale, this.hoverScaleMultiplier);
+      } else {
+        vec3_exports.copy(this.tempScale, this.originalScale);
+      }
+      this.object.setScalingLocal(this.tempScale);
+    }
+    onPress() {
+      if (this.debugMode) {
+        console.log("Button3D: Button pressed!");
+      }
     }
   };
-  __publicField(TargetManager, "TypeName", "target-manager");
-  __publicField(TargetManager, "Properties", {
-    targetPrefab: Property.object(),
-    totalTargets: Property.int(20),
-    spawnDelay: Property.float(1.5),
-    // seconds between targets
-    surfaceWidth: Property.float(2),
-    // width of spawn area
-    surfaceHeight: Property.float(1),
-    // height of spawn area
-    surfaceCenterY: Property.float(1.5),
-    // center height
-    surfaceDistance: Property.float(2)
-    // distance from player
+  __publicField(Button3D, "TypeName", "button-3d");
+  __publicField(Button3D, "Properties", {
+    triggerDistance: Property.float(0.5),
+    cooldownTime: Property.float(0.5),
+    hoverScaleMultiplier: Property.float(1.2),
+    pressScaleMultiplier: Property.float(0.85),
+    debugMode: Property.bool(true),
+    usePlayerForDesktop: Property.bool(true)
+  });
+
+  // js/button.js
+  var button_exports = {};
+  __export(button_exports, {
+    ButtonComponent: () => ButtonComponent,
+    hapticFeedback: () => hapticFeedback
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+  });
+  function hapticFeedback(object, strength, duration) {
+    const input = object.getComponent(InputComponent);
+    if (input && input.xrInputSource) {
+      const gamepad = input.xrInputSource.gamepad;
+      if (gamepad && gamepad.hapticActuators)
+        gamepad.hapticActuators[0].pulse(strength, duration);
+    }
+  }
+  var ButtonComponent = class extends Component3 {
+    static onRegister(engine) {
+      engine.registerComponent(AudioSource);
+      engine.registerComponent(CursorTarget);
+    }
+    /* Position to return to when "unpressing" the button */
+    returnPos = new Float32Array(3);
+    start() {
+      this.mesh = this.buttonMeshObject.getComponent(MeshComponent);
+      this.defaultMaterial = this.mesh.material;
+      this.buttonMeshObject.getTranslationLocal(this.returnPos);
+      this.target = this.object.getComponent(CursorTarget) || this.object.addComponent(CursorTarget);
+      this.soundClick = this.object.addComponent(AudioSource, {
+        src: "sfx/click.wav",
+        hrtf: true
+      });
+      this.soundUnClick = this.object.addComponent(AudioSource, {
+        src: "sfx/unclick.wav",
+        hrtf: true
+      });
+    }
+    onActivate() {
+      this.target.onHover.add(this.onHover);
+      this.target.onUnhover.add(this.onUnhover);
+      this.target.onDown.add(this.onDown);
+      this.target.onUp.add(this.onUp);
+    }
+    onDeactivate() {
+      this.target.onHover.remove(this.onHover);
+      this.target.onUnhover.remove(this.onUnhover);
+      this.target.onDown.remove(this.onDown);
+      this.target.onUp.remove(this.onUp);
+    }
+    /* Called by 'cursor-target' */
+    onHover = (_, cursor) => {
+      this.mesh.material = this.hoverMaterial;
+      if (cursor.type === "finger-cursor") {
+        this.onDown(_, cursor);
+      }
+      hapticFeedback(cursor.object, 0.5, 50);
+    };
+    /* Called by 'cursor-target' */
+    onDown = (_, cursor) => {
+      this.soundClick.play();
+      this.buttonMeshObject.translate([0, -0.1, 0]);
+      hapticFeedback(cursor.object, 1, 20);
+    };
+    /* Called by 'cursor-target' */
+    onUp = (_, cursor) => {
+      this.soundUnClick.play();
+      this.buttonMeshObject.setTranslationLocal(this.returnPos);
+      hapticFeedback(cursor.object, 0.7, 20);
+    };
+    /* Called by 'cursor-target' */
+    onUnhover = (_, cursor) => {
+      this.mesh.material = this.defaultMaterial;
+      if (cursor.type === "finger-cursor") {
+        this.onUp(_, cursor);
+      }
+      hapticFeedback(cursor.object, 0.3, 50);
+    };
+  };
+  __publicField(ButtonComponent, "TypeName", "button");
+  __publicField(ButtonComponent, "Properties", {
+    /** Object that has the button's mesh attached */
+    buttonMeshObject: Property.object(),
+    /** Material to apply when the user hovers the button */
+    hoverMaterial: Property.material()
   });
 
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
+<<<<<<< HEAD
   _registerEditor(ball_manager_exports);
   _registerEditor(ball_physics_exports);
   _registerEditor(target_behavior_exports);
   _registerEditor(target_manager_exports);
+=======
+  _registerEditor(app_exports);
+  _registerEditor(button_3d_exports);
+  _registerEditor(button_exports);
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
 })();

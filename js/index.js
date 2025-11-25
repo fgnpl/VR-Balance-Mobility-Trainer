@@ -17,10 +17,19 @@ import {MouseLookComponent} from '@wonderlandengine/components';
 import {PlayerHeight} from '@wonderlandengine/components';
 import {TeleportComponent} from '@wonderlandengine/components';
 import {VrModeActiveSwitch} from '@wonderlandengine/components';
+<<<<<<< HEAD
 import {BallManager} from './ball-manager.js';
 import {BallPhysics} from './ball-physics.js';
 import {TargetBehavior} from './target-behavior.js';
 import {TargetManager} from './target-manager.js';
+=======
+import {WasdControlsComponent} from '@wonderlandengine/components';
+import {ControllerHit} from './scripts/controller-hit.js';
+import {EnvironmentSwitcher} from './scripts/environment-switcher.js';
+import {HeadBob} from './scripts/head-bob.js';
+import {TargetCollision} from './scripts/target-collision.js';
+import {TargetManager} from './scripts/target-manager.js';
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
 /* wle:auto-imports:end */
 
 export default function(engine) {
@@ -33,9 +42,17 @@ engine.registerComponent(MouseLookComponent);
 engine.registerComponent(PlayerHeight);
 engine.registerComponent(TeleportComponent);
 engine.registerComponent(VrModeActiveSwitch);
+<<<<<<< HEAD
 engine.registerComponent(BallManager);
 engine.registerComponent(BallPhysics);
 engine.registerComponent(TargetBehavior);
+=======
+engine.registerComponent(WasdControlsComponent);
+engine.registerComponent(ControllerHit);
+engine.registerComponent(EnvironmentSwitcher);
+engine.registerComponent(HeadBob);
+engine.registerComponent(TargetCollision);
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
 engine.registerComponent(TargetManager);
 /* wle:auto-register:end */
 }
