@@ -1624,12 +1624,6 @@
                         "mesh": null,
                         "material": null
                     }
-                },
-                {
-                    "type": "target-manager",
-                    "target-manager": {
-                        "spherePrefab": "27"
-                    }
                 }
             ]
         },
@@ -2361,17 +2355,7 @@
         "337": {
             "name": "EnvironmentManager",
             "parent": "235",
-            "components": [
-                {
-                    "type": "environment-switcher",
-                    "environment-switcher": {
-                        "footballField": "315",
-                        "tennisCourt": "240",
-                        "gymFloor": "324",
-                        "defaultEnvironment": "football"
-                    }
-                }
-            ]
+            "components": []
         },
         "342": {
             "link": {
@@ -2399,10 +2383,10 @@
                 {
                     "type": "beam-walk-manager",
                     "beam-walk-manager": {
-                        "playerObject": 140,
+                        "playerObject": "237",
                         "beamWidth": 33.0,
-                        "startPosition": 229,
-                        "endPosition": 233
+                        "startPosition": "346",
+                        "endPosition": "350"
                     }
                 }
             ]
@@ -2433,9 +2417,9 @@
                 -0.00885
             ],
             "rotation": [
-                1.0677015893634234e-7,
+                1.0677015893634237e-7,
                 -0.7071068,
-                -1.0677015893634234e-7,
+                -1.0677015893634237e-7,
                 -0.7071068
             ],
             "scaling": [
@@ -2472,9 +2456,9 @@
                 -3.3275871
             ],
             "rotation": [
-                -1.5723627200259216e-7,
+                -1.572362720025922e-7,
                 0.7071059,
-                1.4066998232920014e-7,
+                1.4066998232920016e-7,
                 0.7071076
             ],
             "scaling": [
@@ -2503,7 +2487,7 @@
                 -1.0218505
             ],
             "rotation": [
-                1.9797826666945184e-7,
+                1.979782666694519e-7,
                 1.0,
                 3.580892382615275e-8,
                 -0.0000049
@@ -2553,6 +2537,9 @@
                 1.0,
                 1.0
             ]
+        },
+        "351": {
+            "name": "Manager"
         }
     },
     "meshes": {

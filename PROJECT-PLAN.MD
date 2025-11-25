@@ -221,3 +221,23 @@ Fastest/Slowest Reaction Time
 Total Hits / Accuracy % (for color-coded drill)
 
 Longest Balance Duration (for beam walk)
+
+8. Implementation Notes (Nov 25, 2025)
+
+- Added central session storage (`js/scripts/data-manager.js`) with APIs:
+	- addReactionTime(sec), addAccuracySample(isCorrect), addBeamRun(sec), getReport().
+- Created `js/scripts/game-selector.js` (scene-level manager) to:
+	- Switch environments via `environment-switcher` methods (football/tennis/gym).
+	- Start/stop drills (`target-manager.startGame()/endGame`, `beam-walk-manager.startDrill()/endDrill`).
+	- Update a simple status text and show aggregated report from `DataManager`.
+- Implemented `js/scripts/beam-walk-manager.js` per plan:
+	- Tracks lateral distance to beam centerline (XZ), resets on fall (Y < resetHeight or distance > maxDistanceFromCenter).
+	- Records run durations to DataManager; exposes startDrill/endDrill and returns summary.
+- Extended `js/scripts/target-manager.js` with color-coded mode:
+	- Properties: useColorMode, uiCueText, dataManager.
+	- Assigns a color tag to spawned target, shows UI cue (e.g., "Hit GREEN"), logs accuracy and reaction times to DataManager.
+	- Added `startGame()` to re-init the drill from GameSelector.
+- Start phase wiring:
+	- Attach `data-manager` and `game-selector` on a central "Manager" object.
+	- Link GameSelector properties to the EnvironmentSwitcher, TargetManager, BeamWalkManager, DataManager, and a text UI object.
+	- Use existing football field layout as reference scale/positions for environment selection.

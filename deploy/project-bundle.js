@@ -7593,9 +7593,222 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
-// js/scripts/head-bob.js
-import { Component as Component29, Object as Object2, Property as Property2 } from "@wonderlandengine/api";
-var HeadBob = class extends Component29 {
+// js/beam-walk-manager.js
+import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
+var BeamWalkManager = class extends Component29 {
+  start() {
+    this.running = false;
+    this.totalBalanceDuration = 0;
+    this.bestDuration = 0;
+    this._currentRunStart = 0;
+  }
+  startDrill() {
+    this.running = true;
+    this.totalBalanceDuration = 0;
+    this._currentRunStart = performance.now();
+    this._resetToStart();
+  }
+  endDrill() {
+    if (!this.running)
+      return;
+    this.running = false;
+    const dur = this.totalBalanceDuration;
+    if (dur > this.bestDuration)
+      this.bestDuration = dur;
+    const dm = this.dataManager?.getComponent("data-manager");
+    dm?.addBeamRun(dur / 1e3);
+    return { totalBalanceDuration: dur / 1e3, bestDuration: this.bestDuration / 1e3 };
+  }
+  update(dt) {
+    if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
+      return;
+    const playerPos = this.playerObject.getPositionWorld();
+    const a = this.startPosition.getPositionWorld();
+    const b = this.endPosition.getPositionWorld();
+    const ab = vec3_exports.sub(vec3_exports.create(), b, a);
+    const ap = vec3_exports.sub(vec3_exports.create(), playerPos, a);
+    const t = Math.max(0, Math.min(1, vec3_exports.dot(ap, ab) / vec3_exports.dot(ab, ab)));
+    const closest = vec3_exports.scaleAndAdd(vec3_exports.create(), a, ab, t);
+    const lateral = vec3_exports.sub(vec3_exports.create(), playerPos, closest);
+    lateral[1] = 0;
+    const dist2 = vec3_exports.length(lateral);
+    if (playerPos[1] < this.resetHeight || dist2 > this.maxDistanceFromCenter) {
+      this._commitRun();
+      this._resetToStart();
+      this._currentRunStart = performance.now();
+    } else {
+      this.totalBalanceDuration = performance.now() - this._currentRunStart;
+    }
+  }
+  _commitRun() {
+    const dm = this.dataManager?.getComponent("data-manager");
+    const durSec = (performance.now() - this._currentRunStart) / 1e3;
+    if (durSec > 0)
+      dm?.addBeamRun(durSec);
+    if (durSec * 1e3 > this.bestDuration)
+      this.bestDuration = durSec * 1e3;
+  }
+  _resetToStart() {
+    if (!this.playerObject || !this.startPosition)
+      return;
+    const pos = this.startPosition.getPositionWorld();
+    this.playerObject.setPositionWorld(pos);
+  }
+};
+__publicField(BeamWalkManager, "TypeName", "beam-walk-manager");
+__publicField(BeamWalkManager, "Properties", {
+  playerObject: Property2.object(),
+  beamWidth: Property2.float(0.3),
+  startPosition: Property2.object(),
+  endPosition: Property2.object(),
+  maxDistanceFromCenter: Property2.float(0.15),
+  resetHeight: Property2.float(-2),
+  dataManager: Property2.object()
+});
+
+// js/controller-hit.js
+import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
+var ControllerHit = class extends Component30 {
+  onCollisionEnter(other) {
+    if (other.object.hasComponent("target-collision")) {
+      console.log(`${this.hand} hand hit a target!`);
+      other.object.getComponent("target-collision").onHit(this.object);
+    }
+  }
+};
+__publicField(ControllerHit, "TypeName", "controller-hit");
+/* Properties that are configurable in the editor */
+__publicField(ControllerHit, "Properties", {
+  hand: Property3.string("right")
+});
+
+// js/game-selector.js
+import { Component as Component31, Property as Property4 } from "@wonderlandengine/api";
+var GameSelector = class extends Component31 {
+  start() {
+    this.currentDrill = null;
+    this.updateStatus("Select a drill");
+    this._storeOriginalScales();
+    this._applyDefaultEnvironment();
+  }
+  updateStatus(text) {
+    if (this.uiStatusText) {
+      const textComp = this.uiStatusText.getComponent("text");
+      if (textComp)
+        textComp.text = text;
+      else
+        console.log("[GameSelector] status:", text);
+    } else {
+      console.log("[GameSelector] status:", text);
+    }
+  }
+  // ----- Environment Switching Logic -----
+  _storeOriginalScales() {
+    this._orig = {
+      football: vec3_exports.fromValues(1, 1, 1),
+      tennis: vec3_exports.fromValues(1, 1, 1),
+      gym: vec3_exports.fromValues(1, 1, 1)
+    };
+    if (this.footballField)
+      vec3_exports.copy(this._orig.football, this.footballField.scalingLocal);
+    if (this.tennisCourt)
+      vec3_exports.copy(this._orig.tennis, this.tennisCourt.scalingLocal);
+    if (this.gymFloor)
+      vec3_exports.copy(this._orig.gym, this.gymFloor.scalingLocal);
+    this._hidden = [1e-7, 1e-7, 1e-7];
+  }
+  _applyDefaultEnvironment() {
+    if (this.defaultEnvironment === 0)
+      this.showFootball();
+    else if (this.defaultEnvironment === 1)
+      this.showTennis();
+    else if (this.defaultEnvironment === 2)
+      this.showGym();
+  }
+  showFootball() {
+    if (this.footballField)
+      this.footballField.setScalingLocal(this._orig.football);
+    if (this.tennisCourt)
+      this.tennisCourt.setScalingLocal(this._hidden);
+    if (this.gymFloor)
+      this.gymFloor.setScalingLocal(this._hidden);
+  }
+  showTennis() {
+    if (this.footballField)
+      this.footballField.setScalingLocal(this._hidden);
+    if (this.tennisCourt)
+      this.tennisCourt.setScalingLocal(this._orig.tennis);
+    if (this.gymFloor)
+      this.gymFloor.setScalingLocal(this._hidden);
+  }
+  showGym() {
+    if (this.footballField)
+      this.footballField.setScalingLocal(this._hidden);
+    if (this.tennisCourt)
+      this.tennisCourt.setScalingLocal(this._hidden);
+    if (this.gymFloor)
+      this.gymFloor.setScalingLocal(this._orig.gym);
+  }
+  // Drills
+  startTargetDrill() {
+    this.stopDrills();
+    this.currentDrill = "target";
+    const mgr = this.targetManager?.getComponent("target-manager");
+    if (mgr) {
+      if (mgr.startGame)
+        mgr.startGame();
+      else
+        mgr.start();
+      this.updateStatus("Target Striking: ON");
+    }
+  }
+  startBeamWalk() {
+    this.stopDrills();
+    this.currentDrill = "beam";
+    const mgr = this.beamWalkManager?.getComponent("beam-walk-manager");
+    if (mgr) {
+      mgr.startDrill?.();
+      this.updateStatus("Beam Walk: ON");
+    }
+  }
+  stopDrills() {
+    if (this.currentDrill === "target") {
+      const tm = this.targetManager?.getComponent("target-manager");
+      tm?.endGame?.();
+    } else if (this.currentDrill === "beam") {
+      const bm = this.beamWalkManager?.getComponent("beam-walk-manager");
+      bm?.endDrill?.();
+    }
+    this.currentDrill = null;
+    this.updateStatus("Drills stopped");
+  }
+  // Report
+  showReport() {
+    const dm = this.dataManager?.getComponent("data-manager");
+    if (!dm)
+      return;
+    const r = dm.getReport();
+    this.updateStatus(`AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s Acc:${r.accuracy.percent.toFixed(0)}% BestBeam:${r.beam.best.toFixed(2)}s`);
+  }
+};
+__publicField(GameSelector, "TypeName", "game-selector");
+__publicField(GameSelector, "Properties", {
+  // Environment parents
+  footballField: Property4.object(),
+  tennisCourt: Property4.object(),
+  gymFloor: Property4.object(),
+  defaultEnvironment: Property4.enum(["football", "tennis", "gym"], "football"),
+  // Drill managers
+  targetManager: Property4.object(),
+  beamWalkManager: Property4.object(),
+  dataManager: Property4.object(),
+  // UI elements
+  uiStatusText: Property4.object()
+});
+
+// js/head-bob.js
+import { Component as Component32, Object as Object2, Property as Property5 } from "@wonderlandengine/api";
+var HeadBob = class extends Component32 {
   start() {
     this.initialLocalPosition = vec3_exports.create();
     this.object.getTranslationLocal(this.initialLocalPosition);
@@ -7634,13 +7847,58 @@ var HeadBob = class extends Component29 {
 __publicField(HeadBob, "TypeName", "head-bob");
 __publicField(HeadBob, "Properties", {
   /** The Player object that has the wasd-controls component */
-  playerObject: Property2.object(),
+  playerObject: Property5.object(),
   /** How fast the bobbing effect is (e.g., 10.0) */
-  bobFrequency: Property2.float(10),
+  bobFrequency: Property5.float(10),
   /** How much the camera bobs up and down (e.g., 0.03) */
-  bobAmount: Property2.float(0.03),
+  bobAmount: Property5.float(0.03),
   /** A small value to ignore tiny movements and stop bobbing */
-  epsilon: Property2.float(1e-3)
+  epsilon: Property5.float(1e-3)
+});
+
+// js/target-collision.js
+import { Component as Component33, Property as Property6 } from "@wonderlandengine/api";
+var TargetCollision = class extends Component33 {
+  start() {
+    this.hit = false;
+  }
+  update() {
+    if (this.hit) {
+      return;
+    }
+    const spherePos = this.object.getPositionWorld();
+    const sticks = [
+      this.engine.scene.getObjectByName("ControllerRight"),
+      this.engine.scene.getObjectByName("ControllerLeft")
+    ];
+    for (let stick of sticks) {
+      if (!stick) {
+        continue;
+      }
+      const stickPos = stick.getPositionWorld();
+      const dx = spherePos[0] - stickPos[0];
+      const dy = spherePos[1] - stickPos[1];
+      const dz = spherePos[2] - stickPos[2];
+      const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const radiusSphere = 0.2;
+      const radiusStick = 0.15;
+      const tolerance = 0.05;
+      if (distance2 < radiusSphere + radiusStick + tolerance) {
+        this.hit = true;
+        const reactionTime = (performance.now() - this.object.startTime) / 1e3;
+        this.manager.onTargetHit(this.object, reactionTime);
+      }
+    }
+  }
+  onHit(controllerObject) {
+    console.log("Target was hit by: ", controllerObject.name);
+    this.object.active = false;
+  }
+};
+__publicField(TargetCollision, "TypeName", "target-collision");
+/* Properties that are configurable in the editor */
+__publicField(TargetCollision, "Properties", {
+  manager: Property6.object()
 });
 
 // js/index.js
@@ -7655,7 +7913,11 @@ function js_default(engine) {
   engine.registerComponent(TeleportComponent);
   engine.registerComponent(VrModeActiveSwitch);
   engine.registerComponent(WasdControlsComponent);
+  engine.registerComponent(BeamWalkManager);
+  engine.registerComponent(ControllerHit);
+  engine.registerComponent(GameSelector);
   engine.registerComponent(HeadBob);
+  engine.registerComponent(TargetCollision);
 }
 export {
   js_default as default

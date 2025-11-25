@@ -11806,6 +11806,82 @@
     runtime.start();
   });
 
+  // js/beam-walk-manager.js
+  var beam_walk_manager_exports = {};
+  __export(beam_walk_manager_exports, {
+    BeamWalkManager: () => BeamWalkManager
+  });
+  var BeamWalkManager = class extends Component3 {
+    start() {
+      this.running = false;
+      this.totalBalanceDuration = 0;
+      this.bestDuration = 0;
+      this._currentRunStart = 0;
+    }
+    startDrill() {
+      this.running = true;
+      this.totalBalanceDuration = 0;
+      this._currentRunStart = performance.now();
+      this._resetToStart();
+    }
+    endDrill() {
+      if (!this.running)
+        return;
+      this.running = false;
+      const dur = this.totalBalanceDuration;
+      if (dur > this.bestDuration)
+        this.bestDuration = dur;
+      const dm = this.dataManager?.getComponent("data-manager");
+      dm?.addBeamRun(dur / 1e3);
+      return { totalBalanceDuration: dur / 1e3, bestDuration: this.bestDuration / 1e3 };
+    }
+    update(dt) {
+      if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
+        return;
+      const playerPos = this.playerObject.getPositionWorld();
+      const a = this.startPosition.getPositionWorld();
+      const b = this.endPosition.getPositionWorld();
+      const ab = vec3_exports.sub(vec3_exports.create(), b, a);
+      const ap = vec3_exports.sub(vec3_exports.create(), playerPos, a);
+      const t = Math.max(0, Math.min(1, vec3_exports.dot(ap, ab) / vec3_exports.dot(ab, ab)));
+      const closest = vec3_exports.scaleAndAdd(vec3_exports.create(), a, ab, t);
+      const lateral = vec3_exports.sub(vec3_exports.create(), playerPos, closest);
+      lateral[1] = 0;
+      const dist2 = vec3_exports.length(lateral);
+      if (playerPos[1] < this.resetHeight || dist2 > this.maxDistanceFromCenter) {
+        this._commitRun();
+        this._resetToStart();
+        this._currentRunStart = performance.now();
+      } else {
+        this.totalBalanceDuration = performance.now() - this._currentRunStart;
+      }
+    }
+    _commitRun() {
+      const dm = this.dataManager?.getComponent("data-manager");
+      const durSec = (performance.now() - this._currentRunStart) / 1e3;
+      if (durSec > 0)
+        dm?.addBeamRun(durSec);
+      if (durSec * 1e3 > this.bestDuration)
+        this.bestDuration = durSec * 1e3;
+    }
+    _resetToStart() {
+      if (!this.playerObject || !this.startPosition)
+        return;
+      const pos = this.startPosition.getPositionWorld();
+      this.playerObject.setPositionWorld(pos);
+    }
+  };
+  __publicField(BeamWalkManager, "TypeName", "beam-walk-manager");
+  __publicField(BeamWalkManager, "Properties", {
+    playerObject: Property.object(),
+    beamWidth: Property.float(0.3),
+    startPosition: Property.object(),
+    endPosition: Property.object(),
+    maxDistanceFromCenter: Property.float(0.15),
+    resetHeight: Property.float(-2),
+    dataManager: Property.object()
+  });
+
   // js/button-3d.js
   var button_3d_exports = {};
   __export(button_3d_exports, {
@@ -11923,6 +11999,104 @@
     usePlayerForDesktop: Property.bool(true)
   });
 
+  // js/button-env-football.js
+  var button_env_football_exports = {};
+  __export(button_env_football_exports, {
+    ButtonEnvFootball: () => ButtonEnvFootball
+  });
+  var ButtonEnvFootball = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.showFootball();
+    }
+  };
+  __publicField(ButtonEnvFootball, "TypeName", "button-env-football");
+
+  // js/button-env-gym.js
+  var button_env_gym_exports = {};
+  __export(button_env_gym_exports, {
+    ButtonEnvGym: () => ButtonEnvGym
+  });
+  var ButtonEnvGym = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.showGym();
+    }
+  };
+  __publicField(ButtonEnvGym, "TypeName", "button-env-gym");
+
+  // js/button-env-tennis.js
+  var button_env_tennis_exports = {};
+  __export(button_env_tennis_exports, {
+    ButtonEnvTennis: () => ButtonEnvTennis
+  });
+  var ButtonEnvTennis = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.showTennis();
+    }
+  };
+  __publicField(ButtonEnvTennis, "TypeName", "button-env-tennis");
+
+  // js/button-show-report.js
+  var button_show_report_exports = {};
+  __export(button_show_report_exports, {
+    ButtonShowReport: () => ButtonShowReport
+  });
+  var ButtonShowReport = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.showReport();
+    }
+  };
+  __publicField(ButtonShowReport, "TypeName", "button-show-report");
+
+  // js/button-start-beam.js
+  var button_start_beam_exports = {};
+  __export(button_start_beam_exports, {
+    ButtonStartBeam: () => ButtonStartBeam
+  });
+  var ButtonStartBeam = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.startBeamWalk();
+    }
+  };
+  __publicField(ButtonStartBeam, "TypeName", "button-start-beam");
+
+  // js/button-start-target.js
+  var button_start_target_exports = {};
+  __export(button_start_target_exports, {
+    ButtonStartTarget: () => ButtonStartTarget
+  });
+  var ButtonStartTarget = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.startTargetDrill();
+    }
+  };
+  __publicField(ButtonStartTarget, "TypeName", "button-start-target");
+
+  // js/button-stop-drills.js
+  var button_stop_drills_exports = {};
+  __export(button_stop_drills_exports, {
+    ButtonStopDrills: () => ButtonStopDrills
+  });
+  var ButtonStopDrills = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.stopDrills();
+    }
+  };
+  __publicField(ButtonStopDrills, "TypeName", "button-stop-drills");
+
   // js/button.js
   var button_exports = {};
   __export(button_exports, {
@@ -12007,7 +12181,319 @@
     hoverMaterial: Property.material()
   });
 
-  // js/scripts/head-bob.js
+  // js/controller-hit.js
+  var controller_hit_exports = {};
+  __export(controller_hit_exports, {
+    ControllerHit: () => ControllerHit
+  });
+  var ControllerHit = class extends Component3 {
+    onCollisionEnter(other) {
+      if (other.object.hasComponent("target-collision")) {
+        console.log(`${this.hand} hand hit a target!`);
+        other.object.getComponent("target-collision").onHit(this.object);
+      }
+    }
+  };
+  __publicField(ControllerHit, "TypeName", "controller-hit");
+  /* Properties that are configurable in the editor */
+  __publicField(ControllerHit, "Properties", {
+    hand: Property.string("right")
+  });
+
+  // js/data-manager.js
+  var data_manager_exports = {};
+  __export(data_manager_exports, {
+    DataManager: () => DataManager
+  });
+  var DataManager = class extends Component3 {
+    start() {
+      this.resetSession();
+    }
+    resetSession() {
+      this.session = {
+        target: { reactionTimes: [], accuracy: { correct: 0, total: 0 } },
+        beam: { runs: [], bestDuration: 0 }
+      };
+    }
+    // Target drill
+    addReactionTime(sec) {
+      this.session.target.reactionTimes.push(sec);
+    }
+    addAccuracySample(isCorrect) {
+      this.session.target.accuracy.total += 1;
+      if (isCorrect)
+        this.session.target.accuracy.correct += 1;
+    }
+    // Beam walk drill
+    addBeamRun(durationSec) {
+      this.session.beam.runs.push(durationSec);
+      if (durationSec > this.session.beam.bestDuration)
+        this.session.beam.bestDuration = durationSec;
+    }
+    // Aggregates
+    getReport() {
+      const rts = this.session.target.reactionTimes;
+      const avg = rts.length ? rts.reduce((a, b) => a + b, 0) / rts.length : 0;
+      const fastest = rts.length ? Math.min(...rts) : 0;
+      const slowest = rts.length ? Math.max(...rts) : 0;
+      const acc = this.session.target.accuracy;
+      const accPct = acc.total ? acc.correct / acc.total * 100 : 0;
+      return {
+        reaction: { average: avg, fastest, slowest, total: rts.length },
+        accuracy: { correct: acc.correct, total: acc.total, percent: accPct },
+        beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() }
+      };
+    }
+  };
+  __publicField(DataManager, "TypeName", "data-manager");
+
+  // js/environment-switcher.js
+  var environment_switcher_exports = {};
+  __export(environment_switcher_exports, {
+    EnvironmentSwitcher: () => EnvironmentSwitcher
+  });
+  var HIDDEN_SCALE = [1e-7, 1e-7, 1e-7];
+  var EnvironmentSwitcher = class extends Component3 {
+    /** Store the original scales of the environments */
+    originalScales = {
+      football: vec3_exports.create(),
+      tennis: vec3_exports.create(),
+      gym: vec3_exports.create()
+    };
+    start() {
+      if (this.footballField) {
+        vec3_exports.copy(this.originalScales.football, this.footballField.scalingLocal);
+      } else {
+        console.warn('EnvironmentSwitcher: "Football Field" object is not linked in the editor properties.');
+        vec3_exports.set(this.originalScales.football, 1, 1, 1);
+      }
+      if (this.tennisCourt) {
+        vec3_exports.copy(this.originalScales.tennis, this.tennisCourt.scalingLocal);
+      } else {
+        console.warn('EnvironmentSwitcher: "Tennis Court" object is not linked in the editor properties.');
+        vec3_exports.set(this.originalScales.tennis, 1, 1, 1);
+      }
+      if (this.gymFloor) {
+        vec3_exports.copy(this.originalScales.gym, this.gymFloor.scalingLocal);
+      } else {
+        console.warn('EnvironmentSwitcher: "Gym Floor" object is not linked in the editor properties.');
+        vec3_exports.set(this.originalScales.gym, 1, 1, 1);
+      }
+      if (this.defaultEnvironment === 0) {
+        this.showFootballField();
+      } else if (this.defaultEnvironment === 1) {
+        this.showTennisCourt();
+      } else if (this.defaultEnvironment === 2) {
+        this.showGymFloor();
+      }
+    }
+    /**
+     * Activates the Football Field and deactivates the others.
+     */
+    showFootballField() {
+      console.log("Attempting to show Football Field...");
+      if (this.footballField) {
+        this.footballField.setScalingLocal(this.originalScales.football);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot show "Football Field", object is not linked.');
+      }
+      if (this.tennisCourt) {
+        this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
+      }
+      if (this.gymFloor) {
+        this.gymFloor.setScalingLocal(HIDDEN_SCALE);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
+      }
+    }
+    /**
+     * Activates the Tennis Court and deactivates the others.
+     */
+    showTennisCourt() {
+      console.log("Attempting to show Tennis Court...");
+      if (this.footballField) {
+        this.footballField.setScalingLocal(HIDDEN_SCALE);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
+      }
+      if (this.tennisCourt) {
+        this.tennisCourt.setScalingLocal(this.originalScales.tennis);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot show "Tennis Court", object is not linked.');
+      }
+      if (this.gymFloor) {
+        this.gymFloor.setScalingLocal(HIDDEN_SCALE);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
+      }
+    }
+    /**
+     * Activates the Gym Floor and deactivates the others.
+     */
+    showGymFloor() {
+      console.log("Attempting to show Gym Floor...");
+      if (this.footballField) {
+        this.footballField.setScalingLocal(HIDDEN_SCALE);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
+      }
+      if (this.tennisCourt) {
+        this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
+      }
+      if (this.gymFloor) {
+        this.gymFloor.setScalingLocal(this.originalScales.gym);
+      } else {
+        console.error('EnvironmentSwitcher: Cannot show "Gym Floor", object is not linked.');
+      }
+    }
+  };
+  __publicField(EnvironmentSwitcher, "TypeName", "environment-switcher");
+  __publicField(EnvironmentSwitcher, "Properties", {
+    /** The parent object for the Football Field environment */
+    footballField: Property.object(null),
+    // Default to null
+    /** The parent object for the Tennis Court environment */
+    tennisCourt: Property.object(null),
+    // Default to null
+    /** The parent object for the Gym Floor environment */
+    gymFloor: Property.object(null),
+    // Default to null
+    /** Which environment to show by default when the scene loads */
+    defaultEnvironment: Property.enum(["football", "tennis", "gym"], "football")
+  });
+
+  // js/game-selector.js
+  var game_selector_exports = {};
+  __export(game_selector_exports, {
+    GameSelector: () => GameSelector
+  });
+  var GameSelector = class extends Component3 {
+    start() {
+      this.currentDrill = null;
+      this.updateStatus("Select a drill");
+      this._storeOriginalScales();
+      this._applyDefaultEnvironment();
+    }
+    updateStatus(text) {
+      if (this.uiStatusText) {
+        const textComp = this.uiStatusText.getComponent("text");
+        if (textComp)
+          textComp.text = text;
+        else
+          console.log("[GameSelector] status:", text);
+      } else {
+        console.log("[GameSelector] status:", text);
+      }
+    }
+    // ----- Environment Switching Logic -----
+    _storeOriginalScales() {
+      this._orig = {
+        football: vec3_exports.fromValues(1, 1, 1),
+        tennis: vec3_exports.fromValues(1, 1, 1),
+        gym: vec3_exports.fromValues(1, 1, 1)
+      };
+      if (this.footballField)
+        vec3_exports.copy(this._orig.football, this.footballField.scalingLocal);
+      if (this.tennisCourt)
+        vec3_exports.copy(this._orig.tennis, this.tennisCourt.scalingLocal);
+      if (this.gymFloor)
+        vec3_exports.copy(this._orig.gym, this.gymFloor.scalingLocal);
+      this._hidden = [1e-7, 1e-7, 1e-7];
+    }
+    _applyDefaultEnvironment() {
+      if (this.defaultEnvironment === 0)
+        this.showFootball();
+      else if (this.defaultEnvironment === 1)
+        this.showTennis();
+      else if (this.defaultEnvironment === 2)
+        this.showGym();
+    }
+    showFootball() {
+      if (this.footballField)
+        this.footballField.setScalingLocal(this._orig.football);
+      if (this.tennisCourt)
+        this.tennisCourt.setScalingLocal(this._hidden);
+      if (this.gymFloor)
+        this.gymFloor.setScalingLocal(this._hidden);
+    }
+    showTennis() {
+      if (this.footballField)
+        this.footballField.setScalingLocal(this._hidden);
+      if (this.tennisCourt)
+        this.tennisCourt.setScalingLocal(this._orig.tennis);
+      if (this.gymFloor)
+        this.gymFloor.setScalingLocal(this._hidden);
+    }
+    showGym() {
+      if (this.footballField)
+        this.footballField.setScalingLocal(this._hidden);
+      if (this.tennisCourt)
+        this.tennisCourt.setScalingLocal(this._hidden);
+      if (this.gymFloor)
+        this.gymFloor.setScalingLocal(this._orig.gym);
+    }
+    // Drills
+    startTargetDrill() {
+      this.stopDrills();
+      this.currentDrill = "target";
+      const mgr = this.targetManager?.getComponent("target-manager");
+      if (mgr) {
+        if (mgr.startGame)
+          mgr.startGame();
+        else
+          mgr.start();
+        this.updateStatus("Target Striking: ON");
+      }
+    }
+    startBeamWalk() {
+      this.stopDrills();
+      this.currentDrill = "beam";
+      const mgr = this.beamWalkManager?.getComponent("beam-walk-manager");
+      if (mgr) {
+        mgr.startDrill?.();
+        this.updateStatus("Beam Walk: ON");
+      }
+    }
+    stopDrills() {
+      if (this.currentDrill === "target") {
+        const tm = this.targetManager?.getComponent("target-manager");
+        tm?.endGame?.();
+      } else if (this.currentDrill === "beam") {
+        const bm = this.beamWalkManager?.getComponent("beam-walk-manager");
+        bm?.endDrill?.();
+      }
+      this.currentDrill = null;
+      this.updateStatus("Drills stopped");
+    }
+    // Report
+    showReport() {
+      const dm = this.dataManager?.getComponent("data-manager");
+      if (!dm)
+        return;
+      const r = dm.getReport();
+      this.updateStatus(`AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s Acc:${r.accuracy.percent.toFixed(0)}% BestBeam:${r.beam.best.toFixed(2)}s`);
+    }
+  };
+  __publicField(GameSelector, "TypeName", "game-selector");
+  __publicField(GameSelector, "Properties", {
+    // Environment parents
+    footballField: Property.object(),
+    tennisCourt: Property.object(),
+    gymFloor: Property.object(),
+    defaultEnvironment: Property.enum(["football", "tennis", "gym"], "football"),
+    // Drill managers
+    targetManager: Property.object(),
+    beamWalkManager: Property.object(),
+    dataManager: Property.object(),
+    // UI elements
+    uiStatusText: Property.object()
+  });
+
+  // js/head-bob.js
   var head_bob_exports = {};
   __export(head_bob_exports, {
     HeadBob: () => HeadBob
@@ -12060,10 +12546,160 @@
     epsilon: Property.float(1e-3)
   });
 
+  // js/target-collision.js
+  var target_collision_exports = {};
+  __export(target_collision_exports, {
+    TargetCollision: () => TargetCollision
+  });
+  var TargetCollision = class extends Component3 {
+    start() {
+      this.hit = false;
+    }
+    update() {
+      if (this.hit) {
+        return;
+      }
+      const spherePos = this.object.getPositionWorld();
+      const sticks = [
+        this.engine.scene.getObjectByName("ControllerRight"),
+        this.engine.scene.getObjectByName("ControllerLeft")
+      ];
+      for (let stick of sticks) {
+        if (!stick) {
+          continue;
+        }
+        const stickPos = stick.getPositionWorld();
+        const dx = spherePos[0] - stickPos[0];
+        const dy = spherePos[1] - stickPos[1];
+        const dz = spherePos[2] - stickPos[2];
+        const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const radiusSphere = 0.2;
+        const radiusStick = 0.15;
+        const tolerance = 0.05;
+        if (distance2 < radiusSphere + radiusStick + tolerance) {
+          this.hit = true;
+          const reactionTime = (performance.now() - this.object.startTime) / 1e3;
+          this.manager.onTargetHit(this.object, reactionTime);
+        }
+      }
+    }
+    onHit(controllerObject) {
+      console.log("Target was hit by: ", controllerObject.name);
+      this.object.active = false;
+    }
+  };
+  __publicField(TargetCollision, "TypeName", "target-collision");
+  /* Properties that are configurable in the editor */
+  __publicField(TargetCollision, "Properties", {
+    manager: Property.object()
+  });
+
+  // js/target-manager.js
+  var target_manager_exports = {};
+  __export(target_manager_exports, {
+    TargetManager: () => TargetManager
+  });
+  console.log("target-manager.js loaded");
+  var TargetManager = class extends Component3 {
+    start() {
+      this.hitCount = 0;
+      this.reactionTimes = [];
+      this.activeTarget = null;
+      this.spherePrefab.active = false;
+      this.colors = ["red", "green"];
+      this.currentCue = null;
+      this.spawnTarget();
+    }
+    spawnTarget() {
+      if (this.hitCount >= this.maxTargets) {
+        this.endGame();
+        return;
+      }
+      const sphere = this.spherePrefab.clone(this.object);
+      sphere.active = true;
+      this.activeTarget = sphere;
+      const x = (Math.random() - 0.5) * 1.5;
+      const y = 1.5 + Math.random() * 0.5;
+      const z = -1.5 - Math.pow(x, 2) / 2;
+      console.log("Target position:", x, y, z);
+      sphere.setPositionWorld([x, y, z]);
+      sphere.startTime = performance.now();
+      if (this.useColorMode) {
+        const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+        sphere.colorTag = color;
+        this.currentCue = this.colors[Math.floor(Math.random() * this.colors.length)];
+        const textComp = this.uiCueText?.getComponent("text");
+        if (textComp)
+          textComp.text = `Hit ${this.currentCue.toUpperCase()}`;
+        const matComp = sphere.getComponent("mesh");
+        const mat = matComp?.material;
+        if (mat && mat.setColor) {
+          if (color === "red")
+            mat.setColor([1, 0, 0, 1]);
+          else
+            mat.setColor([0, 1, 0, 1]);
+        }
+      }
+      const collisionComp = sphere.addComponent("target-collision");
+      collisionComp.manager = this;
+      console.log("Spawned at:", sphere.getPositionWorld());
+    }
+    onTargetHit(sphere, reactionTime) {
+      this.hitCount++;
+      this.reactionTimes.push(reactionTime);
+      const dm = this.dataManager?.getComponent("data-manager");
+      dm?.addReactionTime(reactionTime);
+      if (this.useColorMode) {
+        const correct = sphere.colorTag === this.currentCue;
+        dm?.addAccuracySample(!!correct);
+      }
+      sphere.destroy();
+      setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
+    }
+    endGame() {
+      console.log("Game over! Reaction times: ", this.reactionTimes);
+      const dm = this.dataManager?.getComponent("data-manager");
+      const report = dm?.getReport();
+      if (report)
+        console.log("[TargetManager] Report summary:", report);
+    }
+    startGame() {
+      this.hitCount = 0;
+      this.reactionTimes = [];
+      this.activeTarget = null;
+      this.spawnTarget();
+    }
+  };
+  __publicField(TargetManager, "TypeName", "target-manager");
+  /* Properties that are configurable in the editor */
+  __publicField(TargetManager, "Properties", {
+    spherePrefab: Property.object(),
+    maxTargets: Property.int(20),
+    spawnInterval: Property.float(1),
+    // seconds
+    useColorMode: Property.bool(false),
+    uiCueText: Property.object(),
+    dataManager: Property.object()
+  });
+
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
+  _registerEditor(beam_walk_manager_exports);
   _registerEditor(button_3d_exports);
+  _registerEditor(button_env_football_exports);
+  _registerEditor(button_env_gym_exports);
+  _registerEditor(button_env_tennis_exports);
+  _registerEditor(button_show_report_exports);
+  _registerEditor(button_start_beam_exports);
+  _registerEditor(button_start_target_exports);
+  _registerEditor(button_stop_drills_exports);
   _registerEditor(button_exports);
+  _registerEditor(controller_hit_exports);
+  _registerEditor(data_manager_exports);
+  _registerEditor(environment_switcher_exports);
+  _registerEditor(game_selector_exports);
   _registerEditor(head_bob_exports);
+  _registerEditor(target_collision_exports);
+  _registerEditor(target_manager_exports);
 })();

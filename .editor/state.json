@@ -2,7 +2,7 @@
     "views": {
         "console": {
             "showInfo": true,
-            "showWarnings": true,
+            "showWarnings": false,
             "showErrors": true
         },
         "sceneView": {

@@ -1626,9 +1626,11 @@
                     }
                 },
                 {
-                    "type": "target-manager",
-                    "target-manager": {
-                        "spherePrefab": "27"
+                    "type": "game-selector",
+                    "game-selector": {
+                        "footballField": "315",
+                        "tennisCourt": "240",
+                        "gymFloor": "324"
                     }
                 }
             ]
@@ -2361,17 +2363,7 @@
         "337": {
             "name": "EnvironmentManager",
             "parent": "235",
-            "components": [
-                {
-                    "type": "environment-switcher",
-                    "environment-switcher": {
-                        "footballField": "315",
-                        "tennisCourt": "240",
-                        "gymFloor": "324",
-                        "defaultEnvironment": "football"
-                    }
-                }
-            ]
+            "components": []
         },
         "342": {
             "link": {
@@ -2399,10 +2391,10 @@
                 {
                     "type": "beam-walk-manager",
                     "beam-walk-manager": {
-                        "playerObject": 140,
+                        "playerObject": null,
                         "beamWidth": 33.0,
-                        "startPosition": 229,
-                        "endPosition": 233
+                        "startPosition": null,
+                        "endPosition": null
                     }
                 }
             ]
@@ -2433,9 +2425,9 @@
                 -0.00885
             ],
             "rotation": [
-                1.0677015893634234e-7,
+                1.0677015893634237e-7,
                 -0.7071068,
-                -1.0677015893634234e-7,
+                -1.0677015893634237e-7,
                 -0.7071068
             ],
             "scaling": [
@@ -2472,9 +2464,9 @@
                 -3.3275871
             ],
             "rotation": [
-                -1.5723627200259216e-7,
+                -1.572362720025922e-7,
                 0.7071059,
-                1.4066998232920014e-7,
+                1.4066998232920016e-7,
                 0.7071076
             ],
             "scaling": [
@@ -2503,7 +2495,7 @@
                 -1.0218505
             ],
             "rotation": [
-                1.9797826666945184e-7,
+                1.979782666694519e-7,
                 1.0,
                 3.580892382615275e-8,
                 -0.0000049
@@ -4117,6 +4109,71 @@
         },
         "265": {
             "fileName": "assets/OurModels/balance beam model/scene.bin",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "266": {
+            "fileName": "js/scripts/beam-walk-manager.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "267": {
+            "fileName": "js/scripts/button-env-football.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "268": {
+            "fileName": "js/scripts/button-env-gym.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "269": {
+            "fileName": "js/scripts/button-env-tennis.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "270": {
+            "fileName": "js/scripts/button-show-report.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "271": {
+            "fileName": "js/scripts/button-start-beam.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "272": {
+            "fileName": "js/scripts/button-start-target.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "273": {
+            "fileName": "js/scripts/button-stop-drills.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "274": {
+            "fileName": "js/scripts/controller-hit.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "275": {
+            "fileName": "js/scripts/data-manager.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "276": {
+            "fileName": "js/scripts/environment-switcher.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "277": {
+            "fileName": "js/scripts/game-selector.js",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "278": {
+            "fileName": "js/scripts/head-bob.js",
             "importerName": "",
             "importPhysicalAsPhongMaterials": true
         }

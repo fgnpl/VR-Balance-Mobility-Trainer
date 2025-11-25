@@ -19,7 +19,11 @@ import {PlayerHeight} from '@wonderlandengine/components';
 import {TeleportComponent} from '@wonderlandengine/components';
 import {VrModeActiveSwitch} from '@wonderlandengine/components';
 import {WasdControlsComponent} from '@wonderlandengine/components';
-import {HeadBob} from './scripts/head-bob.js';
+import {BeamWalkManager} from './beam-walk-manager.js';
+import {ControllerHit} from './controller-hit.js';
+import {GameSelector} from './game-selector.js';
+import {HeadBob} from './head-bob.js';
+import {TargetCollision} from './target-collision.js';
 /* wle:auto-imports:end */
 
 export default function(engine) {
@@ -34,6 +38,12 @@ engine.registerComponent(PlayerHeight);
 engine.registerComponent(TeleportComponent);
 engine.registerComponent(VrModeActiveSwitch);
 engine.registerComponent(WasdControlsComponent);
+engine.registerComponent(BeamWalkManager);
+engine.registerComponent(ControllerHit);
+engine.registerComponent(GameSelector);
 engine.registerComponent(HeadBob);
+engine.registerComponent(TargetCollision);
 /* wle:auto-register:end */
+
+
 }

@@ -12,7 +12,10 @@ export class TargetManager extends Component {
     static Properties = {
         spherePrefab: Property.object(),
         maxTargets: Property.int(20),
-        spawnInterval: Property.float(1.0) // seconds
+    spawnInterval: Property.float(1.0), // seconds
+    useColorMode: Property.bool(false),
+    uiCueText: Property.object(),
+    dataManager: Property.object(),
     };
     
     start() {
@@ -21,7 +24,9 @@ export class TargetManager extends Component {
         this.activeTarget = null;
         this.spherePrefab.active = false;
 
-        this.spawnTarget();
+    this.colors = ['red','green'];
+    this.currentCue = null;
+    this.spawnTarget();
     }
 
     spawnTarget() {
@@ -31,7 +36,7 @@ export class TargetManager extends Component {
             return;
         }
 
-        // Creating a new sphere using the prefab
+    // Creating a new sphere using the prefab
         const sphere = this.spherePrefab.clone(this.object);
         sphere.active = true;
         this.activeTarget = sphere;
@@ -46,6 +51,22 @@ export class TargetManager extends Component {
         sphere.setPositionWorld([x, y, z]);
         sphere.startTime = performance.now();
 
+        // Color-coded mode: assign material tag
+        if (this.useColorMode) {
+            const color = this.colors[Math.floor(Math.random()*this.colors.length)];
+            sphere.colorTag = color;
+            // Update UI cue to tell which to hit
+            this.currentCue = this.colors[Math.floor(Math.random()*this.colors.length)];
+            const textComp = this.uiCueText?.getComponent('text');
+            if (textComp) textComp.text = `Hit ${this.currentCue.toUpperCase()}`;
+            // Optionally change material by name if available
+            const matComp = sphere.getComponent('mesh');
+            const mat = matComp?.material;
+            if (mat && mat.setColor) {
+                if (color === 'red') mat.setColor([1,0,0,1]); else mat.setColor([0,1,0,1]);
+            }
+        }
+
         // Add collision component
         const collisionComp = sphere.addComponent('target-collision');
         collisionComp.manager = this;
@@ -56,6 +77,14 @@ export class TargetManager extends Component {
         this.hitCount++;
         this.reactionTimes.push(reactionTime);
 
+        // DataManager logging
+        const dm = this.dataManager?.getComponent('data-manager');
+        dm?.addReactionTime(reactionTime);
+        if (this.useColorMode) {
+            const correct = sphere.colorTag === this.currentCue;
+            dm?.addAccuracySample(!!correct);
+        }
+
         sphere.destroy();
 
         setTimeout(() => this.spawnTarget(), this.spawnInterval * 1000);
@@ -63,6 +92,16 @@ export class TargetManager extends Component {
 
     endGame() {
         console.log("Game over! Reaction times: ", this.reactionTimes);
+        const dm = this.dataManager?.getComponent('data-manager');
+        const report = dm?.getReport();
+        if (report) console.log('[TargetManager] Report summary:', report);
+    }
+
+    startGame() {
+        this.hitCount = 0;
+        this.reactionTimes = [];
+        this.activeTarget = null;
+        this.spawnTarget();
     }
 }
 
