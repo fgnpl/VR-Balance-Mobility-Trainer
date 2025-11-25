@@ -7593,236 +7593,12 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
-// js/ball-manager.js
+// js/target-manager.js
 import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
 
-// js/ball-physics.js
-import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
-var BallPhysics = class extends Component29 {
-  start() {
-    this.velocity = [this.velocityX, this.velocityY, this.velocityZ];
-    this.caught = false;
-    this.deflected = false;
-    this.controllers = [
-      this.engine.scene.findByName("ControllerRight")[0],
-      this.engine.scene.findByName("ControllerLeft")[0]
-    ];
-    this.prevControllerPositions = [null, null];
-  }
-  update(dt) {
-    if (this.caught || this.deflected) {
-      return;
-    }
-    this.velocity[1] += this.gravity * dt;
-    const pos = this.object.getPositionWorld();
-    for (let i = 0; i < this.controllers.length; i++) {
-      const controller = this.controllers[i];
-      if (!controller)
-        continue;
-      const controllerPos = controller.getPositionWorld();
-      const dx = pos[0] - controllerPos[0];
-      const dy = pos[1] - controllerPos[1];
-      const dz = pos[2] - controllerPos[2];
-      const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      if (distance2 < this.ballRadius + this.controllerRadius + 0.05) {
-        this.handleCollision(controller, i, controllerPos);
-        return;
-      }
-      this.prevControllerPositions[i] = [...controllerPos];
-    }
-    const newPos = [
-      pos[0] + this.velocity[0] * dt,
-      pos[1] + this.velocity[1] * dt,
-      pos[2] + this.velocity[2] * dt
-    ];
-    this.object.setPositionWorld(newPos);
-  }
-  handleCollision(controller, controllerIndex, controllerPos) {
-    let controllerVelocity = [0, 0, 0];
-    if (this.prevControllerPositions[controllerIndex]) {
-      const prev = this.prevControllerPositions[controllerIndex];
-      const dt = 1 / 60;
-      controllerVelocity = [
-        (controllerPos[0] - prev[0]) / dt,
-        (controllerPos[1] - prev[1]) / dt,
-        (controllerPos[2] - prev[2]) / dt
-      ];
-    }
-    const controllerSpeed = Math.sqrt(
-      controllerVelocity[0] ** 2 + controllerVelocity[1] ** 2 + controllerVelocity[2] ** 2
-    );
-    const ballSpeed = Math.sqrt(
-      this.velocity[0] ** 2 + this.velocity[1] ** 2 + this.velocity[2] ** 2
-    );
-    const relativeSpeed = Math.abs(ballSpeed - controllerSpeed);
-    if (relativeSpeed < this.catchThreshold) {
-      this.caught = true;
-      this.manager.onBallCaught(this.object);
-      console.log("Ball caught with relative speed:", relativeSpeed.toFixed(2));
-    } else {
-      this.deflected = true;
-      if (this.bounceEnabled) {
-        const ballPos = this.object.getPositionWorld();
-        const normalX = ballPos[0] - controllerPos[0];
-        const normalY = ballPos[1] - controllerPos[1];
-        const normalZ = ballPos[2] - controllerPos[2];
-        const normalLength = Math.sqrt(normalX ** 2 + normalY ** 2 + normalZ ** 2);
-        const dotProduct = (this.velocity[0] * normalX + this.velocity[1] * normalY + this.velocity[2] * normalZ) / normalLength;
-        this.velocity[0] = this.velocity[0] - 2 * dotProduct * normalX / normalLength;
-        this.velocity[1] = this.velocity[1] - 2 * dotProduct * normalY / normalLength;
-        this.velocity[2] = this.velocity[2] - 2 * dotProduct * normalZ / normalLength;
-        this.velocity[0] += controllerVelocity[0] * 0.5;
-        this.velocity[1] += controllerVelocity[1] * 0.5;
-        this.velocity[2] += controllerVelocity[2] * 0.5;
-        setTimeout(() => {
-          this.manager.onBallDeflected(this.object);
-        }, 1e3);
-      } else {
-        this.manager.onBallDeflected(this.object);
-      }
-      console.log("Ball deflected with relative speed:", relativeSpeed.toFixed(2));
-    }
-  }
-};
-__publicField(BallPhysics, "TypeName", "ball-physics");
-__publicField(BallPhysics, "Properties", {
-  manager: Property2.object(),
-  velocityX: Property2.float(0),
-  velocityY: Property2.float(0),
-  velocityZ: Property2.float(0),
-  gravity: Property2.float(-9.8),
-  ballRadius: Property2.float(0.1),
-  controllerRadius: Property2.float(0.1),
-  catchThreshold: Property2.float(1.5),
-  // max velocity to catch vs deflect
-  bounceEnabled: Property2.bool(false)
-  // whether balls bounce off controllers
-});
-
-// js/ball-manager.js
-console.log("ball-manager.js loaded");
-var BallManager = class extends Component30 {
-  start() {
-    this.ballsSpawned = 0;
-    this.ballsCaught = 0;
-    this.ballsDeflected = 0;
-    this.ballsMissed = 0;
-    this.activeBalls = [];
-    this.ballPrefab.active = false;
-    this.scheduleNextBall();
-    console.log("Ball Manager started");
-  }
-  scheduleNextBall() {
-    if (this.ballsSpawned >= this.maxBalls) {
-      this.checkGameEnd();
-      return;
-    }
-    setTimeout(() => {
-      this.spawnBall();
-      this.scheduleNextBall();
-    }, this.spawnInterval * 1e3);
-  }
-  spawnBall() {
-    this.ballsSpawned++;
-    const ball = this.ballPrefab.clone(this.object);
-    ball.active = true;
-    this.activeBalls.push(ball);
-    const angleVariation = (Math.random() - 0.5) * Math.PI / 3;
-    const heightVariation = (Math.random() - 0.5) * 1;
-    const spawnX = Math.sin(angleVariation) * this.spawnDistance;
-    const spawnY = this.spawnHeight + heightVariation;
-    const spawnZ = -Math.cos(angleVariation) * this.spawnDistance;
-    ball.setPositionWorld([spawnX, spawnY, spawnZ]);
-    const speed = this.minSpeed + Math.random() * (this.maxSpeed - this.minSpeed);
-    const targetX = (Math.random() - 0.5) * 2;
-    const targetY = 1.2 + (Math.random() - 0.5) * 0.8;
-    const targetZ = -0.5;
-    const dirX = targetX - spawnX;
-    const dirY = targetY - spawnY;
-    const dirZ = targetZ - spawnZ;
-    const length5 = Math.sqrt(dirX * dirX + dirY * dirY + dirZ * dirZ);
-    const velocityX = dirX / length5 * speed;
-    const velocityY = dirY / length5 * speed;
-    const velocityZ = dirZ / length5 * speed;
-    const physicsComp = ball.addComponent(BallPhysics, {
-      manager: this,
-      velocityX,
-      velocityY,
-      velocityZ
-    });
-    console.log(
-      `Ball ${this.ballsSpawned} spawned at:`,
-      [spawnX, spawnY, spawnZ],
-      "velocity:",
-      [velocityX, velocityY, velocityZ]
-    );
-  }
-  onBallCaught(ball) {
-    this.ballsCaught++;
-    this.removeBall(ball);
-    console.log(`Ball caught! Total caught: ${this.ballsCaught}`);
-  }
-  onBallDeflected(ball) {
-    this.ballsDeflected++;
-    this.removeBall(ball);
-    console.log(`Ball deflected! Total deflected: ${this.ballsDeflected}`);
-  }
-  onBallMissed(ball) {
-    this.ballsMissed++;
-    this.removeBall(ball);
-    console.log(`Ball missed! Total missed: ${this.ballsMissed}`);
-  }
-  removeBall(ball) {
-    const index = this.activeBalls.indexOf(ball);
-    if (index > -1) {
-      this.activeBalls.splice(index, 1);
-    }
-    ball.destroy();
-    this.checkGameEnd();
-  }
-  checkGameEnd() {
-    if (this.ballsSpawned >= this.maxBalls && this.activeBalls.length === 0) {
-      this.endGame();
-    }
-  }
-  endGame() {
-    const total = this.ballsCaught + this.ballsDeflected + this.ballsMissed;
-    const catchRate = (this.ballsCaught / total * 100).toFixed(1);
-    const deflectRate = (this.ballsDeflected / total * 100).toFixed(1);
-    const missRate = (this.ballsMissed / total * 100).toFixed(1);
-    console.log("GAME OVER");
-    console.log(`Total balls: ${total}`);
-    console.log(`Caught: ${this.ballsCaught} (${catchRate}%)`);
-    console.log(`Deflected: ${this.ballsDeflected} (${deflectRate}%)`);
-    console.log(`Missed: ${this.ballsMissed} (${missRate}%)`);
-  }
-  update(dt) {
-    for (let i = this.activeBalls.length - 1; i >= 0; i--) {
-      const ball = this.activeBalls[i];
-      const pos = ball.getPositionWorld();
-      if (pos[1] < -1 || Math.abs(pos[2]) > 10) {
-        this.onBallMissed(ball);
-      }
-    }
-  }
-};
-__publicField(BallManager, "TypeName", "ball-manager");
-__publicField(BallManager, "Properties", {
-  ballPrefab: Property3.object(),
-  maxBalls: Property3.int(30),
-  spawnInterval: Property3.float(2),
-  // seconds between spawns
-  minSpeed: Property3.float(2),
-  maxSpeed: Property3.float(6),
-  spawnDistance: Property3.float(5),
-  // distance from player
-  spawnHeight: Property3.float(1.5)
-  // average spawn height
-});
-
 // js/target-behavior.js
-import { Component as Component31, Property as Property4 } from "@wonderlandengine/api";
-var TargetBehavior = class extends Component31 {
+import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
+var TargetBehavior = class extends Component29 {
   init() {
     console.log("TargetBehavior initialized");
   }
@@ -7877,18 +7653,17 @@ var TargetBehavior = class extends Component31 {
 };
 __publicField(TargetBehavior, "TypeName", "target-behavior");
 __publicField(TargetBehavior, "Properties", {
-  manager: Property4.object(),
-  targetRadius: Property4.float(0.15),
+  manager: Property2.object(),
+  targetRadius: Property2.float(0.15),
   // radius of target sphere
-  controllerRadius: Property4.float(0.08),
+  controllerRadius: Property2.float(0.08),
   // radius of controller tip
-  hitTolerance: Property4.float(0.05)
+  hitTolerance: Property2.float(0.05)
   // extra collision buffer
 });
 
 // js/target-manager.js
-import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
-var TargetManager = class extends Component32 {
+var TargetManager = class extends Component30 {
   init() {
     console.log("TargetManager initialized");
   }
@@ -7980,17 +7755,17 @@ Reaction Times:`);
 };
 __publicField(TargetManager, "TypeName", "target-manager");
 __publicField(TargetManager, "Properties", {
-  targetPrefab: Property5.object(),
-  totalTargets: Property5.int(20),
-  spawnDelay: Property5.float(1.5),
+  targetPrefab: Property3.object(),
+  totalTargets: Property3.int(20),
+  spawnDelay: Property3.float(1.5),
   // seconds between targets
-  surfaceWidth: Property5.float(2),
+  surfaceWidth: Property3.float(2),
   // width of spawn area
-  surfaceHeight: Property5.float(1),
+  surfaceHeight: Property3.float(1),
   // height of spawn area
-  surfaceCenterY: Property5.float(1.5),
+  surfaceCenterY: Property3.float(1.5),
   // center height
-  surfaceDistance: Property5.float(2)
+  surfaceDistance: Property3.float(2)
   // distance from player
 });
 
@@ -7998,15 +7773,14 @@ __publicField(TargetManager, "Properties", {
 function js_default(engine) {
   engine.registerComponent(AudioListener);
   engine.registerComponent(Cursor);
+  engine.registerComponent(CursorTarget);
   engine.registerComponent(FingerCursor);
   engine.registerComponent(HandTracking);
   engine.registerComponent(MouseLookComponent);
   engine.registerComponent(PlayerHeight);
   engine.registerComponent(TeleportComponent);
   engine.registerComponent(VrModeActiveSwitch);
-  engine.registerComponent(BallManager);
-  engine.registerComponent(BallPhysics);
-  engine.registerComponent(TargetBehavior);
+  engine.registerComponent(WasdControlsComponent);
   engine.registerComponent(TargetManager);
 }
 export {
