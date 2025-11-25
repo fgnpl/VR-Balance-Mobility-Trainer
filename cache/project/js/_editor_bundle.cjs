@@ -9503,6 +9503,7 @@
   ], OrbitalCamera.prototype, "damping", void 0);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   // js/ball-manager.js
   var ball_manager_exports = {};
   __export(ball_manager_exports, {
@@ -9741,6 +9742,8 @@
   __export(target_behavior_exports, {
     TargetBehavior: () => TargetBehavior
 =======
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
   // js/app.js
   var app_exports = {};
   loadRuntime("WonderlandRuntime-physx-threads", { threads: false }).then((runtime) => {
@@ -9869,6 +9872,9 @@
   __export(button_exports, {
     ButtonComponent: () => ButtonComponent,
     hapticFeedback: () => hapticFeedback
+<<<<<<< HEAD
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
 >>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
   });
   function hapticFeedback(object, strength, duration) {
@@ -9947,6 +9953,7 @@
     buttonMeshObject: Property.object(),
     /** Material to apply when the user hovers the button */
     hoverMaterial: Property.material()
+<<<<<<< HEAD
   });
 
   // js/scripts/head-bob.js
@@ -10000,10 +10007,13 @@
     bobAmount: Property.float(0.03),
     /** A small value to ignore tiny movements and stop bobbing */
     epsilon: Property.float(1e-3)
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
   });
 
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
+<<<<<<< HEAD
 <<<<<<< HEAD
   _registerEditor(ball_manager_exports);
   _registerEditor(ball_physics_exports);
@@ -10018,4 +10028,9 @@
 =======
   _registerEditor(head_bob_exports);
 >>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
+=======
+  _registerEditor(app_exports);
+  _registerEditor(button_3d_exports);
+  _registerEditor(button_exports);
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
 })();
