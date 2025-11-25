@@ -11,14 +11,15 @@
 /* wle:auto-imports:start */
 import {AudioListener} from '@wonderlandengine/components';
 import {Cursor} from '@wonderlandengine/components';
-import {CursorTarget} from '@wonderlandengine/components';
 import {FingerCursor} from '@wonderlandengine/components';
 import {HandTracking} from '@wonderlandengine/components';
 import {MouseLookComponent} from '@wonderlandengine/components';
 import {PlayerHeight} from '@wonderlandengine/components';
 import {TeleportComponent} from '@wonderlandengine/components';
 import {VrModeActiveSwitch} from '@wonderlandengine/components';
-import {WasdControlsComponent} from '@wonderlandengine/components';
+import {BallManager} from './ball-manager.js';
+import {BallPhysics} from './ball-physics.js';
+import {TargetBehavior} from './target-behavior.js';
 import {TargetManager} from './target-manager.js';
 /* wle:auto-imports:end */
 
@@ -26,14 +27,15 @@ export default function(engine) {
 /* wle:auto-register:start */
 engine.registerComponent(AudioListener);
 engine.registerComponent(Cursor);
-engine.registerComponent(CursorTarget);
 engine.registerComponent(FingerCursor);
 engine.registerComponent(HandTracking);
 engine.registerComponent(MouseLookComponent);
 engine.registerComponent(PlayerHeight);
 engine.registerComponent(TeleportComponent);
 engine.registerComponent(VrModeActiveSwitch);
-engine.registerComponent(WasdControlsComponent);
+engine.registerComponent(BallManager);
+engine.registerComponent(BallPhysics);
+engine.registerComponent(TargetBehavior);
 engine.registerComponent(TargetManager);
 /* wle:auto-register:end */
 }
