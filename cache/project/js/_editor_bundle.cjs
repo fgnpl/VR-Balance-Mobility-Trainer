@@ -12007,63 +12007,9 @@
     hoverMaterial: Property.material()
   });
 
-  // js/scripts/head-bob.js
-  var head_bob_exports = {};
-  __export(head_bob_exports, {
-    HeadBob: () => HeadBob
-  });
-  var HeadBob = class extends Component3 {
-    start() {
-      this.initialLocalPosition = vec3_exports.create();
-      this.object.getTranslationLocal(this.initialLocalPosition);
-      this.lastPlayerPosition = vec3_exports.create();
-      if (this.playerObject) {
-        this.playerObject.getTranslationWorld(this.lastPlayerPosition);
-      }
-      this.bobTime = 0;
-    }
-    update(dt) {
-      if (!this.playerObject) {
-        if (this.engine.frame % 60 === 0) {
-          console.warn('HeadBob: "Player Object" property is not set.');
-        }
-        return;
-      }
-      const currentPlayerPosition = vec3_exports.create();
-      this.playerObject.getTranslationWorld(currentPlayerPosition);
-      const deltaX = this.lastPlayerPosition[0] - currentPlayerPosition[0];
-      const deltaZ = this.lastPlayerPosition[2] - currentPlayerPosition[2];
-      const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
-      let bobOffset = 0;
-      if (distanceMoved > this.epsilon) {
-        this.bobTime += dt * this.bobFrequency;
-        bobOffset = Math.sin(this.bobTime) * this.bobAmount;
-      } else {
-        this.bobTime = 0;
-      }
-      const newLocalPosition = vec3_exports.create();
-      vec3_exports.copy(newLocalPosition, this.initialLocalPosition);
-      newLocalPosition[1] += bobOffset;
-      this.object.setTranslationLocal(newLocalPosition);
-      vec3_exports.copy(this.lastPlayerPosition, currentPlayerPosition);
-    }
-  };
-  __publicField(HeadBob, "TypeName", "head-bob");
-  __publicField(HeadBob, "Properties", {
-    /** The Player object that has the wasd-controls component */
-    playerObject: Property.object(),
-    /** How fast the bobbing effect is (e.g., 10.0) */
-    bobFrequency: Property.float(10),
-    /** How much the camera bobs up and down (e.g., 0.03) */
-    bobAmount: Property.float(0.03),
-    /** A small value to ignore tiny movements and stop bobbing */
-    epsilon: Property.float(1e-3)
-  });
-
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
   _registerEditor(button_3d_exports);
   _registerEditor(button_exports);
-  _registerEditor(head_bob_exports);
 })();

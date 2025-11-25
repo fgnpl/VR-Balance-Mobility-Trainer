@@ -1,10 +1,8 @@
 import * as __wonderlandengine_components from '@wonderlandengine/components';
 _registerEditor(__wonderlandengine_components);
-import * as __Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_app_js from '/Volumes/SAVE HERE/RC5984/github/VR-Balance-Mobility-Trainer/js/app.js';
-_registerEditor(__Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_app_js);
-import * as __Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_button_3d_js from '/Volumes/SAVE HERE/RC5984/github/VR-Balance-Mobility-Trainer/js/button-3d.js';
-_registerEditor(__Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_button_3d_js);
-import * as __Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_button_js from '/Volumes/SAVE HERE/RC5984/github/VR-Balance-Mobility-Trainer/js/button.js';
-_registerEditor(__Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_button_js);
-import * as __Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_scripts_head_bob_js from '/Volumes/SAVE HERE/RC5984/github/VR-Balance-Mobility-Trainer/js/scripts/head-bob.js';
-_registerEditor(__Volumes_SAVE_HERE_RC5984_github_VR_Balance_Mobility_Trainer_js_scripts_head_bob_js);
+import * as _C__Users_rc5984_Documents_GitHub_VR_Balance_Mobility_Trainer_js_app_js from 'C:/Users/rc5984/Documents/GitHub/VR-Balance-Mobility-Trainer/js/app.js';
+_registerEditor(_C__Users_rc5984_Documents_GitHub_VR_Balance_Mobility_Trainer_js_app_js);
+import * as _C__Users_rc5984_Documents_GitHub_VR_Balance_Mobility_Trainer_js_button_3d_js from 'C:/Users/rc5984/Documents/GitHub/VR-Balance-Mobility-Trainer/js/button-3d.js';
+_registerEditor(_C__Users_rc5984_Documents_GitHub_VR_Balance_Mobility_Trainer_js_button_3d_js);
+import * as _C__Users_rc5984_Documents_GitHub_VR_Balance_Mobility_Trainer_js_button_js from 'C:/Users/rc5984/Documents/GitHub/VR-Balance-Mobility-Trainer/js/button.js';
+_registerEditor(_C__Users_rc5984_Documents_GitHub_VR_Balance_Mobility_Trainer_js_button_js);
