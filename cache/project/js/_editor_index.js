@@ -42,3 +42,5 @@ import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_target_collision_js from '
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_target_collision_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_target_manager_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/target-manager.js';
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_target_manager_js);
+import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_ui_plane_env_tennis_button_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/ui-plane-env-tennis-button.js';
+_registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_ui_plane_env_tennis_button_js);

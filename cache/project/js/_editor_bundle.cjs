@@ -13040,6 +13040,35 @@
     dataManager: Property.object()
   });
 
+  // js/ui-plane-env-tennis-button.js
+  var ui_plane_env_tennis_button_exports = {};
+  __export(ui_plane_env_tennis_button_exports, {
+    UIPlaneEnvTennisButton: () => UIPlaneEnvTennisButton
+  });
+  var UIPlaneEnvTennisButton = class extends Component3 {
+    start() {
+      this.object.onClick = this._onClick.bind(this);
+      this.object.onPointerDown = this._onClick.bind(this);
+    }
+    _onClick() {
+      if (!this.managerObject) {
+        console.warn("Manager object not set on UIPlaneEnvTennisButton");
+        return;
+      }
+      const gs = this.managerObject.getComponent("game-selector");
+      if (gs && typeof gs.showTennis === "function") {
+        gs.showTennis();
+      } else {
+        console.warn("game-selector or showTennis() not found on manager object");
+      }
+    }
+  };
+  __publicField(UIPlaneEnvTennisButton, "TypeName", "ui-plane-env-tennis-button");
+  __publicField(UIPlaneEnvTennisButton, "Properties", {
+    managerObject: Property.object()
+    // Reference to the Manager object (with game-selector)
+  });
+
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
@@ -13063,4 +13092,5 @@
   _registerEditor(head_bob_exports);
   _registerEditor(target_collision_exports);
   _registerEditor(target_manager_exports);
+  _registerEditor(ui_plane_env_tennis_button_exports);
 })();

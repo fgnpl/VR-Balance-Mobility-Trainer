@@ -1565,7 +1565,7 @@
             ]
         },
         "27": {
-            "name": "TargetSphere",
+            "name": "ballPreFab",
             "components": [
                 {
                     "type": "mesh",
@@ -1585,18 +1585,10 @@
                     "active": true
                 },
                 {
-                    "type": "target-collision",
-                    "target-collision": {
-                        "manager": "234"
+                    "type": "ball-collision",
+                    "ball-collision": {
+                        "thrower": "351"
                     }
-                },
-                {
-                    "type": "physx",
-                    "physx": {
-                        "kinematic": false,
-                        "static": false
-                    },
-                    "active": false
                 }
             ],
             "scaling": [
@@ -1607,7 +1599,7 @@
             "translation": [
                 0.0,
                 3.875,
-                0.9792991
+                -8.9708213
             ],
             "rotation": [
                 0.0,
@@ -1635,7 +1627,8 @@
                         "targetManager": "234",
                         "beamWalkManager": "234",
                         "dataManager": "234",
-                        "uiStatusText": "347"
+                        "uiStatusText": "347",
+                        "ballThrower": "351"
                     }
                 },
                 {
@@ -2386,11 +2379,6 @@
             },
             "parent": "335"
         },
-        "337": {
-            "name": "EnvironmentManager",
-            "parent": "235",
-            "components": []
-        },
         "342": {
             "link": {
                 "name": "Sketchfab_model",
@@ -2553,6 +2541,409 @@
                 20.7000007,
                 20.7000007,
                 20.7000007
+            ]
+        },
+        "351": {
+            "name": "ballThrower",
+            "translation": [
+                0.0,
+                4.374897,
+                -10.7906332
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "components": [
+                {
+                    "type": "ball-thrower",
+                    "ball-thrower": {
+                        "playerObject": "237",
+                        "dataManager": "234",
+                        "ballPrefab": "27"
+                    }
+                }
+            ]
+        },
+        "352": {
+            "name": "TargetSphere",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "22"
+                    },
+                    "active": true
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.2
+                        }
+                    },
+                    "active": true
+                },
+                {
+                    "type": "target-collision",
+                    "target-collision": {
+                        "manager": "234"
+                    }
+                }
+            ],
+            "scaling": [
+                0.2,
+                0.2,
+                0.2
+            ],
+            "translation": [
+                0.0,
+                3.875,
+                0.9792991
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "337": {
+            "name": "Button1",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4996719,
+                0.8004336,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "354": {
+            "name": "UIPANEL",
+            "parent": "17",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "128",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -3.4203281,
+                1.1855664,
+                -4.7793679
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "355": {
+            "name": "Button2",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                0.4508597,
+                0.8004336,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "356": {
+            "name": "Button3",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4996719,
+                0.5,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "358": {
+            "name": "Button4",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                0.4508597,
+                0.5,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "359": {
+            "name": "Button5",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4996719,
+                0.1819581,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "360": {
+            "name": "Button6",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                0.4508597,
+                0.1819581,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "361": {
+            "name": "Button7",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4996719,
+                -0.1184754,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "362": {
+            "name": "Button8",
+            "parent": "354",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                0.4508597,
+                -0.1184754,
+                0.179368
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.101,
+                0.8
+            ]
+        },
+        "363": {
+            "name": "ButtonText1",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Target",
+                        "lineSpacing": 0.0,
+                        "characterSpacing": 0.0
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                0.0219644
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                3.0,
+                3.0,
+                3.0
+            ]
+        },
+        "364": {
+            "name": "ButtonText1",
+            "parent": "355",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Target",
+                        "lineSpacing": 0.0,
+                        "characterSpacing": 0.0
+                    }
+                }
+            ],
+            "translation": [
+                -0.1361016,
+                0.2386932,
+                0.1614159
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.2,
+                8.7128725,
+                1.1
             ]
         }
     },
@@ -3196,9 +3587,9 @@
                 ],
                 "font": "230",
                 "color": [
-                    0.0,
-                    0.0,
-                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ]
             }

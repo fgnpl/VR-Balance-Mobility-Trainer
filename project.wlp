@@ -1565,7 +1565,7 @@
             ]
         },
         "27": {
-            "name": "TargetSphere",
+            "name": "ballPreFab",
             "components": [
                 {
                     "type": "mesh",
@@ -1585,9 +1585,9 @@
                     "active": true
                 },
                 {
-                    "type": "target-collision",
-                    "target-collision": {
-                        "manager": "234"
+                    "type": "ball-collision",
+                    "ball-collision": {
+                        "thrower": "351"
                     }
                 }
             ],
@@ -1599,7 +1599,7 @@
             "translation": [
                 0.0,
                 3.875,
-                0.9792991
+                -8.9708213
             ],
             "rotation": [
                 0.0,
@@ -1627,7 +1627,8 @@
                         "targetManager": "234",
                         "beamWalkManager": "234",
                         "dataManager": "234",
-                        "uiStatusText": "347"
+                        "uiStatusText": "347",
+                        "ballThrower": "351"
                     }
                 },
                 {
@@ -2378,11 +2379,6 @@
             },
             "parent": "335"
         },
-        "337": {
-            "name": "EnvironmentManager",
-            "parent": "235",
-            "components": []
-        },
         "342": {
             "link": {
                 "name": "Sketchfab_model",
@@ -2546,6 +2542,573 @@
                 20.7000007,
                 20.7000007
             ]
+        },
+        "351": {
+            "name": "ballThrower",
+            "translation": [
+                0.0,
+                4.374897,
+                -10.7906332
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "components": [
+                {
+                    "type": "ball-thrower",
+                    "ball-thrower": {
+                        "playerObject": "237",
+                        "dataManager": "234",
+                        "ballPrefab": "27"
+                    }
+                }
+            ]
+        },
+        "352": {
+            "name": "TargetSphere",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "22"
+                    },
+                    "active": true
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.2
+                        }
+                    },
+                    "active": true
+                },
+                {
+                    "type": "target-collision",
+                    "target-collision": {
+                        "manager": "234"
+                    }
+                }
+            ],
+            "scaling": [
+                0.2,
+                0.2,
+                0.2
+            ],
+            "translation": [
+                0.0,
+                3.875,
+                0.9792991
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "337": {
+            "name": "UIPANEL",
+            "parent": "17",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "128",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -3.4203281,
+                1.1855664,
+                -4.7793679
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "353": {
+            "name": "button-start-target",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                0.7052774,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "354": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Target"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "353"
+        },
+        "358": {
+            "name": "button-start-beam",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                0.4711279,
+                0.7052774,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "359": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Beam"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "358"
+        },
+        "360": {
+            "name": "button-start-ball",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                0.4395904,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "361": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Ball"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "360"
+        },
+        "362": {
+            "name": "button-stop-drills",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                0.4711279,
+                0.4395904,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "363": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Stop"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "362"
+        },
+        "364": {
+            "name": "button-show-report",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                0.1827082,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "365": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Show Report"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "364"
+        },
+        "368": {
+            "name": "button-env-football",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                -0.3062176,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "369": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Football"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "368"
+        },
+        "370": {
+            "name": "button-env-tennis",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4427149,
+                -0.5621829,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "371": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Tennis"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "370"
+        },
+        "372": {
+            "name": "button-env-gym",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -0.4427149,
+                -0.8061275,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "373": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Gym"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "372"
         }
     },
     "meshes": {
@@ -3181,16 +3744,16 @@
             },
             "Text": {
                 "effectColor": [
-                    1.0,
-                    1.0,
-                    1.0,
+                    0.8470588,
+                    0.6975778,
+                    0.0,
                     1.0
                 ],
                 "font": "230",
                 "color": [
-                    0.0,
-                    0.0,
-                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ]
             }

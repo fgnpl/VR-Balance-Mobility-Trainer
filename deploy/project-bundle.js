@@ -7593,9 +7593,261 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
-// js/beam-walk-manager.js
+// js/ball-collision.js
 import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
-var BeamWalkManager = class extends Component29 {
+var BallCollision = class extends Component29 {
+  start() {
+    this.handled = false;
+    this.lastControllerPositions = {
+      left: vec3_exports.create(),
+      right: vec3_exports.create()
+    };
+    const leftCtrl = this.engine.scene.findByName("ControllerLeft")[0];
+    const rightCtrl = this.engine.scene.findByName("ControllerRight")[0];
+    if (leftCtrl)
+      leftCtrl.getPositionWorld(this.lastControllerPositions.left);
+    if (rightCtrl)
+      rightCtrl.getPositionWorld(this.lastControllerPositions.right);
+  }
+  update(dt) {
+    if (this.handled)
+      return;
+    if (this.object.velocity) {
+      const currentPos = this.object.getPositionWorld();
+      const newPos = vec3_exports.scaleAndAdd(
+        vec3_exports.create(),
+        currentPos,
+        this.object.velocity,
+        dt
+      );
+      this.object.setPositionWorld(newPos);
+    }
+    const leftCtrl = this.engine.scene.findByName("ControllerLeft")[0];
+    const rightCtrl = this.engine.scene.findByName("ControllerRight")[0];
+    const ballPos = this.object.getPositionWorld();
+    if (leftCtrl) {
+      const ctrlPos = leftCtrl.getPositionWorld();
+      const distance2 = vec3_exports.distance(ballPos, ctrlPos);
+      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.left) / dt;
+      vec3_exports.copy(this.lastControllerPositions.left, ctrlPos);
+      if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
+        this.onCatch(leftCtrl);
+        return;
+      } else if (distance2 < this.deflectRadius) {
+        this.onDeflect(leftCtrl, velocity);
+        return;
+      }
+    }
+    if (rightCtrl) {
+      const ctrlPos = rightCtrl.getPositionWorld();
+      const distance2 = vec3_exports.distance(ballPos, ctrlPos);
+      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.right) / dt;
+      vec3_exports.copy(this.lastControllerPositions.right, ctrlPos);
+      if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
+        this.onCatch(rightCtrl);
+        return;
+      } else if (distance2 < this.deflectRadius) {
+        this.onDeflect(rightCtrl, velocity);
+        return;
+      }
+    }
+  }
+  onCatch(controller) {
+    if (this.handled)
+      return;
+    this.handled = true;
+    console.log(`[BallCollision] Caught by ${controller.name}!`);
+    const throwerComp = this.thrower?.getComponent("ball-thrower");
+    throwerComp?.onBallCaught(this.object);
+    this.object.velocity = [0, 0, 0];
+    setTimeout(() => {
+      if (this.object && this.object.active) {
+        this.object.destroy();
+      }
+    }, 200);
+  }
+  onDeflect(controller, velocity) {
+    if (this.handled)
+      return;
+    this.handled = true;
+    console.log(`[BallCollision] Deflected by ${controller.name} (vel: ${velocity.toFixed(2)})!`);
+    const throwerComp = this.thrower?.getComponent("ball-thrower");
+    throwerComp?.onBallDeflected(this.object);
+    const ctrlPos = controller.getPositionWorld();
+    const ballPos = this.object.getPositionWorld();
+    const bounceDir = vec3_exports.sub(vec3_exports.create(), ballPos, ctrlPos);
+    vec3_exports.normalize(bounceDir, bounceDir);
+    vec3_exports.scale(bounceDir, bounceDir, 2);
+    this.object.velocity = bounceDir;
+    setTimeout(() => {
+      if (this.object && this.object.active) {
+        this.object.destroy();
+      }
+    }, 500);
+  }
+  // Also handle physics collisions if enabled
+  onCollisionEnter(other) {
+    if (this.handled)
+      return;
+    const name = other.object?.name || "";
+    if (name.startsWith("Controller")) {
+      this.onDeflect(other.object, 1);
+    }
+  }
+};
+__publicField(BallCollision, "TypeName", "ball-collision");
+__publicField(BallCollision, "Properties", {
+  thrower: Property2.object(),
+  catchRadius: Property2.float(0.15),
+  // How close controller must be to catch
+  deflectRadius: Property2.float(0.2),
+  // Slightly larger for deflection
+  catchVelocityThreshold: Property2.float(0.5)
+  // Max controller velocity for catch
+});
+
+// js/ball-thrower.js
+import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
+var BallThrower = class extends Component30 {
+  start() {
+    this.running = false;
+    this.ballsThrown = 0;
+    this.ballsCaught = 0;
+    this.ballsDeflected = 0;
+    this.ballsMissed = 0;
+    this.activeBalls = [];
+    this.nextSpawnTime = 0;
+    if (this.ballPrefab) {
+      this.ballPrefab.active = false;
+    }
+  }
+  startDrill() {
+    console.log("[BallThrower] Starting drill");
+    this.running = true;
+    this.ballsThrown = 0;
+    this.ballsCaught = 0;
+    this.ballsDeflected = 0;
+    this.ballsMissed = 0;
+    this.nextSpawnTime = 0;
+    this.activeBalls.forEach((ball) => ball.destroy());
+    this.activeBalls = [];
+  }
+  endDrill() {
+    console.log("[BallThrower] Ending drill");
+    this.running = false;
+    this.activeBalls.forEach((ball) => ball.destroy());
+    this.activeBalls = [];
+    const total = this.ballsCaught + this.ballsDeflected + this.ballsMissed;
+    const accuracy = total > 0 ? (this.ballsCaught + this.ballsDeflected) / total * 100 : 0;
+    console.log(`[BallThrower] Results - Caught: ${this.ballsCaught}, Deflected: ${this.ballsDeflected}, Missed: ${this.ballsMissed}, Accuracy: ${accuracy.toFixed(1)}%`);
+    return {
+      ballsThrown: this.ballsThrown,
+      ballsCaught: this.ballsCaught,
+      ballsDeflected: this.ballsDeflected,
+      ballsMissed: this.ballsMissed,
+      accuracy
+    };
+  }
+  update(dt) {
+    if (!this.running || !this.playerObject)
+      return;
+    this.nextSpawnTime -= dt;
+    if (this.nextSpawnTime <= 0 && this.ballsThrown < this.maxBalls) {
+      this.spawnBall();
+      this.nextSpawnTime = this.spawnInterval;
+    }
+    this.activeBalls = this.activeBalls.filter((ball) => {
+      if (!ball || !ball.active)
+        return false;
+      const ballPos = ball.getPositionWorld();
+      const playerPos = this.playerObject.getPositionWorld();
+      const behindDist = playerPos[2] - ballPos[2];
+      if (behindDist > 3 || ballPos[1] < -1) {
+        this.onBallMissed(ball);
+        ball.destroy();
+        return false;
+      }
+      return true;
+    });
+    if (this.ballsThrown >= this.maxBalls && this.activeBalls.length === 0) {
+      this.endDrill();
+    }
+  }
+  spawnBall() {
+    if (!this.ballPrefab || !this.playerObject)
+      return;
+    const ball = this.ballPrefab.clone(this.object);
+    ball.active = true;
+    const playerPos = this.playerObject.getPositionWorld();
+    const angle2 = Math.random() * Math.PI * 2;
+    const heightVariation = this.spawnHeightMin + Math.random() * (this.spawnHeightMax - this.spawnHeightMin);
+    const spawnX = playerPos[0] + Math.cos(angle2) * this.spawnRadius;
+    const spawnY = heightVariation;
+    const spawnZ = playerPos[2] + Math.sin(angle2) * this.spawnRadius;
+    ball.setPositionWorld([spawnX, spawnY, spawnZ]);
+    ball.spawnTime = performance.now();
+    const direction2 = vec3_exports.sub(vec3_exports.create(), playerPos, [spawnX, spawnY, spawnZ]);
+    vec3_exports.normalize(direction2, direction2);
+    vec3_exports.scale(direction2, direction2, this.ballSpeed);
+    ball.velocity = direction2;
+    ball.isCaught = false;
+    ball.isDeflected = false;
+    let collision = ball.getComponent("ball-collision");
+    if (!collision) {
+      collision = ball.addComponent("ball-collision");
+    }
+    collision.thrower = this;
+    this.activeBalls.push(ball);
+    this.ballsThrown++;
+    console.log(`[BallThrower] Ball ${this.ballsThrown} spawned at ${spawnX.toFixed(1)}, ${spawnY.toFixed(1)}, ${spawnZ.toFixed(1)}`);
+  }
+  onBallCaught(ball) {
+    if (ball.isCaught || ball.isDeflected)
+      return;
+    ball.isCaught = true;
+    this.ballsCaught++;
+    const dm = this.dataManager?.getComponent("data-manager");
+    dm?.addBallResult("caught");
+    console.log("[BallThrower] Ball caught!");
+  }
+  onBallDeflected(ball) {
+    if (ball.isCaught || ball.isDeflected)
+      return;
+    ball.isDeflected = true;
+    this.ballsDeflected++;
+    const dm = this.dataManager?.getComponent("data-manager");
+    dm?.addBallResult("deflected");
+    console.log("[BallThrower] Ball deflected!");
+  }
+  onBallMissed(ball) {
+    if (ball.isCaught || ball.isDeflected) {
+      return;
+    }
+    this.ballsMissed++;
+    const dm = this.dataManager?.getComponent("data-manager");
+    dm?.addBallResult("missed");
+    console.log("[BallThrower] Ball missed!");
+  }
+};
+__publicField(BallThrower, "TypeName", "ball-thrower");
+__publicField(BallThrower, "Properties", {
+  ballPrefab: Property3.object(),
+  playerObject: Property3.object(),
+  maxBalls: Property3.int(15),
+  spawnInterval: Property3.float(2),
+  // seconds between spawns
+  ballSpeed: Property3.float(3),
+  // meters per second
+  spawnRadius: Property3.float(3),
+  // distance from player to spawn
+  spawnHeightMin: Property3.float(1),
+  spawnHeightMax: Property3.float(2.5),
+  dataManager: Property3.object()
+});
+
+// js/beam-walk-manager.js
+import { Component as Component31, Property as Property4 } from "@wonderlandengine/api";
+var BeamWalkManager = class extends Component31 {
   start() {
     this.running = false;
     this.totalBalanceDuration = 0;
@@ -7663,18 +7915,18 @@ var BeamWalkManager = class extends Component29 {
 };
 __publicField(BeamWalkManager, "TypeName", "beam-walk-manager");
 __publicField(BeamWalkManager, "Properties", {
-  playerObject: Property2.object(),
-  beamWidth: Property2.float(0.3),
-  startPosition: Property2.object(),
-  endPosition: Property2.object(),
-  maxDistanceFromCenter: Property2.float(0.15),
-  resetHeight: Property2.float(-2),
-  dataManager: Property2.object()
+  playerObject: Property4.object(),
+  beamWidth: Property4.float(0.3),
+  startPosition: Property4.object(),
+  endPosition: Property4.object(),
+  maxDistanceFromCenter: Property4.float(0.15),
+  resetHeight: Property4.float(-2),
+  dataManager: Property4.object()
 });
 
 // js/controller-hit.js
-import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
-var ControllerHit = class extends Component30 {
+import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
+var ControllerHit = class extends Component32 {
   onCollisionEnter(other) {
     if (other.object.hasComponent("target-collision")) {
       console.log(`${this.hand} hand hit a target!`);
@@ -7685,12 +7937,12 @@ var ControllerHit = class extends Component30 {
 __publicField(ControllerHit, "TypeName", "controller-hit");
 /* Properties that are configurable in the editor */
 __publicField(ControllerHit, "Properties", {
-  hand: Property3.string("right")
+  hand: Property5.string("right")
 });
 
 // js/data-manager.js
-import { Component as Component31 } from "@wonderlandengine/api";
-var DataManager = class extends Component31 {
+import { Component as Component33 } from "@wonderlandengine/api";
+var DataManager = class extends Component33 {
   start() {
     this.resetSession();
   }
@@ -7754,8 +8006,8 @@ var DataManager = class extends Component31 {
 __publicField(DataManager, "TypeName", "data-manager");
 
 // js/game-selector.js
-import { Component as Component32, Property as Property4 } from "@wonderlandengine/api";
-var GameSelector = class extends Component32 {
+import { Component as Component34, Property as Property6 } from "@wonderlandengine/api";
+var GameSelector = class extends Component34 {
   start() {
     this.currentDrill = null;
     this._lastStatus = "";
@@ -7928,22 +8180,22 @@ var GameSelector = class extends Component32 {
 __publicField(GameSelector, "TypeName", "game-selector");
 __publicField(GameSelector, "Properties", {
   // Environment parents
-  footballField: Property4.object(),
-  tennisCourt: Property4.object(),
-  gymFloor: Property4.object(),
-  defaultEnvironment: Property4.enum(["football", "tennis", "gym"], "football"),
+  footballField: Property6.object(),
+  tennisCourt: Property6.object(),
+  gymFloor: Property6.object(),
+  defaultEnvironment: Property6.enum(["football", "tennis", "gym"], "football"),
   // Drill managers
-  targetManager: Property4.object(),
-  beamWalkManager: Property4.object(),
-  ballThrower: Property4.object(),
-  dataManager: Property4.object(),
+  targetManager: Property6.object(),
+  beamWalkManager: Property6.object(),
+  ballThrower: Property6.object(),
+  dataManager: Property6.object(),
   // UI elements
-  uiStatusText: Property4.object()
+  uiStatusText: Property6.object()
 });
 
 // js/head-bob.js
-import { Component as Component33, Object as Object2, Property as Property5 } from "@wonderlandengine/api";
-var HeadBob = class extends Component33 {
+import { Component as Component35, Object as Object2, Property as Property7 } from "@wonderlandengine/api";
+var HeadBob = class extends Component35 {
   start() {
     this.initialLocalPosition = vec3_exports.create();
     this.object.getTranslationLocal(this.initialLocalPosition);
@@ -7982,18 +8234,18 @@ var HeadBob = class extends Component33 {
 __publicField(HeadBob, "TypeName", "head-bob");
 __publicField(HeadBob, "Properties", {
   /** The Player object that has the wasd-controls component */
-  playerObject: Property5.object(),
+  playerObject: Property7.object(),
   /** How fast the bobbing effect is (e.g., 10.0) */
-  bobFrequency: Property5.float(10),
+  bobFrequency: Property7.float(10),
   /** How much the camera bobs up and down (e.g., 0.03) */
-  bobAmount: Property5.float(0.03),
+  bobAmount: Property7.float(0.03),
   /** A small value to ignore tiny movements and stop bobbing */
-  epsilon: Property5.float(1e-3)
+  epsilon: Property7.float(1e-3)
 });
 
 // js/target-collision.js
-import { Component as Component34, Property as Property6 } from "@wonderlandengine/api";
-var TargetCollision = class extends Component34 {
+import { Component as Component36, Property as Property8 } from "@wonderlandengine/api";
+var TargetCollision = class extends Component36 {
   start() {
     this.hit = false;
     if (!this.object.startTime)
@@ -8019,13 +8271,13 @@ var TargetCollision = class extends Component34 {
 };
 __publicField(TargetCollision, "TypeName", "target-collision");
 __publicField(TargetCollision, "Properties", {
-  manager: Property6.object()
+  manager: Property8.object()
 });
 
 // js/target-manager.js
-import { Component as Component35, Property as Property7 } from "@wonderlandengine/api";
+import { Component as Component37, Property as Property9 } from "@wonderlandengine/api";
 console.log("target-manager.js loaded");
-var TargetManager = class extends Component35 {
+var TargetManager = class extends Component37 {
   start() {
     this.hitCount = 0;
     this.reactionTimes = [];
@@ -8107,13 +8359,13 @@ var TargetManager = class extends Component35 {
 __publicField(TargetManager, "TypeName", "target-manager");
 /* Properties that are configurable in the editor */
 __publicField(TargetManager, "Properties", {
-  spherePrefab: Property7.object(),
-  maxTargets: Property7.int(20),
-  spawnInterval: Property7.float(1),
+  spherePrefab: Property9.object(),
+  maxTargets: Property9.int(20),
+  spawnInterval: Property9.float(1),
   // seconds
-  useColorMode: Property7.bool(false),
-  uiCueText: Property7.object(),
-  dataManager: Property7.object()
+  useColorMode: Property9.bool(false),
+  uiCueText: Property9.object(),
+  dataManager: Property9.object()
 });
 
 // js/index.js
@@ -8127,6 +8379,8 @@ function js_default(engine) {
   engine.registerComponent(TeleportComponent);
   engine.registerComponent(VrModeActiveSwitch);
   engine.registerComponent(WasdControlsComponent);
+  engine.registerComponent(BallCollision);
+  engine.registerComponent(BallThrower);
   engine.registerComponent(BeamWalkManager);
   engine.registerComponent(ControllerHit);
   engine.registerComponent(DataManager);
