@@ -7612,12 +7612,14 @@ var BeamWalkManager = class extends Component29 {
     if (!this.running)
       return;
     this.running = false;
-    const dur = this.totalBalanceDuration;
-    if (dur > this.bestDuration)
-      this.bestDuration = dur;
-    const dm = this.dataManager?.getComponent("data-manager");
-    dm?.addBeamRun(dur / 1e3);
-    return { totalBalanceDuration: dur / 1e3, bestDuration: this.bestDuration / 1e3 };
+    const currentDur = performance.now() - this._currentRunStart;
+    if (currentDur > 100) {
+      this._commitRun();
+    }
+    return {
+      totalBalanceDuration: this.totalBalanceDuration / 1e3,
+      bestDuration: this.bestDuration / 1e3
+    };
   }
   update(dt) {
     if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
@@ -7637,16 +7639,20 @@ var BeamWalkManager = class extends Component29 {
       this._resetToStart();
       this._currentRunStart = performance.now();
     } else {
-      this.totalBalanceDuration = performance.now() - this._currentRunStart;
+      const currentRunDuration = performance.now() - this._currentRunStart;
+      this.totalBalanceDuration += dt * 1e3;
     }
   }
   _commitRun() {
-    const dm = this.dataManager?.getComponent("data-manager");
     const durSec = (performance.now() - this._currentRunStart) / 1e3;
-    if (durSec > 0)
-      dm?.addBeamRun(durSec);
-    if (durSec * 1e3 > this.bestDuration)
+    if (durSec <= 0.1)
+      return;
+    const dm = this.dataManager?.getComponent("data-manager");
+    dm?.addBeamRun(durSec);
+    if (durSec * 1e3 > this.bestDuration) {
       this.bestDuration = durSec * 1e3;
+    }
+    console.log(`[BeamWalk] Run completed: ${durSec.toFixed(2)}s`);
   }
   _resetToStart() {
     if (!this.playerObject || !this.startPosition)
@@ -7691,7 +7697,8 @@ var DataManager = class extends Component31 {
   resetSession() {
     this.session = {
       target: { reactionTimes: [], accuracy: { correct: 0, total: 0 } },
-      beam: { runs: [], bestDuration: 0 }
+      beam: { runs: [], bestDuration: 0 },
+      ball: { caught: 0, deflected: 0, missed: 0, total: 0 }
     };
   }
   // Target drill
@@ -7709,6 +7716,17 @@ var DataManager = class extends Component31 {
     if (durationSec > this.session.beam.bestDuration)
       this.session.beam.bestDuration = durationSec;
   }
+  // Ball catching drill
+  addBallResult(result) {
+    this.session.ball.total += 1;
+    if (result === "caught") {
+      this.session.ball.caught += 1;
+    } else if (result === "deflected") {
+      this.session.ball.deflected += 1;
+    } else if (result === "missed") {
+      this.session.ball.missed += 1;
+    }
+  }
   // Aggregates
   getReport() {
     const rts = this.session.target.reactionTimes;
@@ -7717,10 +7735,19 @@ var DataManager = class extends Component31 {
     const slowest = rts.length ? Math.max(...rts) : 0;
     const acc = this.session.target.accuracy;
     const accPct = acc.total ? acc.correct / acc.total * 100 : 0;
+    const ball = this.session.ball;
+    const ballSuccessRate = ball.total ? (ball.caught + ball.deflected) / ball.total * 100 : 0;
     return {
       reaction: { average: avg, fastest, slowest, total: rts.length },
       accuracy: { correct: acc.correct, total: acc.total, percent: accPct },
-      beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() }
+      beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() },
+      ball: {
+        caught: ball.caught,
+        deflected: ball.deflected,
+        missed: ball.missed,
+        total: ball.total,
+        successRate: ballSuccessRate
+      }
     };
   }
 };
@@ -7731,10 +7758,28 @@ import { Component as Component32, Property as Property4 } from "@wonderlandengi
 var GameSelector = class extends Component32 {
   start() {
     this.currentDrill = null;
-    this._lastStatus = void 0;
+    this._lastStatus = "";
     this.updateStatus("Select a drill");
     this._storeOriginalScales();
     this._applyDefaultEnvironment();
+    this._validateSetup();
+  }
+  _validateSetup() {
+    if (!this.footballField && !this.tennisCourt && !this.gymFloor) {
+      console.warn("[GameSelector] No environment objects linked!");
+    }
+    if (!this.targetManager) {
+      console.warn("[GameSelector] Target Manager not linked!");
+    }
+    if (!this.beamWalkManager) {
+      console.warn("[GameSelector] Beam Walk Manager not linked!");
+    }
+    if (!this.ballThrower) {
+      console.warn("[GameSelector] Ball Thrower not linked!");
+    }
+    if (!this.dataManager) {
+      console.warn("[GameSelector] Data Manager not linked!");
+    }
   }
   updateStatus(text) {
     if (this._lastStatus === text)
@@ -7742,10 +7787,11 @@ var GameSelector = class extends Component32 {
     this._lastStatus = text;
     if (this.uiStatusText) {
       const textComp = this.uiStatusText.getComponent("text");
-      if (textComp)
+      if (textComp) {
         textComp.text = text;
-      else
+      } else {
         console.log("[GameSelector] status:", text);
+      }
     } else {
       console.log("[GameSelector] status:", text);
     }
@@ -7808,6 +7854,8 @@ var GameSelector = class extends Component32 {
       else
         mgr.start();
       this.updateStatus("Target Striking: ON");
+    } else {
+      this.updateStatus("Error: Target Manager not found");
     }
   }
   startBeamWalk() {
@@ -7817,6 +7865,19 @@ var GameSelector = class extends Component32 {
     if (mgr) {
       mgr.startDrill?.();
       this.updateStatus("Beam Walk: ON");
+    } else {
+      this.updateStatus("Error: Beam Manager not found");
+    }
+  }
+  startBallDrill() {
+    this.stopDrills();
+    this.currentDrill = "ball";
+    const mgr = this.ballThrower?.getComponent("ball-thrower");
+    if (mgr) {
+      mgr.startDrill?.();
+      this.updateStatus("Ball Catching: ON");
+    } else {
+      this.updateStatus("Error: Ball Thrower not found");
     }
   }
   stopDrills() {
@@ -7826,6 +7887,9 @@ var GameSelector = class extends Component32 {
     } else if (this.currentDrill === "beam") {
       const bm = this.beamWalkManager?.getComponent("beam-walk-manager");
       bm?.endDrill?.();
+    } else if (this.currentDrill === "ball") {
+      const bt = this.ballThrower?.getComponent("ball-thrower");
+      bt?.endDrill?.();
     }
     this.currentDrill = null;
     this.updateStatus("Drills stopped");
@@ -7833,10 +7897,32 @@ var GameSelector = class extends Component32 {
   // Report
   showReport() {
     const dm = this.dataManager?.getComponent("data-manager");
-    if (!dm)
+    if (!dm) {
+      this.updateStatus("Error: No data available");
       return;
+    }
     const r = dm.getReport();
-    this.updateStatus(`AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s Acc:${r.accuracy.percent.toFixed(0)}% BestBeam:${r.beam.best.toFixed(2)}s`);
+    let report = "=== SESSION REPORT ===\n";
+    if (r.reaction.total > 0) {
+      report += `TARGET: Hits:${r.reaction.total} AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s `;
+      if (r.accuracy.total > 0) {
+        report += `Acc:${r.accuracy.percent.toFixed(0)}% `;
+      }
+      report += "\n";
+    }
+    if (r.beam.runs.length > 0) {
+      report += `BEAM: Runs:${r.beam.runs.length} Best:${r.beam.best.toFixed(2)}s Avg:${(r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length).toFixed(2)}s
+`;
+    }
+    if (r.ball.total > 0) {
+      report += `BALL: Caught:${r.ball.caught} Deflected:${r.ball.deflected} Missed:${r.ball.missed} Success:${r.ball.successRate.toFixed(0)}%
+`;
+    }
+    if (r.reaction.total === 0 && r.beam.runs.length === 0 && r.ball.total === 0) {
+      report = "No data yet - complete some drills first!";
+    }
+    console.log(report);
+    this.updateStatus(report.replace(/\n/g, " | "));
   }
 };
 __publicField(GameSelector, "TypeName", "game-selector");
@@ -7849,6 +7935,7 @@ __publicField(GameSelector, "Properties", {
   // Drill managers
   targetManager: Property4.object(),
   beamWalkManager: Property4.object(),
+  ballThrower: Property4.object(),
   dataManager: Property4.object(),
   // UI elements
   uiStatusText: Property4.object()
@@ -7998,15 +8085,22 @@ var TargetManager = class extends Component35 {
   }
   endGame() {
     console.log("Game over! Reaction times: ", this.reactionTimes);
+    if (this.activeTarget) {
+      this.activeTarget.destroy();
+      this.activeTarget = null;
+    }
     const dm = this.dataManager?.getComponent("data-manager");
     const report = dm?.getReport();
     if (report)
       console.log("[TargetManager] Report summary:", report);
   }
   startGame() {
+    if (this.activeTarget) {
+      this.activeTarget.destroy();
+      this.activeTarget = null;
+    }
     this.hitCount = 0;
     this.reactionTimes = [];
-    this.activeTarget = null;
     this.spawnTarget();
   }
 };

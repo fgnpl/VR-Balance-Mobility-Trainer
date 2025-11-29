@@ -30,15 +30,22 @@ export class BeamWalkManager extends Component {
     endDrill() {
         if (!this.running) return;
         this.running = false;
-        const dur = this.totalBalanceDuration;
-        if (dur > this.bestDuration) this.bestDuration = dur;
-        const dm = this.dataManager?.getComponent('data-manager');
-        dm?.addBeamRun(dur/1000);
-        return { totalBalanceDuration: dur/1000, bestDuration: this.bestDuration/1000 };
+        
+        // Commit final run if any time has elapsed
+        const currentDur = performance.now() - this._currentRunStart;
+        if (currentDur > 100) { // Only log if more than 100ms (to avoid accidental short runs)
+            this._commitRun();
+        }
+        
+        return { 
+            totalBalanceDuration: this.totalBalanceDuration/1000, 
+            bestDuration: this.bestDuration/1000 
+        };
     }
 
     update(dt) {
         if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition) return;
+        
         const playerPos = this.playerObject.getPositionWorld();
         const a = this.startPosition.getPositionWorld();
         const b = this.endPosition.getPositionWorld();
@@ -51,21 +58,29 @@ export class BeamWalkManager extends Component {
         const dist = vec3.length(lateral);
 
         if (playerPos[1] < this.resetHeight || dist > this.maxDistanceFromCenter) {
-            // fell off
+            // fell off - commit the run and reset
             this._commitRun();
             this._resetToStart();
             this._currentRunStart = performance.now();
         } else {
-            // still balancing
-            this.totalBalanceDuration = performance.now() - this._currentRunStart;
+            // still balancing - update total duration
+            const currentRunDuration = performance.now() - this._currentRunStart;
+            this.totalBalanceDuration += dt * 1000; // accumulate total time across all runs
         }
     }
 
     _commitRun() {
+        const durSec = (performance.now() - this._currentRunStart) / 1000;
+        if (durSec <= 0.1) return; // Ignore runs shorter than 100ms
+        
         const dm = this.dataManager?.getComponent('data-manager');
-        const durSec = (performance.now() - this._currentRunStart)/1000;
-        if (durSec > 0) dm?.addBeamRun(durSec);
-        if (durSec*1000 > this.bestDuration) this.bestDuration = durSec*1000;
+        dm?.addBeamRun(durSec);
+        
+        if (durSec * 1000 > this.bestDuration) {
+            this.bestDuration = durSec * 1000;
+        }
+        
+        console.log(`[BeamWalk] Run completed: ${durSec.toFixed(2)}s`);
     }
 
     _resetToStart() {

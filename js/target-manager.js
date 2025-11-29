@@ -93,15 +93,27 @@ export class TargetManager extends Component {
 
     endGame() {
         console.log("Game over! Reaction times: ", this.reactionTimes);
+        
+        // Cleanup active target if any
+        if (this.activeTarget) {
+            this.activeTarget.destroy();
+            this.activeTarget = null;
+        }
+        
         const dm = this.dataManager?.getComponent('data-manager');
         const report = dm?.getReport();
         if (report) console.log('[TargetManager] Report summary:', report);
     }
 
     startGame() {
+        // Cleanup any existing target first
+        if (this.activeTarget) {
+            this.activeTarget.destroy();
+            this.activeTarget = null;
+        }
+        
         this.hitCount = 0;
         this.reactionTimes = [];
-        this.activeTarget = null;
         this.spawnTarget();
     }
 }

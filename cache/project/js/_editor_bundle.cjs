@@ -11806,6 +11806,264 @@
     runtime.start();
   });
 
+  // js/ball-collision.js
+  var ball_collision_exports = {};
+  __export(ball_collision_exports, {
+    BallCollision: () => BallCollision
+  });
+  var BallCollision = class extends Component3 {
+    start() {
+      this.handled = false;
+      this.lastControllerPositions = {
+        left: vec3_exports.create(),
+        right: vec3_exports.create()
+      };
+      const leftCtrl = this.engine.scene.findByName("ControllerLeft")[0];
+      const rightCtrl = this.engine.scene.findByName("ControllerRight")[0];
+      if (leftCtrl)
+        leftCtrl.getPositionWorld(this.lastControllerPositions.left);
+      if (rightCtrl)
+        rightCtrl.getPositionWorld(this.lastControllerPositions.right);
+    }
+    update(dt) {
+      if (this.handled)
+        return;
+      if (this.object.velocity) {
+        const currentPos = this.object.getPositionWorld();
+        const newPos = vec3_exports.scaleAndAdd(
+          vec3_exports.create(),
+          currentPos,
+          this.object.velocity,
+          dt
+        );
+        this.object.setPositionWorld(newPos);
+      }
+      const leftCtrl = this.engine.scene.findByName("ControllerLeft")[0];
+      const rightCtrl = this.engine.scene.findByName("ControllerRight")[0];
+      const ballPos = this.object.getPositionWorld();
+      if (leftCtrl) {
+        const ctrlPos = leftCtrl.getPositionWorld();
+        const distance2 = vec3_exports.distance(ballPos, ctrlPos);
+        const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.left) / dt;
+        vec3_exports.copy(this.lastControllerPositions.left, ctrlPos);
+        if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
+          this.onCatch(leftCtrl);
+          return;
+        } else if (distance2 < this.deflectRadius) {
+          this.onDeflect(leftCtrl, velocity);
+          return;
+        }
+      }
+      if (rightCtrl) {
+        const ctrlPos = rightCtrl.getPositionWorld();
+        const distance2 = vec3_exports.distance(ballPos, ctrlPos);
+        const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.right) / dt;
+        vec3_exports.copy(this.lastControllerPositions.right, ctrlPos);
+        if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
+          this.onCatch(rightCtrl);
+          return;
+        } else if (distance2 < this.deflectRadius) {
+          this.onDeflect(rightCtrl, velocity);
+          return;
+        }
+      }
+    }
+    onCatch(controller) {
+      if (this.handled)
+        return;
+      this.handled = true;
+      console.log(`[BallCollision] Caught by ${controller.name}!`);
+      const throwerComp = this.thrower?.getComponent("ball-thrower");
+      throwerComp?.onBallCaught(this.object);
+      this.object.velocity = [0, 0, 0];
+      setTimeout(() => {
+        if (this.object && this.object.active) {
+          this.object.destroy();
+        }
+      }, 200);
+    }
+    onDeflect(controller, velocity) {
+      if (this.handled)
+        return;
+      this.handled = true;
+      console.log(`[BallCollision] Deflected by ${controller.name} (vel: ${velocity.toFixed(2)})!`);
+      const throwerComp = this.thrower?.getComponent("ball-thrower");
+      throwerComp?.onBallDeflected(this.object);
+      const ctrlPos = controller.getPositionWorld();
+      const ballPos = this.object.getPositionWorld();
+      const bounceDir = vec3_exports.sub(vec3_exports.create(), ballPos, ctrlPos);
+      vec3_exports.normalize(bounceDir, bounceDir);
+      vec3_exports.scale(bounceDir, bounceDir, 2);
+      this.object.velocity = bounceDir;
+      setTimeout(() => {
+        if (this.object && this.object.active) {
+          this.object.destroy();
+        }
+      }, 500);
+    }
+    // Also handle physics collisions if enabled
+    onCollisionEnter(other) {
+      if (this.handled)
+        return;
+      const name = other.object?.name || "";
+      if (name.startsWith("Controller")) {
+        this.onDeflect(other.object, 1);
+      }
+    }
+  };
+  __publicField(BallCollision, "TypeName", "ball-collision");
+  __publicField(BallCollision, "Properties", {
+    thrower: Property.object(),
+    catchRadius: Property.float(0.15),
+    // How close controller must be to catch
+    deflectRadius: Property.float(0.2),
+    // Slightly larger for deflection
+    catchVelocityThreshold: Property.float(0.5)
+    // Max controller velocity for catch
+  });
+
+  // js/ball-thrower.js
+  var ball_thrower_exports = {};
+  __export(ball_thrower_exports, {
+    BallThrower: () => BallThrower
+  });
+  var BallThrower = class extends Component3 {
+    start() {
+      this.running = false;
+      this.ballsThrown = 0;
+      this.ballsCaught = 0;
+      this.ballsDeflected = 0;
+      this.ballsMissed = 0;
+      this.activeBalls = [];
+      this.nextSpawnTime = 0;
+      if (this.ballPrefab) {
+        this.ballPrefab.active = false;
+      }
+    }
+    startDrill() {
+      console.log("[BallThrower] Starting drill");
+      this.running = true;
+      this.ballsThrown = 0;
+      this.ballsCaught = 0;
+      this.ballsDeflected = 0;
+      this.ballsMissed = 0;
+      this.nextSpawnTime = 0;
+      this.activeBalls.forEach((ball) => ball.destroy());
+      this.activeBalls = [];
+    }
+    endDrill() {
+      console.log("[BallThrower] Ending drill");
+      this.running = false;
+      this.activeBalls.forEach((ball) => ball.destroy());
+      this.activeBalls = [];
+      const total = this.ballsCaught + this.ballsDeflected + this.ballsMissed;
+      const accuracy = total > 0 ? (this.ballsCaught + this.ballsDeflected) / total * 100 : 0;
+      console.log(`[BallThrower] Results - Caught: ${this.ballsCaught}, Deflected: ${this.ballsDeflected}, Missed: ${this.ballsMissed}, Accuracy: ${accuracy.toFixed(1)}%`);
+      return {
+        ballsThrown: this.ballsThrown,
+        ballsCaught: this.ballsCaught,
+        ballsDeflected: this.ballsDeflected,
+        ballsMissed: this.ballsMissed,
+        accuracy
+      };
+    }
+    update(dt) {
+      if (!this.running || !this.playerObject)
+        return;
+      this.nextSpawnTime -= dt;
+      if (this.nextSpawnTime <= 0 && this.ballsThrown < this.maxBalls) {
+        this.spawnBall();
+        this.nextSpawnTime = this.spawnInterval;
+      }
+      this.activeBalls = this.activeBalls.filter((ball) => {
+        if (!ball || !ball.active)
+          return false;
+        const ballPos = ball.getPositionWorld();
+        const playerPos = this.playerObject.getPositionWorld();
+        const behindDist = playerPos[2] - ballPos[2];
+        if (behindDist > 3 || ballPos[1] < -1) {
+          this.onBallMissed(ball);
+          ball.destroy();
+          return false;
+        }
+        return true;
+      });
+      if (this.ballsThrown >= this.maxBalls && this.activeBalls.length === 0) {
+        this.endDrill();
+      }
+    }
+    spawnBall() {
+      if (!this.ballPrefab || !this.playerObject)
+        return;
+      const ball = this.ballPrefab.clone(this.object);
+      ball.active = true;
+      const playerPos = this.playerObject.getPositionWorld();
+      const angle2 = Math.random() * Math.PI * 2;
+      const heightVariation = this.spawnHeightMin + Math.random() * (this.spawnHeightMax - this.spawnHeightMin);
+      const spawnX = playerPos[0] + Math.cos(angle2) * this.spawnRadius;
+      const spawnY = heightVariation;
+      const spawnZ = playerPos[2] + Math.sin(angle2) * this.spawnRadius;
+      ball.setPositionWorld([spawnX, spawnY, spawnZ]);
+      ball.spawnTime = performance.now();
+      const direction2 = vec3_exports.sub(vec3_exports.create(), playerPos, [spawnX, spawnY, spawnZ]);
+      vec3_exports.normalize(direction2, direction2);
+      vec3_exports.scale(direction2, direction2, this.ballSpeed);
+      ball.velocity = direction2;
+      ball.isCaught = false;
+      ball.isDeflected = false;
+      let collision = ball.getComponent("ball-collision");
+      if (!collision) {
+        collision = ball.addComponent("ball-collision");
+      }
+      collision.thrower = this;
+      this.activeBalls.push(ball);
+      this.ballsThrown++;
+      console.log(`[BallThrower] Ball ${this.ballsThrown} spawned at ${spawnX.toFixed(1)}, ${spawnY.toFixed(1)}, ${spawnZ.toFixed(1)}`);
+    }
+    onBallCaught(ball) {
+      if (ball.isCaught || ball.isDeflected)
+        return;
+      ball.isCaught = true;
+      this.ballsCaught++;
+      const dm = this.dataManager?.getComponent("data-manager");
+      dm?.addBallResult("caught");
+      console.log("[BallThrower] Ball caught!");
+    }
+    onBallDeflected(ball) {
+      if (ball.isCaught || ball.isDeflected)
+        return;
+      ball.isDeflected = true;
+      this.ballsDeflected++;
+      const dm = this.dataManager?.getComponent("data-manager");
+      dm?.addBallResult("deflected");
+      console.log("[BallThrower] Ball deflected!");
+    }
+    onBallMissed(ball) {
+      if (ball.isCaught || ball.isDeflected) {
+        return;
+      }
+      this.ballsMissed++;
+      const dm = this.dataManager?.getComponent("data-manager");
+      dm?.addBallResult("missed");
+      console.log("[BallThrower] Ball missed!");
+    }
+  };
+  __publicField(BallThrower, "TypeName", "ball-thrower");
+  __publicField(BallThrower, "Properties", {
+    ballPrefab: Property.object(),
+    playerObject: Property.object(),
+    maxBalls: Property.int(15),
+    spawnInterval: Property.float(2),
+    // seconds between spawns
+    ballSpeed: Property.float(3),
+    // meters per second
+    spawnRadius: Property.float(3),
+    // distance from player to spawn
+    spawnHeightMin: Property.float(1),
+    spawnHeightMax: Property.float(2.5),
+    dataManager: Property.object()
+  });
+
   // js/beam-walk-manager.js
   var beam_walk_manager_exports = {};
   __export(beam_walk_manager_exports, {
@@ -11828,12 +12086,14 @@
       if (!this.running)
         return;
       this.running = false;
-      const dur = this.totalBalanceDuration;
-      if (dur > this.bestDuration)
-        this.bestDuration = dur;
-      const dm = this.dataManager?.getComponent("data-manager");
-      dm?.addBeamRun(dur / 1e3);
-      return { totalBalanceDuration: dur / 1e3, bestDuration: this.bestDuration / 1e3 };
+      const currentDur = performance.now() - this._currentRunStart;
+      if (currentDur > 100) {
+        this._commitRun();
+      }
+      return {
+        totalBalanceDuration: this.totalBalanceDuration / 1e3,
+        bestDuration: this.bestDuration / 1e3
+      };
     }
     update(dt) {
       if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
@@ -11853,16 +12113,20 @@
         this._resetToStart();
         this._currentRunStart = performance.now();
       } else {
-        this.totalBalanceDuration = performance.now() - this._currentRunStart;
+        const currentRunDuration = performance.now() - this._currentRunStart;
+        this.totalBalanceDuration += dt * 1e3;
       }
     }
     _commitRun() {
-      const dm = this.dataManager?.getComponent("data-manager");
       const durSec = (performance.now() - this._currentRunStart) / 1e3;
-      if (durSec > 0)
-        dm?.addBeamRun(durSec);
-      if (durSec * 1e3 > this.bestDuration)
+      if (durSec <= 0.1)
+        return;
+      const dm = this.dataManager?.getComponent("data-manager");
+      dm?.addBeamRun(durSec);
+      if (durSec * 1e3 > this.bestDuration) {
         this.bestDuration = durSec * 1e3;
+      }
+      console.log(`[BeamWalk] Run completed: ${durSec.toFixed(2)}s`);
     }
     _resetToStart() {
       if (!this.playerObject || !this.startPosition)
@@ -12055,6 +12319,20 @@
   };
   __publicField(ButtonShowReport, "TypeName", "button-show-report");
 
+  // js/button-start-ball.js
+  var button_start_ball_exports = {};
+  __export(button_start_ball_exports, {
+    ButtonStartBall: () => ButtonStartBall
+  });
+  var ButtonStartBall = class extends Button3D {
+    onPress() {
+      super.onPress();
+      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
+      gs?.startBallDrill();
+    }
+  };
+  __publicField(ButtonStartBall, "TypeName", "button-start-ball");
+
   // js/button-start-beam.js
   var button_start_beam_exports = {};
   __export(button_start_beam_exports, {
@@ -12212,7 +12490,8 @@
     resetSession() {
       this.session = {
         target: { reactionTimes: [], accuracy: { correct: 0, total: 0 } },
-        beam: { runs: [], bestDuration: 0 }
+        beam: { runs: [], bestDuration: 0 },
+        ball: { caught: 0, deflected: 0, missed: 0, total: 0 }
       };
     }
     // Target drill
@@ -12230,6 +12509,17 @@
       if (durationSec > this.session.beam.bestDuration)
         this.session.beam.bestDuration = durationSec;
     }
+    // Ball catching drill
+    addBallResult(result) {
+      this.session.ball.total += 1;
+      if (result === "caught") {
+        this.session.ball.caught += 1;
+      } else if (result === "deflected") {
+        this.session.ball.deflected += 1;
+      } else if (result === "missed") {
+        this.session.ball.missed += 1;
+      }
+    }
     // Aggregates
     getReport() {
       const rts = this.session.target.reactionTimes;
@@ -12238,10 +12528,19 @@
       const slowest = rts.length ? Math.max(...rts) : 0;
       const acc = this.session.target.accuracy;
       const accPct = acc.total ? acc.correct / acc.total * 100 : 0;
+      const ball = this.session.ball;
+      const ballSuccessRate = ball.total ? (ball.caught + ball.deflected) / ball.total * 100 : 0;
       return {
         reaction: { average: avg, fastest, slowest, total: rts.length },
         accuracy: { correct: acc.correct, total: acc.total, percent: accPct },
-        beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() }
+        beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() },
+        ball: {
+          caught: ball.caught,
+          deflected: ball.deflected,
+          missed: ball.missed,
+          total: ball.total,
+          successRate: ballSuccessRate
+        }
       };
     }
   };
@@ -12374,10 +12673,28 @@
   var GameSelector = class extends Component3 {
     start() {
       this.currentDrill = null;
-      this._lastStatus = void 0;
+      this._lastStatus = "";
       this.updateStatus("Select a drill");
       this._storeOriginalScales();
       this._applyDefaultEnvironment();
+      this._validateSetup();
+    }
+    _validateSetup() {
+      if (!this.footballField && !this.tennisCourt && !this.gymFloor) {
+        console.warn("[GameSelector] No environment objects linked!");
+      }
+      if (!this.targetManager) {
+        console.warn("[GameSelector] Target Manager not linked!");
+      }
+      if (!this.beamWalkManager) {
+        console.warn("[GameSelector] Beam Walk Manager not linked!");
+      }
+      if (!this.ballThrower) {
+        console.warn("[GameSelector] Ball Thrower not linked!");
+      }
+      if (!this.dataManager) {
+        console.warn("[GameSelector] Data Manager not linked!");
+      }
     }
     updateStatus(text) {
       if (this._lastStatus === text)
@@ -12385,10 +12702,11 @@
       this._lastStatus = text;
       if (this.uiStatusText) {
         const textComp = this.uiStatusText.getComponent("text");
-        if (textComp)
+        if (textComp) {
           textComp.text = text;
-        else
+        } else {
           console.log("[GameSelector] status:", text);
+        }
       } else {
         console.log("[GameSelector] status:", text);
       }
@@ -12451,6 +12769,8 @@
         else
           mgr.start();
         this.updateStatus("Target Striking: ON");
+      } else {
+        this.updateStatus("Error: Target Manager not found");
       }
     }
     startBeamWalk() {
@@ -12460,6 +12780,19 @@
       if (mgr) {
         mgr.startDrill?.();
         this.updateStatus("Beam Walk: ON");
+      } else {
+        this.updateStatus("Error: Beam Manager not found");
+      }
+    }
+    startBallDrill() {
+      this.stopDrills();
+      this.currentDrill = "ball";
+      const mgr = this.ballThrower?.getComponent("ball-thrower");
+      if (mgr) {
+        mgr.startDrill?.();
+        this.updateStatus("Ball Catching: ON");
+      } else {
+        this.updateStatus("Error: Ball Thrower not found");
       }
     }
     stopDrills() {
@@ -12469,6 +12802,9 @@
       } else if (this.currentDrill === "beam") {
         const bm = this.beamWalkManager?.getComponent("beam-walk-manager");
         bm?.endDrill?.();
+      } else if (this.currentDrill === "ball") {
+        const bt = this.ballThrower?.getComponent("ball-thrower");
+        bt?.endDrill?.();
       }
       this.currentDrill = null;
       this.updateStatus("Drills stopped");
@@ -12476,10 +12812,32 @@
     // Report
     showReport() {
       const dm = this.dataManager?.getComponent("data-manager");
-      if (!dm)
+      if (!dm) {
+        this.updateStatus("Error: No data available");
         return;
+      }
       const r = dm.getReport();
-      this.updateStatus(`AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s Acc:${r.accuracy.percent.toFixed(0)}% BestBeam:${r.beam.best.toFixed(2)}s`);
+      let report = "=== SESSION REPORT ===\n";
+      if (r.reaction.total > 0) {
+        report += `TARGET: Hits:${r.reaction.total} AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s `;
+        if (r.accuracy.total > 0) {
+          report += `Acc:${r.accuracy.percent.toFixed(0)}% `;
+        }
+        report += "\n";
+      }
+      if (r.beam.runs.length > 0) {
+        report += `BEAM: Runs:${r.beam.runs.length} Best:${r.beam.best.toFixed(2)}s Avg:${(r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length).toFixed(2)}s
+`;
+      }
+      if (r.ball.total > 0) {
+        report += `BALL: Caught:${r.ball.caught} Deflected:${r.ball.deflected} Missed:${r.ball.missed} Success:${r.ball.successRate.toFixed(0)}%
+`;
+      }
+      if (r.reaction.total === 0 && r.beam.runs.length === 0 && r.ball.total === 0) {
+        report = "No data yet - complete some drills first!";
+      }
+      console.log(report);
+      this.updateStatus(report.replace(/\n/g, " | "));
     }
   };
   __publicField(GameSelector, "TypeName", "game-selector");
@@ -12492,6 +12850,7 @@
     // Drill managers
     targetManager: Property.object(),
     beamWalkManager: Property.object(),
+    ballThrower: Property.object(),
     dataManager: Property.object(),
     // UI elements
     uiStatusText: Property.object()
@@ -12650,15 +13009,22 @@
     }
     endGame() {
       console.log("Game over! Reaction times: ", this.reactionTimes);
+      if (this.activeTarget) {
+        this.activeTarget.destroy();
+        this.activeTarget = null;
+      }
       const dm = this.dataManager?.getComponent("data-manager");
       const report = dm?.getReport();
       if (report)
         console.log("[TargetManager] Report summary:", report);
     }
     startGame() {
+      if (this.activeTarget) {
+        this.activeTarget.destroy();
+        this.activeTarget = null;
+      }
       this.hitCount = 0;
       this.reactionTimes = [];
-      this.activeTarget = null;
       this.spawnTarget();
     }
   };
@@ -12677,12 +13043,15 @@
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
+  _registerEditor(ball_collision_exports);
+  _registerEditor(ball_thrower_exports);
   _registerEditor(beam_walk_manager_exports);
   _registerEditor(button_3d_exports);
   _registerEditor(button_env_football_exports);
   _registerEditor(button_env_gym_exports);
   _registerEditor(button_env_tennis_exports);
   _registerEditor(button_show_report_exports);
+  _registerEditor(button_start_ball_exports);
   _registerEditor(button_start_beam_exports);
   _registerEditor(button_start_target_exports);
   _registerEditor(button_stop_drills_exports);
