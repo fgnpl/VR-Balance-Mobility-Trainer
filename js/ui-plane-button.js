@@ -39,18 +39,24 @@ export class UiPlaneButton extends Component {
         this.target = this.object.getComponent('cursor-target');
         
         if (!this.target) {
-            console.warn('[UiPlaneButton] cursor-target component not found! Button clicks will not work.');
+            console.warn('[UiPlaneButton] cursor-target component not found on', this.object.name, '! Button clicks will not work. Make sure to add cursor-target component in the editor.');
+            // Don't proceed with event registration
+            this.enabled = false;
             return;
         }
 
-        // Register click event
-        this.target.onDown.add(this._onClick.bind(this));
-        
-        if (this.debugMode) {
-            console.log(`[UiPlaneButton] Initialized with action: ${this.action}`);
-            this.target.onHoverStart.add(() => {
-                console.log(`[UiPlaneButton] Hover start on button ${this.action}`);
-            });
+        // Register click event - only if target exists
+        try {
+            this.target.onDown.add(this._onClick.bind(this));
+            
+            if (this.debugMode) {
+                console.log(`[UiPlaneButton] Initialized with action: ${this.action}`);
+                this.target.onHoverStart.add(() => {
+                    console.log(`[UiPlaneButton] Hover start on button ${this.action}`);
+                });
+            }
+        } catch (e) {
+            console.error('[UiPlaneButton] Error registering events:', e);
         }
     }
 

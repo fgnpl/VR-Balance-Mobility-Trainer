@@ -133,7 +133,14 @@ Active: ${this.activeTargets.length}`;
             }
         }
 
-        // Attach / reuse target-collision component
+        // Remove ball-collision if it exists (ball-collision is for ball-catching drill only)
+        const ballCollision = sphere.getComponent('ball-collision');
+        if (ballCollision) {
+            console.log('[TargetManager] Removing ball-collision from target sphere (not needed for target drill)');
+            sphere.removeComponent(ballCollision);
+        }
+        
+        // Attach / reuse target-collision component (this is what targets need)
         let tc = sphere.getComponent('target-collision');
         if (!tc) tc = sphere.addComponent('target-collision');
         tc.manager = this;

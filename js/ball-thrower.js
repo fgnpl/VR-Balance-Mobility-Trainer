@@ -18,6 +18,7 @@ export class BallThrower extends Component {
         spawnHeightMin: Property.float(1.0),
         spawnHeightMax: Property.float(2.5),
         dataManager: Property.object(),
+        waitForHit: Property.bool(true), // Wait for ball to be hit before spawning next
     };
 
     start() {
@@ -75,8 +76,12 @@ export class BallThrower extends Component {
 
         this.nextSpawnTime -= dt;
         
-        // Spawn new ball if it's time and haven't reached max
-        if (this.nextSpawnTime <= 0 && this.ballsThrown < this.maxBalls) {
+        // Determine if we can spawn a new ball
+        const canSpawn = this.ballsThrown < this.maxBalls && 
+                        (this.waitForHit ? this.activeBalls.length === 0 : true);
+        
+        // Spawn new ball if it's time and conditions are met
+        if (this.nextSpawnTime <= 0 && canSpawn) {
             this.spawnBall();
             this.nextSpawnTime = this.spawnInterval;
         }
@@ -85,16 +90,18 @@ export class BallThrower extends Component {
         this.activeBalls = this.activeBalls.filter(ball => {
             if (!ball || !ball.active) return false;
             
-            // Check if ball went too far behind player (missed)
-            const ballPos = ball.getPositionWorld();
-            const playerPos = this.playerObject.getPositionWorld();
-            
-            // If ball is more than 3 meters behind player, count as missed
-            const behindDist = playerPos[2] - ballPos[2];
-            if (behindDist > 3.0 || ballPos[1] < -1.0) {
-                this.onBallMissed(ball);
-                ball.destroy();
-                return false;
+            // Check if ball went too far behind player (missed) - only if NOT waiting for hit
+            if (!this.waitForHit) {
+                const ballPos = ball.getPositionWorld();
+                const playerPos = this.playerObject.getPositionWorld();
+                
+                // If ball is more than 3 meters behind player, count as missed
+                const behindDist = playerPos[2] - ballPos[2];
+                if (behindDist > 3.0 || ballPos[1] < -1.0) {
+                    this.onBallMissed(ball);
+                    ball.destroy();
+                    return false;
+                }
             }
             
             return true;
@@ -153,11 +160,15 @@ export class BallThrower extends Component {
         ball.isCaught = true;
         this.ballsCaught++;
         
+        // Remove from active balls
+        const index = this.activeBalls.indexOf(ball);
+        if (index !== -1) this.activeBalls.splice(index, 1);
+        
         // Log to data manager
         const dm = this.dataManager?.getComponent('data-manager');
         dm?.addBallResult('caught');
         
-        console.log('[BallThrower] Ball caught!');
+        console.log('[BallThrower] Ball caught! Total caught:', this.ballsCaught);
     }
 
     onBallDeflected(ball) {
@@ -165,11 +176,15 @@ export class BallThrower extends Component {
         ball.isDeflected = true;
         this.ballsDeflected++;
         
+        // Remove from active balls
+        const index = this.activeBalls.indexOf(ball);
+        if (index !== -1) this.activeBalls.splice(index, 1);
+        
         // Log to data manager
         const dm = this.dataManager?.getComponent('data-manager');
         dm?.addBallResult('deflected');
         
-        console.log('[BallThrower] Ball deflected!');
+        console.log('[BallThrower] Ball deflected! Total deflected:', this.ballsDeflected);
     }
 
     onBallMissed(ball) {

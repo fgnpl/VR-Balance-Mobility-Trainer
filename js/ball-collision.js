@@ -10,9 +10,10 @@ export class BallCollision extends Component {
     
     static Properties = {
         thrower: Property.object(),
-        catchRadius: Property.float(0.15), // How close controller must be to catch
-        deflectRadius: Property.float(0.20), // Slightly larger for deflection
-        catchVelocityThreshold: Property.float(0.5), // Max controller velocity for catch
+        catchRadius: Property.float(0.25), // How close controller must be to catch (increased for VR)
+        deflectRadius: Property.float(0.35), // Slightly larger for deflection (increased for VR)
+        catchVelocityThreshold: Property.float(0.8), // Max controller velocity for catch
+        debugMode: Property.bool(false), // Enable debug logging
     };
 
     start() {
@@ -22,12 +23,24 @@ export class BallCollision extends Component {
             right: vec3.create()
         };
         
-        // Initialize last positions
-        const leftCtrl = this.engine.scene.findByName('ControllerLeft')[0];
-        const rightCtrl = this.engine.scene.findByName('ControllerRight')[0];
+        // Find controllers - check all possible left/right objects
+        // Priority: HandLeft/Right (most accurate for catching), then ControllerLeft/Right
+        this.leftController = this.engine.scene.findByName('HandLeft')[0] || 
+                             this.engine.scene.findByName('ControllerLeft')[0];
+        this.rightController = this.engine.scene.findByName('HandRight')[0] || 
+                              this.engine.scene.findByName('ControllerRight')[0];
         
-        if (leftCtrl) leftCtrl.getPositionWorld(this.lastControllerPositions.left);
-        if (rightCtrl) rightCtrl.getPositionWorld(this.lastControllerPositions.right);
+        // Debug: Log what we found
+        console.log('[BallCollision] Left controller:', this.leftController?.name);
+        console.log('[BallCollision] Right controller:', this.rightController?.name);
+        
+        if (!this.leftController || !this.rightController) {
+            console.warn('[BallCollision] Controllers not found! Ball catching will not work.');
+        }
+        
+        // Initialize last positions
+        if (this.leftController) this.leftController.getPositionWorld(this.lastControllerPositions.left);
+        if (this.rightController) this.rightController.getPositionWorld(this.lastControllerPositions.right);
     }
 
     update(dt) {
@@ -45,46 +58,88 @@ export class BallCollision extends Component {
             this.object.setPositionWorld(newPos);
         }
 
-        // Check collision with controllers
-        const leftCtrl = this.engine.scene.findByName('ControllerLeft')[0];
-        const rightCtrl = this.engine.scene.findByName('ControllerRight')[0];
-
+        // Use cached controller references
         const ballPos = this.object.getPositionWorld();
+        
+        // Debug: Log ball position every 30 frames
+        if (this.debugMode) {
+            if (!this.frameCount) this.frameCount = 0;
+            this.frameCount++;
+            if (this.frameCount % 30 === 0) {
+                console.log(`[BallCollision] Ball pos: [${ballPos[0].toFixed(2)}, ${ballPos[1].toFixed(2)}, ${ballPos[2].toFixed(2)}]`);
+            }
+        }
+
+        let minDist = 999;
+        let closestController = 'none';
 
         // Check left controller
-        if (leftCtrl) {
-            const ctrlPos = leftCtrl.getPositionWorld();
+        if (this.leftController) {
+            const ctrlPos = this.leftController.getPositionWorld();
             const distance = vec3.distance(ballPos, ctrlPos);
+            
+            if (distance < minDist) {
+                minDist = distance;
+                closestController = 'left';
+            }
             
             // Calculate controller velocity
             const velocity = vec3.distance(ctrlPos, this.lastControllerPositions.left) / dt;
             vec3.copy(this.lastControllerPositions.left, ctrlPos);
 
+            // Debug logging - show when controllers are relatively close
+            if (this.debugMode && distance < 1.0) {
+                console.log(`[BallCollision] LEFT - dist: ${distance.toFixed(3)}m, vel: ${velocity.toFixed(3)}m/s, catch<${this.catchRadius}, deflect<${this.deflectRadius}`);
+            }
+
             if (distance < this.catchRadius && velocity < this.catchVelocityThreshold) {
-                this.onCatch(leftCtrl);
+                console.log(`[BallCollision] CATCH triggered! Left controller`);
+                this.onCatch(this.leftController);
                 return;
             } else if (distance < this.deflectRadius) {
-                this.onDeflect(leftCtrl, velocity);
+                console.log(`[BallCollision] DEFLECT triggered! Left controller`);
+                this.onDeflect(this.leftController, velocity);
                 return;
             }
+        } else if (this.debugMode && this.frameCount % 60 === 0) {
+            console.warn('[BallCollision] No left controller found!');
         }
 
         // Check right controller
-        if (rightCtrl) {
-            const ctrlPos = rightCtrl.getPositionWorld();
+        if (this.rightController) {
+            const ctrlPos = this.rightController.getPositionWorld();
             const distance = vec3.distance(ballPos, ctrlPos);
+            
+            if (distance < minDist) {
+                minDist = distance;
+                closestController = 'right';
+            }
             
             // Calculate controller velocity
             const velocity = vec3.distance(ctrlPos, this.lastControllerPositions.right) / dt;
             vec3.copy(this.lastControllerPositions.right, ctrlPos);
 
+            // Debug logging - show when controllers are relatively close
+            if (this.debugMode && distance < 1.0) {
+                console.log(`[BallCollision] RIGHT - dist: ${distance.toFixed(3)}m, vel: ${velocity.toFixed(3)}m/s, catch<${this.catchRadius}, deflect<${this.deflectRadius}`);
+            }
+
             if (distance < this.catchRadius && velocity < this.catchVelocityThreshold) {
-                this.onCatch(rightCtrl);
+                console.log(`[BallCollision] CATCH triggered! Right controller`);
+                this.onCatch(this.rightController);
                 return;
             } else if (distance < this.deflectRadius) {
-                this.onDeflect(rightCtrl, velocity);
+                console.log(`[BallCollision] DEFLECT triggered! Right controller`);
+                this.onDeflect(this.rightController, velocity);
                 return;
             }
+        } else if (this.debugMode && this.frameCount % 60 === 0) {
+            console.warn('[BallCollision] No right controller found!');
+        }
+        
+        // Debug: Show closest distance periodically
+        if (this.debugMode && this.frameCount % 30 === 0) {
+            console.log(`[BallCollision] Closest: ${closestController} at ${minDist.toFixed(3)}m`);
         }
     }
 

@@ -182,10 +182,11 @@
             "parent": "235"
         },
         "53": {
-            "link": {
-                "name": "root",
-                "file": "models\\oculus-touch-v2-left.glb"
-            },
+            "scaling": [
+                0.9999998,
+                0.9999999,
+                0.9999997
+            ],
             "parent": "130",
             "name": "ControllerModelLeft",
             "translation": [
@@ -199,11 +200,10 @@
                 0.6816681,
                 3.196286257889369e-8
             ],
-            "scaling": [
-                0.9999998,
-                0.9999999,
-                0.9999997
-            ]
+            "link": {
+                "name": "root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
         },
         "54": {
             "link": {
@@ -421,10 +421,11 @@
             "parent": "82"
         },
         "95": {
-            "link": {
-                "name": "root",
-                "file": "models\\oculus-touch-v2-right.glb"
-            },
+            "scaling": [
+                0.9993978,
+                0.9993963,
+                1.0000015
+            ],
             "parent": "129",
             "name": "ControllerModelRight",
             "translation": [
@@ -438,11 +439,10 @@
                 -0.0125658,
                 -4.174509058429976e-7
             ],
-            "scaling": [
-                0.9993978,
-                0.9993963,
-                1.0000015
-            ]
+            "link": {
+                "name": "root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
         },
         "96": {
             "link": {
@@ -1369,9 +1369,9 @@
                 }
             ],
             "translation": [
-                0.0,
-                1.75,
-                0.0
+                2.5052964,
+                3.1964445,
+                0.0000202
             ],
             "rotation": [
                 0.0,
@@ -1380,9 +1380,9 @@
                 1.0
             ],
             "scaling": [
-                1.0,
-                1.0,
-                1.0
+                7.8000001,
+                7.8000001,
+                7.8000001
             ]
         },
         "209": {
@@ -1547,7 +1547,7 @@
                     "type": "mesh",
                     "mesh": {
                         "mesh": "9",
-                        "material": "25"
+                        "material": "22"
                     },
                     "active": true
                 },
@@ -2573,7 +2573,7 @@
                 0.2
             ],
             "translation": [
-                0.0,
+                0.0099563,
                 3.875,
                 0.9792991
             ],
@@ -2714,7 +2714,7 @@
                         "action": "Start Beam Walk",
                         "debugMode": true,
                         "autoStartTargetDrill": false,
-                        "autoStartBeamDrill": true
+                        "autoStartBeamDrill": false
                     }
                 },
                 {
@@ -3303,7 +3303,7 @@
             ],
             "translation": [
                 16.2816524,
-                4.1930198,
+                6.2210907,
                 10.3678998
             ],
             "rotation": [

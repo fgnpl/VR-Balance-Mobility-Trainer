@@ -7602,12 +7602,17 @@ var BallCollision = class extends Component29 {
       left: vec3_exports.create(),
       right: vec3_exports.create()
     };
-    const leftCtrl = this.engine.scene.findByName("ControllerLeft")[0];
-    const rightCtrl = this.engine.scene.findByName("ControllerRight")[0];
-    if (leftCtrl)
-      leftCtrl.getPositionWorld(this.lastControllerPositions.left);
-    if (rightCtrl)
-      rightCtrl.getPositionWorld(this.lastControllerPositions.right);
+    this.leftController = this.engine.scene.findByName("HandLeft")[0] || this.engine.scene.findByName("ControllerLeft")[0];
+    this.rightController = this.engine.scene.findByName("HandRight")[0] || this.engine.scene.findByName("ControllerRight")[0];
+    console.log("[BallCollision] Left controller:", this.leftController?.name);
+    console.log("[BallCollision] Right controller:", this.rightController?.name);
+    if (!this.leftController || !this.rightController) {
+      console.warn("[BallCollision] Controllers not found! Ball catching will not work.");
+    }
+    if (this.leftController)
+      this.leftController.getPositionWorld(this.lastControllerPositions.left);
+    if (this.rightController)
+      this.rightController.getPositionWorld(this.lastControllerPositions.right);
   }
   update(dt) {
     if (this.handled)
@@ -7622,34 +7627,67 @@ var BallCollision = class extends Component29 {
       );
       this.object.setPositionWorld(newPos);
     }
-    const leftCtrl = this.engine.scene.findByName("ControllerLeft")[0];
-    const rightCtrl = this.engine.scene.findByName("ControllerRight")[0];
     const ballPos = this.object.getPositionWorld();
-    if (leftCtrl) {
-      const ctrlPos = leftCtrl.getPositionWorld();
-      const distance2 = vec3_exports.distance(ballPos, ctrlPos);
-      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.left) / dt;
-      vec3_exports.copy(this.lastControllerPositions.left, ctrlPos);
-      if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
-        this.onCatch(leftCtrl);
-        return;
-      } else if (distance2 < this.deflectRadius) {
-        this.onDeflect(leftCtrl, velocity);
-        return;
+    if (this.debugMode) {
+      if (!this.frameCount)
+        this.frameCount = 0;
+      this.frameCount++;
+      if (this.frameCount % 30 === 0) {
+        console.log(`[BallCollision] Ball pos: [${ballPos[0].toFixed(2)}, ${ballPos[1].toFixed(2)}, ${ballPos[2].toFixed(2)}]`);
       }
     }
-    if (rightCtrl) {
-      const ctrlPos = rightCtrl.getPositionWorld();
+    let minDist = 999;
+    let closestController = "none";
+    if (this.leftController) {
+      const ctrlPos = this.leftController.getPositionWorld();
       const distance2 = vec3_exports.distance(ballPos, ctrlPos);
-      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.right) / dt;
-      vec3_exports.copy(this.lastControllerPositions.right, ctrlPos);
+      if (distance2 < minDist) {
+        minDist = distance2;
+        closestController = "left";
+      }
+      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.left) / dt;
+      vec3_exports.copy(this.lastControllerPositions.left, ctrlPos);
+      if (this.debugMode && distance2 < 1) {
+        console.log(`[BallCollision] LEFT - dist: ${distance2.toFixed(3)}m, vel: ${velocity.toFixed(3)}m/s, catch<${this.catchRadius}, deflect<${this.deflectRadius}`);
+      }
       if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
-        this.onCatch(rightCtrl);
+        console.log(`[BallCollision] CATCH triggered! Left controller`);
+        this.onCatch(this.leftController);
         return;
       } else if (distance2 < this.deflectRadius) {
-        this.onDeflect(rightCtrl, velocity);
+        console.log(`[BallCollision] DEFLECT triggered! Left controller`);
+        this.onDeflect(this.leftController, velocity);
         return;
       }
+    } else if (this.debugMode && this.frameCount % 60 === 0) {
+      console.warn("[BallCollision] No left controller found!");
+    }
+    if (this.rightController) {
+      const ctrlPos = this.rightController.getPositionWorld();
+      const distance2 = vec3_exports.distance(ballPos, ctrlPos);
+      if (distance2 < minDist) {
+        minDist = distance2;
+        closestController = "right";
+      }
+      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.right) / dt;
+      vec3_exports.copy(this.lastControllerPositions.right, ctrlPos);
+      if (this.debugMode && distance2 < 1) {
+        console.log(`[BallCollision] RIGHT - dist: ${distance2.toFixed(3)}m, vel: ${velocity.toFixed(3)}m/s, catch<${this.catchRadius}, deflect<${this.deflectRadius}`);
+      }
+      if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
+        console.log(`[BallCollision] CATCH triggered! Right controller`);
+        this.onCatch(this.rightController);
+        return;
+      } else if (distance2 < this.deflectRadius) {
+        console.log(`[BallCollision] DEFLECT triggered! Right controller`);
+        this.onDeflect(this.rightController, velocity);
+        return;
+      }
+    } else if (this.debugMode && this.frameCount % 60 === 0) {
+      console.warn("[BallCollision] No right controller found!");
+    }
+    if (this.debugMode && this.frameCount % 30 === 0) {
+      console.log(`[BallCollision] Closest: ${closestController} at ${minDist.toFixed(3)}m`);
     }
   }
   onCatch(controller) {
@@ -7698,12 +7736,14 @@ var BallCollision = class extends Component29 {
 __publicField(BallCollision, "TypeName", "ball-collision");
 __publicField(BallCollision, "Properties", {
   thrower: Property2.object(),
-  catchRadius: Property2.float(0.15),
-  // How close controller must be to catch
-  deflectRadius: Property2.float(0.2),
-  // Slightly larger for deflection
-  catchVelocityThreshold: Property2.float(0.5)
+  catchRadius: Property2.float(0.25),
+  // How close controller must be to catch (increased for VR)
+  deflectRadius: Property2.float(0.35),
+  // Slightly larger for deflection (increased for VR)
+  catchVelocityThreshold: Property2.float(0.8),
   // Max controller velocity for catch
+  debugMode: Property2.bool(false)
+  // Enable debug logging
 });
 
 // js/ball-thrower.js
@@ -7752,20 +7792,23 @@ var BallThrower = class extends Component30 {
     if (!this.running || !this.playerObject)
       return;
     this.nextSpawnTime -= dt;
-    if (this.nextSpawnTime <= 0 && this.ballsThrown < this.maxBalls) {
+    const canSpawn = this.ballsThrown < this.maxBalls && (this.waitForHit ? this.activeBalls.length === 0 : true);
+    if (this.nextSpawnTime <= 0 && canSpawn) {
       this.spawnBall();
       this.nextSpawnTime = this.spawnInterval;
     }
     this.activeBalls = this.activeBalls.filter((ball) => {
       if (!ball || !ball.active)
         return false;
-      const ballPos = ball.getPositionWorld();
-      const playerPos = this.playerObject.getPositionWorld();
-      const behindDist = playerPos[2] - ballPos[2];
-      if (behindDist > 3 || ballPos[1] < -1) {
-        this.onBallMissed(ball);
-        ball.destroy();
-        return false;
+      if (!this.waitForHit) {
+        const ballPos = ball.getPositionWorld();
+        const playerPos = this.playerObject.getPositionWorld();
+        const behindDist = playerPos[2] - ballPos[2];
+        if (behindDist > 3 || ballPos[1] < -1) {
+          this.onBallMissed(ball);
+          ball.destroy();
+          return false;
+        }
       }
       return true;
     });
@@ -7806,18 +7849,24 @@ var BallThrower = class extends Component30 {
       return;
     ball.isCaught = true;
     this.ballsCaught++;
+    const index = this.activeBalls.indexOf(ball);
+    if (index !== -1)
+      this.activeBalls.splice(index, 1);
     const dm = this.dataManager?.getComponent("data-manager");
     dm?.addBallResult("caught");
-    console.log("[BallThrower] Ball caught!");
+    console.log("[BallThrower] Ball caught! Total caught:", this.ballsCaught);
   }
   onBallDeflected(ball) {
     if (ball.isCaught || ball.isDeflected)
       return;
     ball.isDeflected = true;
     this.ballsDeflected++;
+    const index = this.activeBalls.indexOf(ball);
+    if (index !== -1)
+      this.activeBalls.splice(index, 1);
     const dm = this.dataManager?.getComponent("data-manager");
     dm?.addBallResult("deflected");
-    console.log("[BallThrower] Ball deflected!");
+    console.log("[BallThrower] Ball deflected! Total deflected:", this.ballsDeflected);
   }
   onBallMissed(ball) {
     if (ball.isCaught || ball.isDeflected) {
@@ -7842,7 +7891,9 @@ __publicField(BallThrower, "Properties", {
   // distance from player to spawn
   spawnHeightMin: Property3.float(1),
   spawnHeightMax: Property3.float(2.5),
-  dataManager: Property3.object()
+  dataManager: Property3.object(),
+  waitForHit: Property3.bool(true)
+  // Wait for ball to be hit before spawning next
 });
 
 // js/beam-walk-manager.js
@@ -8456,6 +8507,11 @@ Active: ${this.activeTargets.length}`;
         }
       }
     }
+    const ballCollision = sphere.getComponent("ball-collision");
+    if (ballCollision) {
+      console.log("[TargetManager] Removing ball-collision from target sphere (not needed for target drill)");
+      sphere.removeComponent(ballCollision);
+    }
     let tc = sphere.getComponent("target-collision");
     if (!tc)
       tc = sphere.addComponent("target-collision");
@@ -8563,15 +8619,20 @@ var UiPlaneButton = class extends Component38 {
     }
     this.target = this.object.getComponent("cursor-target");
     if (!this.target) {
-      console.warn("[UiPlaneButton] cursor-target component not found! Button clicks will not work.");
+      console.warn("[UiPlaneButton] cursor-target component not found on", this.object.name, "! Button clicks will not work. Make sure to add cursor-target component in the editor.");
+      this.enabled = false;
       return;
     }
-    this.target.onDown.add(this._onClick.bind(this));
-    if (this.debugMode) {
-      console.log(`[UiPlaneButton] Initialized with action: ${this.action}`);
-      this.target.onHoverStart.add(() => {
-        console.log(`[UiPlaneButton] Hover start on button ${this.action}`);
-      });
+    try {
+      this.target.onDown.add(this._onClick.bind(this));
+      if (this.debugMode) {
+        console.log(`[UiPlaneButton] Initialized with action: ${this.action}`);
+        this.target.onHoverStart.add(() => {
+          console.log(`[UiPlaneButton] Hover start on button ${this.action}`);
+        });
+      }
+    } catch (e) {
+      console.error("[UiPlaneButton] Error registering events:", e);
     }
   }
   _startBeamDrill() {
