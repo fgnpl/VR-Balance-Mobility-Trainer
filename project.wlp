@@ -679,18 +679,6 @@
                     }
                 },
                 {
-                    "type": "teleport",
-                    "teleport": {
-                        "floorGroup": 2,
-                        "camRoot": "14",
-                        "cam": "17",
-                        "teleportIndicatorMeshObject": null,
-                        "indicatorYOffset": 0.0099999,
-                        "eyeLeft": "18",
-                        "eyeRight": "19"
-                    }
-                },
-                {
                     "type": "vr-mode-active-switch"
                 }
             ],
@@ -1466,18 +1454,6 @@
                     }
                 },
                 {
-                    "type": "teleport",
-                    "teleport": {
-                        "floorGroup": 2,
-                        "camRoot": "14",
-                        "cam": "17",
-                        "teleportIndicatorMeshObject": null,
-                        "indicatorYOffset": 0.0099999,
-                        "eyeLeft": "18",
-                        "eyeRight": "19"
-                    }
-                },
-                {
                     "type": "vr-mode-active-switch"
                 }
             ],
@@ -1640,7 +1616,8 @@
                         "playerObject": "237",
                         "startPosition": "349",
                         "endPosition": "350",
-                        "dataManager": "234"
+                        "dataManager": "234",
+                        "statsText": "374"
                     }
                 },
                 {
@@ -1649,7 +1626,8 @@
                         "spherePrefab": "27",
                         "useColorMode": true,
                         "dataManager": "234",
-                        "uiCueText": "346"
+                        "uiCueText": "346",
+                        "statsText": "375"
                     }
                 }
             ]
@@ -2401,17 +2379,7 @@
                 0.7071111
             ],
             "name": "Beam",
-            "components": [
-                {
-                    "type": "beam-walk-manager",
-                    "beam-walk-manager": {
-                        "playerObject": null,
-                        "beamWidth": 33.0,
-                        "startPosition": null,
-                        "endPosition": null
-                    }
-                }
-            ]
+            "components": []
         },
         "343": {
             "link": {
@@ -2454,9 +2422,9 @@
             "name": "BeamStart",
             "parent": "342",
             "translation": [
-                1645.2108154,
-                501.6091003,
-                -72.7650604
+                1645.1994628,
+                501.6088562,
+                109.7900009
             ],
             "rotation": [
                 0.0,
@@ -2474,9 +2442,9 @@
             "name": "BeamEnd",
             "parent": "342",
             "translation": [
-                1645.192749,
-                -533.1409912,
-                -72.7661895
+                1645.1826171,
+                -533.1333007,
+                125.2099304
             ],
             "rotation": [
                 0.0,
@@ -2618,7 +2586,7 @@
         },
         "337": {
             "name": "UIPANEL",
-            "parent": "17",
+            "parent": "235",
             "components": [
                 {
                     "type": "mesh",
@@ -2630,9 +2598,9 @@
                 }
             ],
             "translation": [
-                -3.4203281,
-                1.1855664,
-                -4.7793679
+                -3.4199771,
+                4.2041521,
+                -3.3919343
             ],
             "rotation": [
                 0.0,
@@ -2657,6 +2625,30 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Target Drill",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -2715,6 +2707,31 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Beam Walk",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false,
+                        "autoStartBeamDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -2773,6 +2790,29 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Ball Catching",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -2831,6 +2871,29 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Stop All Drills",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -2889,6 +2952,29 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Show Report",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -2947,6 +3033,29 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Football Environment",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -3005,6 +3114,29 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "debugMode": true,
+                        "triggerDistance": 5.0
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -3063,6 +3195,29 @@
                         "material": "202",
                         "morphTargets": null
                     }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Gym Environment",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
                 }
             ],
             "translation": [
@@ -3109,6 +3264,59 @@
                 3.3222591
             ],
             "parent": "372"
+        },
+        "375": {
+            "name": "uiStats",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Wonderland Engine 2"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                10.5919246,
+                -16.4906978
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                10.3000001,
+                10.3000001,
+                10.3000001
+            ]
+        },
+        "374": {
+            "name": "beamStatistics",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "text"
+                }
+            ],
+            "translation": [
+                16.2816524,
+                6.2210907,
+                10.3678998
+            ],
+            "rotation": [
+                0.0,
+                0.9989582,
+                0.0,
+                0.0456341
+            ],
+            "scaling": [
+                8.8999996,
+                8.9000291,
+                8.8999996
+            ]
         }
     },
     "meshes": {

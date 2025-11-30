@@ -12075,12 +12075,59 @@
       this.totalBalanceDuration = 0;
       this.bestDuration = 0;
       this._currentRunStart = 0;
+      this.movementData = [];
+      this.currentRunNumber = 0;
+      this.totalFalls = 0;
+      this.successfulRuns = 0;
+      this.maxDistanceReached = 0;
+      this.avgDeviation = 0;
+      this.deviationSamples = [];
+      console.log("[BeamWalk] start() - statsText:", this.statsText);
+      if (this.statsText) {
+        console.log("[BeamWalk] statsText object found:", this.statsText.name);
+        const textComp = this.statsText.getComponent("text");
+        console.log("[BeamWalk] text component:", textComp);
+      }
+    }
+    updateStats() {
+      if (!this.statsText) {
+        console.warn("[BeamWalk] statsText not assigned - check editor property");
+        return;
+      }
+      const textComp = this.statsText.getComponent("text");
+      if (!textComp) {
+        console.warn("[BeamWalk] text component not found on:", this.statsText.name);
+        console.warn("[BeamWalk] Available components:", this.statsText);
+        return;
+      }
+      const currentRunTime = this.running ? ((performance.now() - this._currentRunStart) / 1e3).toFixed(2) : "0.00";
+      const avgDev = this.deviationSamples.length > 0 ? (this.deviationSamples.reduce((a, b) => a + b, 0) / this.deviationSamples.length).toFixed(3) : "0.000";
+      const totalTime = (this.totalBalanceDuration / 1e3).toFixed(2);
+      const bestTime = (this.bestDuration / 1e3).toFixed(2);
+      const stats = `BEAM WALK STATS
+Run #: ${this.currentRunNumber}
+Current: ${currentRunTime}s
+Total Time: ${totalTime}s
+Best Run: ${bestTime}s
+Success: ${this.successfulRuns}
+Falls: ${this.totalFalls}
+Max Dist: ${this.maxDistanceReached.toFixed(2)}m
+Avg Dev: ${avgDev}m`;
+      textComp.text = stats;
+      console.log("[BeamWalk] Stats updated:", stats);
     }
     startDrill() {
       this.running = true;
       this.totalBalanceDuration = 0;
+      this.currentRunNumber = 1;
+      this.totalFalls = 0;
+      this.successfulRuns = 0;
+      this.maxDistanceReached = 0;
+      this.deviationSamples = [];
+      this.movementData = [];
       this._currentRunStart = performance.now();
       this._resetToStart();
+      this.updateStats();
     }
     endDrill() {
       if (!this.running)
@@ -12090,9 +12137,22 @@
       if (currentDur > 100) {
         this._commitRun();
       }
+      console.log("[BeamWalk] Complete Movement Data:");
+      console.log(`Total Runs: ${this.currentRunNumber}`);
+      console.log(`Successful Runs: ${this.successfulRuns}`);
+      console.log(`Total Falls: ${this.totalFalls}`);
+      console.log(`Max Distance: ${this.maxDistanceReached.toFixed(2)}m`);
+      console.log(`Movement Samples: ${this.movementData.length}`);
+      console.log("Detailed Data:", this.movementData);
+      this.updateStats();
       return {
         totalBalanceDuration: this.totalBalanceDuration / 1e3,
-        bestDuration: this.bestDuration / 1e3
+        bestDuration: this.bestDuration / 1e3,
+        movementData: this.movementData,
+        successfulRuns: this.successfulRuns,
+        totalFalls: this.totalFalls,
+        maxDistanceReached: this.maxDistanceReached,
+        avgDeviation: this.deviationSamples.length > 0 ? this.deviationSamples.reduce((a, b) => a + b, 0) / this.deviationSamples.length : 0
       };
     }
     update(dt) {
@@ -12108,16 +12168,45 @@
       const lateral = vec3_exports.sub(vec3_exports.create(), playerPos, closest);
       lateral[1] = 0;
       const dist2 = vec3_exports.length(lateral);
-      if (playerPos[1] < this.resetHeight || dist2 > this.maxDistanceFromCenter) {
-        this._commitRun();
+      const beamLength = vec3_exports.length(ab);
+      const distanceAlongBeam = t * beamLength;
+      if (distanceAlongBeam > this.maxDistanceReached) {
+        this.maxDistanceReached = distanceAlongBeam;
+      }
+      this.deviationSamples.push(dist2);
+      this.movementData.push({
+        time: performance.now(),
+        position: [playerPos[0], playerPos[1], playerPos[2]],
+        distanceFromCenter: dist2,
+        distanceAlongBeam,
+        runNumber: this.currentRunNumber
+      });
+      this.updateStats();
+      const distToEnd = vec3_exports.distance(playerPos, b);
+      if (distToEnd <= this.successRadius) {
+        console.log("[BeamWalk] SUCCESS! Reached end of beam");
+        this.successfulRuns++;
+        this._commitRun(true);
         this._resetToStart();
+        this.currentRunNumber++;
         this._currentRunStart = performance.now();
+        this.updateStats();
+        return;
+      }
+      if (playerPos[1] < this.resetHeight || dist2 > this.maxDistanceFromCenter) {
+        console.log("[BeamWalk] FALL detected");
+        this.totalFalls++;
+        this._commitRun(false);
+        this._resetToStart();
+        this.currentRunNumber++;
+        this._currentRunStart = performance.now();
+        this.updateStats();
       } else {
         const currentRunDuration = performance.now() - this._currentRunStart;
         this.totalBalanceDuration += dt * 1e3;
       }
     }
-    _commitRun() {
+    _commitRun(isSuccess = false) {
       const durSec = (performance.now() - this._currentRunStart) / 1e3;
       if (durSec <= 0.1)
         return;
@@ -12126,7 +12215,8 @@
       if (durSec * 1e3 > this.bestDuration) {
         this.bestDuration = durSec * 1e3;
       }
-      console.log(`[BeamWalk] Run completed: ${durSec.toFixed(2)}s`);
+      const status = isSuccess ? "SUCCESS" : "FALL";
+      console.log(`[BeamWalk] Run completed: ${durSec.toFixed(2)}s - ${status}`);
     }
     _resetToStart() {
       if (!this.playerObject || !this.startPosition)
@@ -12141,9 +12231,14 @@
     beamWidth: Property.float(0.3),
     startPosition: Property.object(),
     endPosition: Property.object(),
-    maxDistanceFromCenter: Property.float(0.15),
+    maxDistanceFromCenter: Property.float(0.5),
+    // Increased from 0.15 to 0.5 (50cm tolerance)
     resetHeight: Property.float(-2),
-    dataManager: Property.object()
+    dataManager: Property.object(),
+    statsText: Property.object(),
+    // Text component to display live stats
+    successRadius: Property.float(1)
+    // Radius around end point to count as success
   });
 
   // js/button-3d.js
@@ -12952,12 +13047,44 @@
   var TargetManager = class extends Component3 {
     start() {
       this.hitCount = 0;
+      this.missCount = 0;
       this.reactionTimes = [];
-      this.activeTarget = null;
+      this.activeTargets = [];
       this.spherePrefab.active = false;
-      this.colors = ["red", "green"];
+      this.colors = [
+        { name: "yellow", materialId: this.yellowMaterialId },
+        { name: "pink", materialId: this.pinkMaterialId },
+        { name: "green", materialId: this.greenMaterialId }
+      ];
       this.currentCue = null;
-      this.spawnTarget();
+      console.log(
+        "[TargetManager] Material IDs - Yellow:",
+        this.yellowMaterialId,
+        "Pink:",
+        this.pinkMaterialId,
+        "Green:",
+        this.greenMaterialId
+      );
+      this.updateStats();
+      for (let i = 0; i < this.simultaneousTargets; i++) {
+        this.spawnTarget();
+      }
+    }
+    updateStats() {
+      if (!this.statsText)
+        return;
+      const textComp = this.statsText.getComponent("text");
+      if (!textComp)
+        return;
+      const avgReactionTime = this.reactionTimes.length > 0 ? (this.reactionTimes.reduce((a, b) => a + b, 0) / this.reactionTimes.length).toFixed(3) : "0.000";
+      const accuracy = this.hitCount + this.missCount > 0 ? (this.hitCount / (this.hitCount + this.missCount) * 100).toFixed(1) : "0.0";
+      const stats = `STATS
+Hits: ${this.hitCount} / ${this.maxTargets}
+Misses: ${this.missCount}
+Accuracy: ${accuracy}%
+Avg RT: ${avgReactionTime}s
+Active: ${this.activeTargets.length}`;
+      textComp.text = stats;
     }
     spawnTarget() {
       if (this.hitCount >= this.maxTargets) {
@@ -12966,27 +13093,39 @@
       }
       const sphere = this.spherePrefab.clone(this.object);
       sphere.active = true;
-      this.activeTarget = sphere;
-      const x = (Math.random() - 0.5) * 1.5;
-      const y = 1.5 + Math.random() * 0.5;
-      const z = -1.5 - Math.pow(x, 2) / 2;
+      this.activeTargets.push(sphere);
+      const x = (Math.random() - 0.5) * 7.5;
+      const y = 1.5 + Math.random() * 2.5;
+      const z = 2 + Math.pow(x, 2) / 2;
       console.log("Target position:", x, y, z);
       sphere.setPositionWorld([x, y, z]);
       sphere.startTime = performance.now();
       if (this.useColorMode) {
-        const color = this.colors[Math.floor(Math.random() * this.colors.length)];
-        sphere.colorTag = color;
-        this.currentCue = this.colors[Math.floor(Math.random() * this.colors.length)];
+        const colorObj = this.colors[Math.floor(Math.random() * this.colors.length)];
+        sphere.colorTag = colorObj.name;
+        this.currentCue = this.colors[Math.floor(Math.random() * this.colors.length)].name;
         const textComp = this.uiCueText?.getComponent("text");
         if (textComp)
           textComp.text = `Hit ${this.currentCue.toUpperCase()}`;
-        const matComp = sphere.getComponent("mesh");
-        const mat = matComp?.material;
-        if (mat && mat.setColor) {
-          if (color === "red")
-            mat.setColor([1, 0, 0, 1]);
-          else
-            mat.setColor([0, 1, 0, 1]);
+        const meshComp = sphere.getComponent("mesh");
+        if (meshComp && meshComp.material) {
+          try {
+            const colorMap = {
+              "yellow": [1, 1, 0, 1],
+              // Yellow
+              "pink": [1, 0.41, 0.71, 1],
+              // Hot Pink
+              "green": [0, 1, 0, 1]
+              // Green
+            };
+            const colorRGBA = colorMap[colorObj.name];
+            if (colorRGBA) {
+              meshComp.material.diffuseColor = colorRGBA;
+              console.log(`[TargetManager] Set color to ${colorObj.name}:`, colorRGBA);
+            }
+          } catch (e) {
+            console.error(`[TargetManager] Error setting color:`, e);
+          }
         }
       }
       let tc = sphere.getComponent("target-collision");
@@ -12994,8 +13133,30 @@
         tc = sphere.addComponent("target-collision");
       tc.manager = this;
       console.log("Spawned at:", sphere.getPositionWorld());
+      sphere.timeoutId = setTimeout(() => {
+        this.onTargetTimeout(sphere);
+      }, this.targetLifetime * 1e3);
+    }
+    onTargetTimeout(sphere) {
+      const index = this.activeTargets.indexOf(sphere);
+      if (index === -1)
+        return;
+      console.log("[TargetManager] Target timeout - respawning");
+      this.activeTargets.splice(index, 1);
+      this.missCount++;
+      sphere.destroy();
+      this.updateStats();
+      this.spawnTarget();
     }
     onTargetHit(sphere, reactionTime) {
+      if (sphere.timeoutId) {
+        clearTimeout(sphere.timeoutId);
+        sphere.timeoutId = null;
+      }
+      const index = this.activeTargets.indexOf(sphere);
+      if (index !== -1) {
+        this.activeTargets.splice(index, 1);
+      }
       this.hitCount++;
       this.reactionTimes.push(reactionTime);
       const dm = this.dataManager?.getComponent("data-manager");
@@ -13005,27 +13166,38 @@
         dm?.addAccuracySample(!!correct);
       }
       sphere.destroy();
+      this.updateStats();
       setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
     }
     endGame() {
       console.log("Game over! Reaction times: ", this.reactionTimes);
-      if (this.activeTarget) {
-        this.activeTarget.destroy();
-        this.activeTarget = null;
+      for (const target of this.activeTargets) {
+        if (target.timeoutId) {
+          clearTimeout(target.timeoutId);
+        }
+        target.destroy();
       }
+      this.activeTargets = [];
       const dm = this.dataManager?.getComponent("data-manager");
       const report = dm?.getReport();
       if (report)
         console.log("[TargetManager] Report summary:", report);
     }
     startGame() {
-      if (this.activeTarget) {
-        this.activeTarget.destroy();
-        this.activeTarget = null;
+      for (const target of this.activeTargets) {
+        if (target.timeoutId) {
+          clearTimeout(target.timeoutId);
+        }
+        target.destroy();
       }
+      this.activeTargets = [];
       this.hitCount = 0;
+      this.missCount = 0;
       this.reactionTimes = [];
-      this.spawnTarget();
+      this.updateStats();
+      for (let i = 0; i < this.simultaneousTargets; i++) {
+        this.spawnTarget();
+      }
     }
   };
   __publicField(TargetManager, "TypeName", "target-manager");
@@ -13037,36 +13209,157 @@
     // seconds
     useColorMode: Property.bool(false),
     uiCueText: Property.object(),
-    dataManager: Property.object()
+    dataManager: Property.object(),
+    targetLifetime: Property.float(1),
+    // seconds - auto-respawn if not hit
+    simultaneousTargets: Property.int(1),
+    // number of targets to spawn at once
+    statsText: Property.object(),
+    // Text component to display stats
+    // Material IDs - set these in the editor to match your scene materials
+    yellowMaterialId: Property.int(25),
+    pinkMaterialId: Property.int(22),
+    greenMaterialId: Property.int(26)
   });
 
-  // js/ui-plane-env-tennis-button.js
-  var ui_plane_env_tennis_button_exports = {};
-  __export(ui_plane_env_tennis_button_exports, {
-    UIPlaneEnvTennisButton: () => UIPlaneEnvTennisButton
+  // js/ui-plane-button.js
+  var ui_plane_button_exports = {};
+  __export(ui_plane_button_exports, {
+    UiPlaneButton: () => UiPlaneButton
   });
-  var UIPlaneEnvTennisButton = class extends Component3 {
+  var UiPlaneButton = class extends Component3 {
     start() {
-      this.object.onClick = this._onClick.bind(this);
-      this.object.onPointerDown = this._onClick.bind(this);
-    }
-    _onClick() {
-      if (!this.managerObject) {
-        console.warn("Manager object not set on UIPlaneEnvTennisButton");
+      if (this.autoStartBeamDrill) {
+        console.log("[UiPlaneButton] Auto-starting beam drill in 3 seconds...");
+        setTimeout(() => {
+          console.log("[UiPlaneButton] Auto-starting beam drill NOW");
+          this._startBeamDrill();
+        }, 3e3);
+      }
+      this.target = this.object.getComponent("cursor-target");
+      if (!this.target) {
+        console.warn("[UiPlaneButton] cursor-target component not found! Button clicks will not work.");
         return;
       }
-      const gs = this.managerObject.getComponent("game-selector");
-      if (gs && typeof gs.showTennis === "function") {
-        gs.showTennis();
+      this.target.onDown.add(this._onClick.bind(this));
+      if (this.debugMode) {
+        console.log(`[UiPlaneButton] Initialized with action: ${this.action}`);
+        this.target.onHoverStart.add(() => {
+          console.log(`[UiPlaneButton] Hover start on button ${this.action}`);
+        });
+      }
+    }
+    _startBeamDrill() {
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (!manager) {
+        console.error("[UiPlaneButton] Manager object not found - cannot start beam drill");
+        return;
+      }
+      const gs = manager.getComponent("game-selector");
+      if (!gs) {
+        console.error("[UiPlaneButton] game-selector component not found on Manager - cannot start beam drill");
+        return;
+      }
+      if (gs.startBeamWalk) {
+        console.log("[UiPlaneButton] Starting beam walk drill...");
+        gs.startBeamWalk();
       } else {
-        console.warn("game-selector or showTennis() not found on manager object");
+        console.error("[UiPlaneButton] startBeamWalk method not found on game-selector");
+      }
+    }
+    _onClick() {
+      if (this.debugMode) {
+        console.log(`[UiPlaneButton] Button clicked: ${this.action}`);
+      }
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (!manager) {
+        console.warn("[UiPlaneButton] Manager object not found");
+        return;
+      }
+      const gs = manager.getComponent("game-selector");
+      if (!gs) {
+        console.warn("[UiPlaneButton] game-selector component not found on Manager");
+        return;
+      }
+      switch (this.action) {
+        case 0:
+          if (gs.showTennis) {
+            gs.showTennis();
+          } else {
+            console.warn("[UiPlaneButton] showTennis method not found");
+          }
+          break;
+        case 1:
+          if (gs.showFootball) {
+            gs.showFootball();
+          } else {
+            console.warn("[UiPlaneButton] showFootball method not found");
+          }
+          break;
+        case 2:
+          if (gs.showGym) {
+            gs.showGym();
+          } else {
+            console.warn("[UiPlaneButton] showGym method not found");
+          }
+          break;
+        case 3:
+          if (gs.startTargetDrill) {
+            gs.startTargetDrill();
+          } else {
+            console.warn("[UiPlaneButton] startTargetDrill method not found");
+          }
+          break;
+        case 4:
+          if (gs.startBeamWalk) {
+            gs.startBeamWalk();
+          } else {
+            console.warn("[UiPlaneButton] startBeamWalk method not found");
+          }
+          break;
+        case 5:
+          if (gs.startBallDrill) {
+            gs.startBallDrill();
+          } else {
+            console.warn("[UiPlaneButton] startBallDrill method not found");
+          }
+          break;
+        case 6:
+          if (gs.stopDrills) {
+            gs.stopDrills();
+          } else {
+            console.warn("[UiPlaneButton] stopDrills method not found");
+          }
+          break;
+        case 7:
+          if (gs.showReport) {
+            gs.showReport();
+          } else {
+            console.warn("[UiPlaneButton] showReport method not found");
+          }
+          break;
+        default:
+          console.warn(`[UiPlaneButton] Unknown action: ${this.action}`);
       }
     }
   };
-  __publicField(UIPlaneEnvTennisButton, "TypeName", "ui-plane-env-tennis-button");
-  __publicField(UIPlaneEnvTennisButton, "Properties", {
-    managerObject: Property.object()
-    // Reference to the Manager object (with game-selector)
+  __publicField(UiPlaneButton, "TypeName", "ui-plane-button");
+  __publicField(UiPlaneButton, "Properties", {
+    action: Property.enum(
+      [
+        "Tennis Environment",
+        "Football Environment",
+        "Gym Environment",
+        "Start Target Drill",
+        "Start Beam Walk",
+        "Start Ball Catching",
+        "Stop All Drills",
+        "Show Report"
+      ],
+      "Tennis Environment"
+    ),
+    debugMode: Property.bool(true),
+    autoStartBeamDrill: Property.bool(false)
   });
 
   // cache/project/js/_editor_index.js
@@ -13092,5 +13385,5 @@
   _registerEditor(head_bob_exports);
   _registerEditor(target_collision_exports);
   _registerEditor(target_manager_exports);
-  _registerEditor(ui_plane_env_tennis_button_exports);
+  _registerEditor(ui_plane_button_exports);
 })();

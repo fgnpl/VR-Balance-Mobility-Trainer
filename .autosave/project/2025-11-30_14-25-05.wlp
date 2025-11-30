@@ -679,18 +679,6 @@
                     }
                 },
                 {
-                    "type": "teleport",
-                    "teleport": {
-                        "floorGroup": 2,
-                        "camRoot": "14",
-                        "cam": "17",
-                        "teleportIndicatorMeshObject": null,
-                        "indicatorYOffset": 0.0099999,
-                        "eyeLeft": "18",
-                        "eyeRight": "19"
-                    }
-                },
-                {
                     "type": "vr-mode-active-switch"
                 }
             ],
@@ -1466,18 +1454,6 @@
                     }
                 },
                 {
-                    "type": "teleport",
-                    "teleport": {
-                        "floorGroup": 2,
-                        "camRoot": "14",
-                        "cam": "17",
-                        "teleportIndicatorMeshObject": null,
-                        "indicatorYOffset": 0.0099999,
-                        "eyeLeft": "18",
-                        "eyeRight": "19"
-                    }
-                },
-                {
                     "type": "vr-mode-active-switch"
                 }
             ],
@@ -1565,13 +1541,13 @@
             ]
         },
         "27": {
-            "name": "TargetSphere",
+            "name": "ballPreFab",
             "components": [
                 {
                     "type": "mesh",
                     "mesh": {
                         "mesh": "9",
-                        "material": "22"
+                        "material": "25"
                     },
                     "active": true
                 },
@@ -1585,9 +1561,9 @@
                     "active": true
                 },
                 {
-                    "type": "target-collision",
-                    "target-collision": {
-                        "manager": "234"
+                    "type": "ball-collision",
+                    "ball-collision": {
+                        "thrower": "351"
                     }
                 }
             ],
@@ -1599,7 +1575,7 @@
             "translation": [
                 0.0,
                 3.875,
-                0.9792991
+                -8.9708213
             ],
             "rotation": [
                 0.0,
@@ -1640,7 +1616,8 @@
                         "playerObject": "237",
                         "startPosition": "349",
                         "endPosition": "350",
-                        "dataManager": "234"
+                        "dataManager": "234",
+                        "statsText": "374"
                     }
                 },
                 {
@@ -1649,7 +1626,8 @@
                         "spherePrefab": "27",
                         "useColorMode": true,
                         "dataManager": "234",
-                        "uiCueText": "346"
+                        "uiCueText": "346",
+                        "statsText": "375"
                     }
                 }
             ]
@@ -2379,11 +2357,6 @@
             },
             "parent": "335"
         },
-        "337": {
-            "name": "EnvironmentManager",
-            "parent": "235",
-            "components": []
-        },
         "342": {
             "link": {
                 "name": "Sketchfab_model",
@@ -2406,17 +2379,7 @@
                 0.7071111
             ],
             "name": "Beam",
-            "components": [
-                {
-                    "type": "beam-walk-manager",
-                    "beam-walk-manager": {
-                        "playerObject": null,
-                        "beamWidth": 33.0,
-                        "startPosition": null,
-                        "endPosition": null
-                    }
-                }
-            ]
+            "components": []
         },
         "343": {
             "link": {
@@ -2459,9 +2422,9 @@
             "name": "BeamStart",
             "parent": "342",
             "translation": [
-                1645.2108154,
-                501.6091003,
-                -72.7650604
+                1645.1994628,
+                501.6088562,
+                109.7900009
             ],
             "rotation": [
                 0.0,
@@ -2479,9 +2442,9 @@
             "name": "BeamEnd",
             "parent": "342",
             "translation": [
-                1645.192749,
-                -533.1409912,
-                -72.7661895
+                1645.1826171,
+                -533.1333007,
+                125.2099304
             ],
             "rotation": [
                 0.0,
@@ -2552,8 +2515,8 @@
             "name": "ballThrower",
             "translation": [
                 0.0,
-                -1.4901161193847656e-8,
-                0.0
+                4.374897,
+                -10.7906332
             ],
             "rotation": [
                 0.0,
@@ -2565,6 +2528,794 @@
                 1.0,
                 1.0,
                 1.0
+            ],
+            "components": [
+                {
+                    "type": "ball-thrower",
+                    "ball-thrower": {
+                        "playerObject": "237",
+                        "dataManager": "234",
+                        "ballPrefab": "27"
+                    }
+                }
+            ]
+        },
+        "352": {
+            "name": "TargetSphere",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "22"
+                    },
+                    "active": true
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.2
+                        }
+                    },
+                    "active": true
+                },
+                {
+                    "type": "target-collision",
+                    "target-collision": {
+                        "manager": "234"
+                    }
+                }
+            ],
+            "scaling": [
+                0.2,
+                0.2,
+                0.2
+            ],
+            "translation": [
+                0.0,
+                3.875,
+                0.9792991
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "337": {
+            "name": "UIPANEL",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "128",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -3.4199771,
+                4.2041521,
+                -3.3919343
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "353": {
+            "name": "button-start-target",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Target Drill",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                0.7052774,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "354": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Target"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "353"
+        },
+        "358": {
+            "name": "button-start-beam",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Beam Walk",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false,
+                        "autoStartBeamDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                0.4711279,
+                0.7052774,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "359": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Beam"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "358"
+        },
+        "360": {
+            "name": "button-start-ball",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Ball Catching",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                0.4395904,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "361": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Ball"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "360"
+        },
+        "362": {
+            "name": "button-stop-drills",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Stop All Drills",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                0.4711279,
+                0.4395904,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "363": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Stop"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "362"
+        },
+        "364": {
+            "name": "button-show-report",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Show Report",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                0.1827082,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "365": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Show Report"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "364"
+        },
+        "368": {
+            "name": "button-env-football",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Football Environment",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4509174,
+                -0.3062176,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "369": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Football"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "368"
+        },
+        "370": {
+            "name": "button-env-tennis",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "debugMode": true,
+                        "triggerDistance": 5.0
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4427149,
+                -0.5621829,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "371": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Tennis"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "370"
+        },
+        "372": {
+            "name": "button-env-gym",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Gym Environment",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4427149,
+                -0.8061275,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "373": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Gym"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "372"
+        },
+        "375": {
+            "name": "uiStats",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Wonderland Engine 2"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                10.5919246,
+                -16.4906978
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                10.3000001,
+                10.3000001,
+                10.3000001
+            ]
+        },
+        "374": {
+            "name": "beamStatistics",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "text"
+                }
+            ],
+            "translation": [
+                16.2816524,
+                6.2210907,
+                10.3678998
+            ],
+            "rotation": [
+                0.0,
+                0.9989582,
+                0.0,
+                0.0456341
+            ],
+            "scaling": [
+                8.8999996,
+                8.9000291,
+                8.8999996
             ]
         }
     },
@@ -3201,16 +3952,16 @@
             },
             "Text": {
                 "effectColor": [
-                    1.0,
-                    1.0,
-                    1.0,
+                    0.8470588,
+                    0.6975778,
+                    0.0,
                     1.0
                 ],
                 "font": "230",
                 "color": [
-                    0.0,
-                    0.0,
-                    0.0,
+                    1.0,
+                    1.0,
+                    1.0,
                     1.0
                 ]
             }
