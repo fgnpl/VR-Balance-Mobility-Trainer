@@ -13362,6 +13362,9 @@ Active: ${this.activeTargets.length}`;
     autoStartBeamDrill: Property.bool(false)
   });
 
+  // js/ui-plane-env-tennis-button.js
+  var ui_plane_env_tennis_button_exports = {};
+
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
@@ -13386,4 +13389,5 @@ Active: ${this.activeTargets.length}`;
   _registerEditor(target_collision_exports);
   _registerEditor(target_manager_exports);
   _registerEditor(ui_plane_button_exports);
+  _registerEditor(ui_plane_env_tennis_button_exports);
 })();
