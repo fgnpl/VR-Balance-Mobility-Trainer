@@ -8113,25 +8113,85 @@ __publicField(BeamWalkManager, "Properties", {
   // Radius around end point to count as success
 });
 
-// js/controller-hit.js
+// js/collision-debug.js
 import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
-var ControllerHit = class extends Component32 {
+var CollisionDebug = class extends Component32 {
+  start() {
+    console.log(`[${this.logName}] Collision debug active on:`, this.object.name);
+    const collision = this.object.getComponent("collision");
+    if (!collision) {
+      console.error(`[${this.logName}] \u274C NO COLLISION COMPONENT on ${this.object.name}!`);
+      console.error(`[${this.logName}] Add a 'collision' component in the editor for physics to work!`);
+    } else {
+      console.log(`[${this.logName}] \u2705 Collision component found`);
+      console.log(`[${this.logName}] Collision settings:`, {
+        collider: collision.collider,
+        group: collision.group,
+        extents: collision.extents
+      });
+    }
+    console.log(`[${this.logName}] Components on ${this.object.name}:`);
+    const components = this.object.getComponents();
+    components.forEach((comp) => {
+      console.log(`  - ${comp.type}`);
+    });
+  }
   onCollisionEnter(other) {
-    if (other.object.hasComponent("target-collision")) {
-      console.log(`${this.hand} hand hit a target!`);
+    if (!this.showEnter)
+      return;
+    console.log(`[${this.logName}] \u{1F534} COLLISION ENTER!`);
+    console.log(`  This object: ${this.object.name}`);
+    console.log(`  Other object: ${other.object?.name || "unknown"}`);
+    console.log(`  Other components:`, other.object?.getComponents().map((c) => c.type));
+  }
+  onCollisionExit(other) {
+    if (!this.showExit)
+      return;
+    console.log(`[${this.logName}] \u{1F535} COLLISION EXIT`);
+    console.log(`  This object: ${this.object.name}`);
+    console.log(`  Other object: ${other.object?.name || "unknown"}`);
+  }
+};
+__publicField(CollisionDebug, "TypeName", "collision-debug");
+__publicField(CollisionDebug, "Properties", {
+  logName: Property5.string("CollisionDebug"),
+  showEnter: Property5.bool(true),
+  showExit: Property5.bool(false)
+});
+
+// js/controller-hit.js
+import { Component as Component33, Property as Property6 } from "@wonderlandengine/api";
+var ControllerHit = class extends Component33 {
+  start() {
+    console.log(`[ControllerHit] ${this.hand} controller initialized`);
+    const collision = this.object.getComponent("collision");
+    if (!collision) {
+      console.error(`[ControllerHit] \u274C ${this.hand} controller has NO collision component!`);
+      console.error(`[ControllerHit] Add 'collision' component in editor for hits to work!`);
+    } else {
+      console.log(`[ControllerHit] \u2705 ${this.hand} controller has collision component`);
+    }
+  }
+  onCollisionEnter(other) {
+    console.log(`[ControllerHit] \u{1F535} ${this.hand} collision DETECTED with:`, other.object?.name);
+    console.log(`[ControllerHit] Other object has target-collision?`, other.object?.hasComponent("target-collision"));
+    if (other.object && other.object.hasComponent("target-collision")) {
+      console.log(`[ControllerHit] \u{1F3AF} ${this.hand} hand hit a target!`);
       other.object.getComponent("target-collision").onHit(this.object);
+    } else {
+      console.log(`[ControllerHit] ${this.hand} hit non-target object`);
     }
   }
 };
 __publicField(ControllerHit, "TypeName", "controller-hit");
 /* Properties that are configurable in the editor */
 __publicField(ControllerHit, "Properties", {
-  hand: Property5.string("right")
+  hand: Property6.string("right")
 });
 
 // js/data-manager.js
-import { Component as Component33 } from "@wonderlandengine/api";
-var DataManager = class extends Component33 {
+import { Component as Component34 } from "@wonderlandengine/api";
+var DataManager = class extends Component34 {
   start() {
     this.resetSession();
   }
@@ -8195,8 +8255,8 @@ var DataManager = class extends Component33 {
 __publicField(DataManager, "TypeName", "data-manager");
 
 // js/game-selector.js
-import { Component as Component34, Property as Property6 } from "@wonderlandengine/api";
-var GameSelector = class extends Component34 {
+import { Component as Component35, Property as Property7 } from "@wonderlandengine/api";
+var GameSelector = class extends Component35 {
   start() {
     this.currentDrill = null;
     this._lastStatus = "";
@@ -8369,22 +8429,22 @@ var GameSelector = class extends Component34 {
 __publicField(GameSelector, "TypeName", "game-selector");
 __publicField(GameSelector, "Properties", {
   // Environment parents
-  footballField: Property6.object(),
-  tennisCourt: Property6.object(),
-  gymFloor: Property6.object(),
-  defaultEnvironment: Property6.enum(["football", "tennis", "gym"], "football"),
+  footballField: Property7.object(),
+  tennisCourt: Property7.object(),
+  gymFloor: Property7.object(),
+  defaultEnvironment: Property7.enum(["football", "tennis", "gym"], "football"),
   // Drill managers
-  targetManager: Property6.object(),
-  beamWalkManager: Property6.object(),
-  ballThrower: Property6.object(),
-  dataManager: Property6.object(),
+  targetManager: Property7.object(),
+  beamWalkManager: Property7.object(),
+  ballThrower: Property7.object(),
+  dataManager: Property7.object(),
   // UI elements
-  uiStatusText: Property6.object()
+  uiStatusText: Property7.object()
 });
 
 // js/head-bob.js
-import { Component as Component35, Object as Object2, Property as Property7 } from "@wonderlandengine/api";
-var HeadBob = class extends Component35 {
+import { Component as Component36, Object as Object2, Property as Property8 } from "@wonderlandengine/api";
+var HeadBob = class extends Component36 {
   start() {
     this.initialLocalPosition = vec3_exports.create();
     this.object.getTranslationLocal(this.initialLocalPosition);
@@ -8423,50 +8483,72 @@ var HeadBob = class extends Component35 {
 __publicField(HeadBob, "TypeName", "head-bob");
 __publicField(HeadBob, "Properties", {
   /** The Player object that has the wasd-controls component */
-  playerObject: Property7.object(),
+  playerObject: Property8.object(),
   /** How fast the bobbing effect is (e.g., 10.0) */
-  bobFrequency: Property7.float(10),
+  bobFrequency: Property8.float(10),
   /** How much the camera bobs up and down (e.g., 0.03) */
-  bobAmount: Property7.float(0.03),
+  bobAmount: Property8.float(0.03),
   /** A small value to ignore tiny movements and stop bobbing */
-  epsilon: Property7.float(1e-3)
+  epsilon: Property8.float(1e-3)
 });
 
 // js/target-collision.js
-import { Component as Component36, Property as Property8 } from "@wonderlandengine/api";
-var TargetCollision = class extends Component36 {
+import { Component as Component37, Property as Property9 } from "@wonderlandengine/api";
+var TargetCollision = class extends Component37 {
   start() {
     this.hit = false;
     if (!this.object.startTime)
       this.object.startTime = performance.now();
+    console.log("[TargetCollision] Initialized on:", this.object.name);
+    const collision = this.object.getComponent("collision");
+    if (!collision) {
+      console.error("[TargetCollision] \u274C Target has NO collision component!");
+    } else {
+      console.log("[TargetCollision] \u2705 Target has collision component");
+    }
   }
   // Called by ControllerHit OR direct collision events if enabled
   onHit(controllerObject) {
-    if (this.hit)
+    console.log("[TargetCollision] onHit called! hit:", this.hit);
+    if (this.hit) {
+      console.log("[TargetCollision] Already hit, ignoring");
       return;
+    }
     this.hit = true;
     const reactionTime = (performance.now() - this.object.startTime) / 1e3;
-    this.manager?.onTargetHit(this.object, reactionTime);
+    console.log("[TargetCollision] Registering hit with manager, RT:", reactionTime);
+    if (!this.manager) {
+      console.error("[TargetCollision] \u274C No manager set!");
+      return;
+    }
+    this.manager.onTargetHit(this.object, reactionTime);
   }
   // Optional direct collision handling (if controller objects collide with sphere)
   onCollisionEnter(other) {
-    if (this.hit)
+    console.log("[TargetCollision] onCollisionEnter with:", other.object?.name);
+    if (this.hit) {
+      console.log("[TargetCollision] Already hit");
       return;
+    }
     const name = other.object?.name || "";
-    if (name.startsWith("Controller")) {
+    console.log("[TargetCollision] Checking if controller:", name);
+    if (name.includes("Controller") || name.includes("controller")) {
+      console.log("[TargetCollision] \u{1F3AF} Controller collision detected!");
       this.onHit(other.object);
+    } else {
+      console.log("[TargetCollision] Not a controller");
     }
   }
 };
 __publicField(TargetCollision, "TypeName", "target-collision");
 __publicField(TargetCollision, "Properties", {
-  manager: Property8.object()
+  manager: Property9.object()
 });
 
 // js/target-manager.js
-import { Component as Component37, Property as Property9 } from "@wonderlandengine/api";
+import { Component as Component38, Property as Property10 } from "@wonderlandengine/api";
 console.log("target-manager.js loaded");
-var TargetManager = class extends Component37 {
+var TargetManager = class extends Component38 {
   start() {
     this.hitCount = 0;
     this.missCount = 0;
@@ -8487,10 +8569,32 @@ var TargetManager = class extends Component37 {
       "Green:",
       this.greenMaterialId
     );
-    this.updateStats();
-    for (let i = 0; i < this.simultaneousTargets; i++) {
-      this.spawnTarget();
+    console.log("[TargetManager] simultaneousTargets:", this.simultaneousTargets);
+    if (this.spawnZone) {
+      this._calculateSpawnZone();
+    } else {
+      console.warn("[TargetManager] No spawn zone set - using default curved area");
     }
+    this.updateStats();
+    console.log("[TargetManager] Initialized - waiting for startGame()");
+  }
+  _calculateSpawnZone() {
+    const mesh = this.spawnZone.getComponent("mesh");
+    if (!mesh) {
+      console.error("[TargetManager] Spawn zone has no mesh component!");
+      return;
+    }
+    const pos = this.spawnZone.getPositionWorld();
+    const scale6 = this.spawnZone.getScalingWorld();
+    this.spawnBounds = {
+      minX: pos[0] - scale6[0] / 2,
+      maxX: pos[0] + scale6[0] / 2,
+      minY: pos[1] - scale6[1] / 2,
+      maxY: pos[1] + scale6[1] / 2,
+      minZ: pos[2] - scale6[2] / 2,
+      maxZ: pos[2] + scale6[2] / 2
+    };
+    console.log("[TargetManager] Spawn zone calculated:", this.spawnBounds);
   }
   updateStats() {
     if (!this.statsText)
@@ -8516,10 +8620,18 @@ Active: ${this.activeTargets.length}`;
     const sphere = this.spherePrefab.clone(this.object);
     sphere.active = true;
     this.activeTargets.push(sphere);
-    const x = (Math.random() - 0.5) * 7.5;
-    const y = 1.5 + Math.random() * 2.5;
-    const z = 2 + Math.pow(x, 2) / 2;
-    console.log("Target position:", x, y, z);
+    let x, y, z;
+    if (this.spawnBounds) {
+      x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
+      y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
+      z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
+      console.log("[TargetManager] Spawning in zone:", x, y, z);
+    } else {
+      x = (Math.random() - 0.5) * 7.5;
+      y = 1.5 + Math.random() * 2.5;
+      z = 2 + Math.pow(x, 2) / 2;
+      console.log("[TargetManager] Spawning (no zone):", x, y, z);
+    }
     sphere.setPositionWorld([x, y, z]);
     sphere.startTime = performance.now();
     if (this.useColorMode) {
@@ -8553,13 +8665,33 @@ Active: ${this.activeTargets.length}`;
     const ballCollision = sphere.getComponent("ball-collision");
     if (ballCollision) {
       console.log("[TargetManager] Removing ball-collision from target sphere (not needed for target drill)");
-      sphere.removeComponent(ballCollision);
+      ballCollision.destroy();
+    }
+    let collision = sphere.getComponent("collision");
+    if (!collision) {
+      console.warn("[TargetManager] \u26A0\uFE0F Target has no collision component! Adding one...");
+      collision = sphere.addComponent("collision", {
+        collider: 2,
+        // Sphere collider
+        extents: [0.15, 0.15, 0.15],
+        group: 2
+      });
+    } else {
+      console.log("[TargetManager] \u2705 Target has collision component");
+      console.log("[TargetManager] Collision settings:", {
+        group: collision.group,
+        collider: collision.collider,
+        extents: collision.extents
+      });
     }
     let tc = sphere.getComponent("target-collision");
-    if (!tc)
+    if (!tc) {
+      console.log("[TargetManager] Adding target-collision component");
       tc = sphere.addComponent("target-collision");
+    }
     tc.manager = this;
-    console.log("Spawned at:", sphere.getPositionWorld());
+    console.log("[TargetManager] Target spawned at:", sphere.getPositionWorld());
+    console.log("[TargetManager] Active targets:", this.activeTargets.length, "/", this.simultaneousTargets);
     sphere.timeoutId = setTimeout(() => {
       this.onTargetTimeout(sphere);
     }, this.targetLifetime * 1e3);
@@ -8630,28 +8762,30 @@ Active: ${this.activeTargets.length}`;
 __publicField(TargetManager, "TypeName", "target-manager");
 /* Properties that are configurable in the editor */
 __publicField(TargetManager, "Properties", {
-  spherePrefab: Property9.object(),
-  maxTargets: Property9.int(20),
-  spawnInterval: Property9.float(1),
+  spherePrefab: Property10.object(),
+  spawnZone: Property10.object(),
+  // Optional: Cube mesh object to define spawn boundaries
+  maxTargets: Property10.int(20),
+  spawnInterval: Property10.float(1),
   // seconds
-  useColorMode: Property9.bool(false),
-  uiCueText: Property9.object(),
-  dataManager: Property9.object(),
-  targetLifetime: Property9.float(1),
+  useColorMode: Property10.bool(false),
+  uiCueText: Property10.object(),
+  dataManager: Property10.object(),
+  targetLifetime: Property10.float(1),
   // seconds - auto-respawn if not hit
-  simultaneousTargets: Property9.int(1),
+  simultaneousTargets: Property10.int(1),
   // number of targets to spawn at once
-  statsText: Property9.object(),
+  statsText: Property10.object(),
   // Text component to display stats
   // Material IDs - set these in the editor to match your scene materials
-  yellowMaterialId: Property9.int(25),
-  pinkMaterialId: Property9.int(22),
-  greenMaterialId: Property9.int(26)
+  yellowMaterialId: Property10.int(25),
+  pinkMaterialId: Property10.int(22),
+  greenMaterialId: Property10.int(26)
 });
 
 // js/ui-plane-button.js
-import { Component as Component38, Property as Property10 } from "@wonderlandengine/api";
-var UiPlaneButton = class extends Component38 {
+import { Component as Component39, Property as Property11 } from "@wonderlandengine/api";
+var UiPlaneButton = class extends Component39 {
   start() {
     if (this.autoStartBeamDrill) {
       console.log("[UiPlaneButton] Auto-starting beam drill in 3 seconds...");
@@ -8774,7 +8908,7 @@ var UiPlaneButton = class extends Component38 {
 };
 __publicField(UiPlaneButton, "TypeName", "ui-plane-button");
 __publicField(UiPlaneButton, "Properties", {
-  action: Property10.enum(
+  action: Property11.enum(
     [
       "Tennis Environment",
       "Football Environment",
@@ -8787,8 +8921,8 @@ __publicField(UiPlaneButton, "Properties", {
     ],
     "Tennis Environment"
   ),
-  debugMode: Property10.bool(true),
-  autoStartBeamDrill: Property10.bool(false)
+  debugMode: Property11.bool(true),
+  autoStartBeamDrill: Property11.bool(false)
 });
 
 // js/index.js
@@ -8805,6 +8939,7 @@ function js_default(engine) {
   engine.registerComponent(BallCollision);
   engine.registerComponent(BallThrower);
   engine.registerComponent(BeamWalkManager);
+  engine.registerComponent(CollisionDebug);
   engine.registerComponent(ControllerHit);
   engine.registerComponent(DataManager);
   engine.registerComponent(GameSelector);

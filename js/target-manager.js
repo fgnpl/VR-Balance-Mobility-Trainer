@@ -11,6 +11,7 @@ export class TargetManager extends Component {
     /* Properties that are configurable in the editor */
     static Properties = {
         spherePrefab: Property.object(),
+        spawnZone: Property.object(), // Optional: Cube mesh object to define spawn boundaries
         maxTargets: Property.int(20),
         spawnInterval: Property.float(1.0), // seconds
         useColorMode: Property.bool(false),
@@ -43,14 +44,45 @@ export class TargetManager extends Component {
         // Log material IDs for debugging
         console.log('[TargetManager] Material IDs - Yellow:', this.yellowMaterialId, 
                     'Pink:', this.pinkMaterialId, 'Green:', this.greenMaterialId);
+        console.log('[TargetManager] simultaneousTargets:', this.simultaneousTargets);
+        
+        // Calculate spawn zone if provided
+        if (this.spawnZone) {
+            this._calculateSpawnZone();
+        } else {
+            console.warn('[TargetManager] No spawn zone set - using default curved area');
+        }
         
         // Update initial stats
         this.updateStats();
         
-        // Spawn initial batch of targets
-        for (let i = 0; i < this.simultaneousTargets; i++) {
-            this.spawnTarget();
+        // DON'T spawn targets here - wait for startGame() to be called
+        console.log('[TargetManager] Initialized - waiting for startGame()');
+    }
+    
+    _calculateSpawnZone() {
+        // Get the spawn zone mesh dimensions
+        const mesh = this.spawnZone.getComponent('mesh');
+        if (!mesh) {
+            console.error('[TargetManager] Spawn zone has no mesh component!');
+            return;
         }
+        
+        // Get world position and scale
+        const pos = this.spawnZone.getPositionWorld();
+        const scale = this.spawnZone.getScalingWorld();
+        
+        // Store spawn boundaries (assuming unit cube centered at origin)
+        this.spawnBounds = {
+            minX: pos[0] - scale[0] / 2,
+            maxX: pos[0] + scale[0] / 2,
+            minY: pos[1] - scale[1] / 2,
+            maxY: pos[1] + scale[1] / 2,
+            minZ: pos[2] - scale[2] / 2,
+            maxZ: pos[2] + scale[2] / 2
+        };
+        
+        console.log('[TargetManager] Spawn zone calculated:', this.spawnBounds);
     }
 
     updateStats() {
@@ -91,12 +123,22 @@ Active: ${this.activeTargets.length}`;
         // Add to active targets array
         this.activeTargets.push(sphere);
 
-        // Random position on curved rectangular surface - 5x bigger spawn area
-        const x = (Math.random() - 0.5) * 7.5; // 1.5 * 5 = 7.5
-        const y = 1.5 + Math.random() * 2.5; // 0.5 * 5 = 2.5
-        const z = 2.0 + (Math.pow(x, 2) / 2); // Positive Z, in front of player
-
-        console.log("Target position:", x, y, z); 
+        // Calculate spawn position
+        let x, y, z;
+        
+        if (this.spawnBounds) {
+            // Spawn within the defined cube zone
+            x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
+            y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
+            z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
+            console.log('[TargetManager] Spawning in zone:', x, y, z);
+        } else {
+            // Fallback: Random position on curved rectangular surface
+            x = (Math.random() - 0.5) * 7.5; // 1.5 * 5 = 7.5
+            y = 1.5 + Math.random() * 2.5; // 0.5 * 5 = 2.5
+            z = 2.0 + (Math.pow(x, 2) / 2); // Positive Z, in front of player
+            console.log('[TargetManager] Spawning (no zone):', x, y, z);
+        }
 
         sphere.setPositionWorld([x, y, z]);
         sphere.startTime = performance.now();
@@ -137,14 +179,37 @@ Active: ${this.activeTargets.length}`;
         const ballCollision = sphere.getComponent('ball-collision');
         if (ballCollision) {
             console.log('[TargetManager] Removing ball-collision from target sphere (not needed for target drill)');
-            sphere.removeComponent(ballCollision);
+            ballCollision.destroy();
+        }
+        
+        // Ensure collision component exists on the sphere
+        let collision = sphere.getComponent('collision');
+        if (!collision) {
+            console.warn('[TargetManager] ⚠️ Target has no collision component! Adding one...');
+            collision = sphere.addComponent('collision', {
+                collider: 2, // Sphere collider
+                extents: [0.15, 0.15, 0.15],
+                group: 2
+            });
+        } else {
+            console.log('[TargetManager] ✅ Target has collision component');
+            console.log('[TargetManager] Collision settings:', {
+                group: collision.group,
+                collider: collision.collider,
+                extents: collision.extents
+            });
         }
         
         // Attach / reuse target-collision component (this is what targets need)
         let tc = sphere.getComponent('target-collision');
-        if (!tc) tc = sphere.addComponent('target-collision');
+        if (!tc) {
+            console.log('[TargetManager] Adding target-collision component');
+            tc = sphere.addComponent('target-collision');
+        }
         tc.manager = this;
-        console.log("Spawned at:", sphere.getPositionWorld());
+        
+        console.log('[TargetManager] Target spawned at:', sphere.getPositionWorld());
+        console.log('[TargetManager] Active targets:', this.activeTargets.length, '/', this.simultaneousTargets);
 
         // Auto-respawn if not hit within targetLifetime
         sphere.timeoutId = setTimeout(() => {

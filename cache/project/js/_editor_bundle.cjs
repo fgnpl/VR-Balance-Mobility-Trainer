@@ -12703,10 +12703,24 @@ Avg Dev: ${avgDev}m`;
     ControllerHit: () => ControllerHit
   });
   var ControllerHit = class extends Component3 {
+    start() {
+      console.log(`[ControllerHit] ${this.hand} controller initialized`);
+      const collision = this.object.getComponent("collision");
+      if (!collision) {
+        console.error(`[ControllerHit] \u274C ${this.hand} controller has NO collision component!`);
+        console.error(`[ControllerHit] Add 'collision' component in editor for hits to work!`);
+      } else {
+        console.log(`[ControllerHit] \u2705 ${this.hand} controller has collision component`);
+      }
+    }
     onCollisionEnter(other) {
-      if (other.object.hasComponent("target-collision")) {
-        console.log(`${this.hand} hand hit a target!`);
+      console.log(`[ControllerHit] \u{1F535} ${this.hand} collision DETECTED with:`, other.object?.name);
+      console.log(`[ControllerHit] Other object has target-collision?`, other.object?.hasComponent("target-collision"));
+      if (other.object && other.object.hasComponent("target-collision")) {
+        console.log(`[ControllerHit] \u{1F3AF} ${this.hand} hand hit a target!`);
         other.object.getComponent("target-collision").onHit(this.object);
+      } else {
+        console.log(`[ControllerHit] ${this.hand} hit non-target object`);
       }
     }
   };
@@ -13261,22 +13275,44 @@ Checking ray mesh hierarchy:`);
       this.hit = false;
       if (!this.object.startTime)
         this.object.startTime = performance.now();
+      console.log("[TargetCollision] Initialized on:", this.object.name);
+      const collision = this.object.getComponent("collision");
+      if (!collision) {
+        console.error("[TargetCollision] \u274C Target has NO collision component!");
+      } else {
+        console.log("[TargetCollision] \u2705 Target has collision component");
+      }
     }
     // Called by ControllerHit OR direct collision events if enabled
     onHit(controllerObject) {
-      if (this.hit)
+      console.log("[TargetCollision] onHit called! hit:", this.hit);
+      if (this.hit) {
+        console.log("[TargetCollision] Already hit, ignoring");
         return;
+      }
       this.hit = true;
       const reactionTime = (performance.now() - this.object.startTime) / 1e3;
-      this.manager?.onTargetHit(this.object, reactionTime);
+      console.log("[TargetCollision] Registering hit with manager, RT:", reactionTime);
+      if (!this.manager) {
+        console.error("[TargetCollision] \u274C No manager set!");
+        return;
+      }
+      this.manager.onTargetHit(this.object, reactionTime);
     }
     // Optional direct collision handling (if controller objects collide with sphere)
     onCollisionEnter(other) {
-      if (this.hit)
+      console.log("[TargetCollision] onCollisionEnter with:", other.object?.name);
+      if (this.hit) {
+        console.log("[TargetCollision] Already hit");
         return;
+      }
       const name = other.object?.name || "";
-      if (name.startsWith("Controller")) {
+      console.log("[TargetCollision] Checking if controller:", name);
+      if (name.includes("Controller") || name.includes("controller")) {
+        console.log("[TargetCollision] \u{1F3AF} Controller collision detected!");
         this.onHit(other.object);
+      } else {
+        console.log("[TargetCollision] Not a controller");
       }
     }
   };
@@ -13312,10 +13348,32 @@ Checking ray mesh hierarchy:`);
         "Green:",
         this.greenMaterialId
       );
-      this.updateStats();
-      for (let i = 0; i < this.simultaneousTargets; i++) {
-        this.spawnTarget();
+      console.log("[TargetManager] simultaneousTargets:", this.simultaneousTargets);
+      if (this.spawnZone) {
+        this._calculateSpawnZone();
+      } else {
+        console.warn("[TargetManager] No spawn zone set - using default curved area");
       }
+      this.updateStats();
+      console.log("[TargetManager] Initialized - waiting for startGame()");
+    }
+    _calculateSpawnZone() {
+      const mesh = this.spawnZone.getComponent("mesh");
+      if (!mesh) {
+        console.error("[TargetManager] Spawn zone has no mesh component!");
+        return;
+      }
+      const pos = this.spawnZone.getPositionWorld();
+      const scale6 = this.spawnZone.getScalingWorld();
+      this.spawnBounds = {
+        minX: pos[0] - scale6[0] / 2,
+        maxX: pos[0] + scale6[0] / 2,
+        minY: pos[1] - scale6[1] / 2,
+        maxY: pos[1] + scale6[1] / 2,
+        minZ: pos[2] - scale6[2] / 2,
+        maxZ: pos[2] + scale6[2] / 2
+      };
+      console.log("[TargetManager] Spawn zone calculated:", this.spawnBounds);
     }
     updateStats() {
       if (!this.statsText)
@@ -13341,10 +13399,18 @@ Active: ${this.activeTargets.length}`;
       const sphere = this.spherePrefab.clone(this.object);
       sphere.active = true;
       this.activeTargets.push(sphere);
-      const x = (Math.random() - 0.5) * 7.5;
-      const y = 1.5 + Math.random() * 2.5;
-      const z = 2 + Math.pow(x, 2) / 2;
-      console.log("Target position:", x, y, z);
+      let x, y, z;
+      if (this.spawnBounds) {
+        x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
+        y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
+        z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
+        console.log("[TargetManager] Spawning in zone:", x, y, z);
+      } else {
+        x = (Math.random() - 0.5) * 7.5;
+        y = 1.5 + Math.random() * 2.5;
+        z = 2 + Math.pow(x, 2) / 2;
+        console.log("[TargetManager] Spawning (no zone):", x, y, z);
+      }
       sphere.setPositionWorld([x, y, z]);
       sphere.startTime = performance.now();
       if (this.useColorMode) {
@@ -13378,13 +13444,33 @@ Active: ${this.activeTargets.length}`;
       const ballCollision = sphere.getComponent("ball-collision");
       if (ballCollision) {
         console.log("[TargetManager] Removing ball-collision from target sphere (not needed for target drill)");
-        sphere.removeComponent(ballCollision);
+        ballCollision.destroy();
+      }
+      let collision = sphere.getComponent("collision");
+      if (!collision) {
+        console.warn("[TargetManager] \u26A0\uFE0F Target has no collision component! Adding one...");
+        collision = sphere.addComponent("collision", {
+          collider: 2,
+          // Sphere collider
+          extents: [0.15, 0.15, 0.15],
+          group: 2
+        });
+      } else {
+        console.log("[TargetManager] \u2705 Target has collision component");
+        console.log("[TargetManager] Collision settings:", {
+          group: collision.group,
+          collider: collision.collider,
+          extents: collision.extents
+        });
       }
       let tc = sphere.getComponent("target-collision");
-      if (!tc)
+      if (!tc) {
+        console.log("[TargetManager] Adding target-collision component");
         tc = sphere.addComponent("target-collision");
+      }
       tc.manager = this;
-      console.log("Spawned at:", sphere.getPositionWorld());
+      console.log("[TargetManager] Target spawned at:", sphere.getPositionWorld());
+      console.log("[TargetManager] Active targets:", this.activeTargets.length, "/", this.simultaneousTargets);
       sphere.timeoutId = setTimeout(() => {
         this.onTargetTimeout(sphere);
       }, this.targetLifetime * 1e3);
@@ -13456,6 +13542,8 @@ Active: ${this.activeTargets.length}`;
   /* Properties that are configurable in the editor */
   __publicField(TargetManager, "Properties", {
     spherePrefab: Property.object(),
+    spawnZone: Property.object(),
+    // Optional: Cube mesh object to define spawn boundaries
     maxTargets: Property.int(20),
     spawnInterval: Property.float(1),
     // seconds

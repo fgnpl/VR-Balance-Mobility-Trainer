@@ -733,6 +733,12 @@
                             "radius": 0.15
                         }
                     }
+                },
+                {
+                    "type": "collision-debug",
+                    "collision-debug": {
+                        "showExit": true
+                    }
                 }
             ],
             "translation": [
@@ -786,6 +792,12 @@
                         "sphere": {
                             "radius": 0.15
                         }
+                    }
+                },
+                {
+                    "type": "collision-debug",
+                    "collision-debug": {
+                        "showExit": true
                     }
                 }
             ],
@@ -1567,7 +1579,8 @@
                 {
                     "type": "ball-collision",
                     "ball-collision": {
-                        "thrower": "351"
+                        "thrower": "351",
+                        "debugMode": true
                     }
                 }
             ],
@@ -1628,12 +1641,13 @@
                 {
                     "type": "target-manager",
                     "target-manager": {
-                        "spherePrefab": "27",
+                        "spherePrefab": "352",
                         "useColorMode": true,
                         "dataManager": "234",
                         "uiCueText": "346",
                         "statsText": "375",
-                        "simultaneousTargets": 4
+                        "simultaneousTargets": 4,
+                        "spawnZone": "391"
                     }
                 }
             ]
@@ -2539,9 +2553,9 @@
                 {
                     "type": "ball-thrower",
                     "ball-thrower": {
-                        "playerObject": "237",
+                        "playerObject": "14",
                         "dataManager": "234",
-                        "ballPrefab": "352"
+                        "ballPrefab": "27"
                     }
                 }
             ]
@@ -2588,7 +2602,8 @@
                 0.0,
                 0.0,
                 1.0
-            ]
+            ],
+            "hiddenForLightBaking": true
         },
         "337": {
             "name": "UIPANEL",
@@ -3490,6 +3505,35 @@
                 3.3222591
             ],
             "parent": "393"
+        },
+        "391": {
+            "name": "TargetSpawnBox",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "8",
+                        "material": null
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                3.2202551,
+                -0.7451277
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.7,
+                1.7,
+                1.7
+            ]
         }
     },
     "meshes": {

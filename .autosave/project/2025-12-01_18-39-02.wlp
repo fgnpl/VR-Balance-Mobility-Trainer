@@ -733,6 +733,12 @@
                             "radius": 0.15
                         }
                     }
+                },
+                {
+                    "type": "collision-debug",
+                    "collision-debug": {
+                        "showExit": true
+                    }
                 }
             ],
             "translation": [
@@ -786,6 +792,12 @@
                         "sphere": {
                             "radius": 0.15
                         }
+                    }
+                },
+                {
+                    "type": "collision-debug",
+                    "collision-debug": {
+                        "showExit": true
                     }
                 }
             ],
@@ -1567,7 +1579,8 @@
                 {
                     "type": "ball-collision",
                     "ball-collision": {
-                        "thrower": "351"
+                        "thrower": "351",
+                        "debugMode": true
                     }
                 }
             ],
@@ -1617,11 +1630,12 @@
                 {
                     "type": "beam-walk-manager",
                     "beam-walk-manager": {
-                        "playerObject": "237",
+                        "playerObject": "14",
                         "startPosition": "349",
                         "endPosition": "350",
                         "dataManager": "234",
-                        "statsText": "374"
+                        "statsText": "374",
+                        "headObject": "233"
                     }
                 },
                 {
@@ -1631,7 +1645,9 @@
                         "useColorMode": true,
                         "dataManager": "234",
                         "uiCueText": "346",
-                        "statsText": "375"
+                        "statsText": "375",
+                        "simultaneousTargets": 4,
+                        "spawnZone": "391"
                     }
                 }
             ]
@@ -2539,7 +2555,7 @@
                     "ball-thrower": {
                         "playerObject": "237",
                         "dataManager": "234",
-                        "ballPrefab": "27"
+                        "ballPrefab": "352"
                     }
                 }
             ]
@@ -3406,6 +3422,116 @@
                 13.8999996,
                 5.5,
                 4.9
+            ]
+        },
+        "393": {
+            "name": "button-stop-drills",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Stop All Drills",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                1.5,
+                                0.375,
+                                0.1875
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                17.4678344,
+                5.0731863,
+                9.785057
+            ],
+            "rotation": [
+                0.0,
+                1.0,
+                0.0,
+                1.1148004119831967e-7
+            ],
+            "scaling": [
+                1.2009999,
+                0.3024963,
+                0.9014986
+            ]
+        },
+        "394": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Stop"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "393"
+        },
+        "391": {
+            "name": "TargetSpawnBox",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "8",
+                        "material": null
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                3.2202551,
+                -0.7451277
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.7,
+                1.7,
+                1.7
             ]
         }
     },

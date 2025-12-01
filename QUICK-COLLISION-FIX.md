@@ -161,4 +161,10 @@ BeamWalkManager
 
 Build, deploy, and test. Your collisions should now work! 🎉
 
-For detailed explanations, see: **COLLISION-FIXES.md**
+---
+
+## Additional Guides
+
+- **COLLISION-FIXES.md** - Detailed collision troubleshooting
+- **TARGET-SPAWN-FIX.md** - Multiple target spawning & spawn zones
+- **BEAM-TELEPORT-FIX.md** - VR teleportation fix
