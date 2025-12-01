@@ -7904,6 +7904,10 @@ var BeamWalkManager = class extends Component31 {
     this.totalBalanceDuration = 0;
     this.bestDuration = 0;
     this._currentRunStart = 0;
+    if (!this.headObject && this.playerObject) {
+      console.log("[BeamWalk] Searching for head/camera object...");
+      this._findHeadObject(this.playerObject);
+    }
     this.movementData = [];
     this.currentRunNumber = 0;
     this.totalFalls = 0;
@@ -7916,6 +7920,23 @@ var BeamWalkManager = class extends Component31 {
       console.log("[BeamWalk] statsText object found:", this.statsText.name);
       const textComp = this.statsText.getComponent("text");
       console.log("[BeamWalk] text component:", textComp);
+    }
+    if (this.headObject) {
+      console.log("[BeamWalk] Head object set:", this.headObject.name);
+    } else {
+      console.warn("[BeamWalk] No head object - will use playerObject for fall detection (may not work in VR!)");
+    }
+  }
+  _findHeadObject(parent) {
+    const children = parent.children;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      if (child.getComponent("view")) {
+        this.headObject = child;
+        console.log("[BeamWalk] Auto-found head object:", child.name);
+        return;
+      }
+      this._findHeadObject(child);
     }
   }
   updateStats() {
@@ -7987,7 +8008,8 @@ Avg Dev: ${avgDev}m`;
   update(dt) {
     if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
       return;
-    const playerPos = this.playerObject.getPositionWorld();
+    const trackingObject = this.headObject || this.playerObject;
+    const playerPos = trackingObject.getPositionWorld();
     const a = this.startPosition.getPositionWorld();
     const b = this.endPosition.getPositionWorld();
     const ab = vec3_exports.sub(vec3_exports.create(), b, a);
@@ -8050,18 +8072,39 @@ Avg Dev: ${avgDev}m`;
   _resetToStart() {
     if (!this.playerObject || !this.startPosition)
       return;
-    const pos = this.startPosition.getPositionWorld();
-    this.playerObject.setPositionWorld(pos);
+    const startPos = this.startPosition.getPositionWorld();
+    const trackingObject = this.headObject || this.playerObject;
+    if (this.headObject) {
+      const currentPlayerPos = this.playerObject.getPositionWorld();
+      const currentHeadPos = this.headObject.getPositionWorld();
+      const offsetX = currentHeadPos[0] - currentPlayerPos[0];
+      const offsetZ = currentHeadPos[2] - currentPlayerPos[2];
+      const adjustedPos = [
+        startPos[0] - offsetX,
+        startPos[1],
+        // Use start position Y
+        startPos[2] - offsetZ
+      ];
+      console.log("[BeamWalk] Teleporting - Head offset:", [offsetX, 0, offsetZ]);
+      console.log("[BeamWalk] Target head pos:", startPos);
+      console.log("[BeamWalk] Setting player to:", adjustedPos);
+      this.playerObject.setPositionWorld(adjustedPos);
+    } else {
+      console.log("[BeamWalk] Teleporting player (no head offset) to:", startPos);
+      this.playerObject.setPositionWorld(startPos);
+    }
   }
 };
 __publicField(BeamWalkManager, "TypeName", "beam-walk-manager");
 __publicField(BeamWalkManager, "Properties", {
   playerObject: Property4.object(),
+  headObject: Property4.object(),
+  // VR camera/head for Y position checking
   beamWidth: Property4.float(0.3),
   startPosition: Property4.object(),
   endPosition: Property4.object(),
-  maxDistanceFromCenter: Property4.float(0.5),
-  // Increased from 0.15 to 0.5 (50cm tolerance)
+  maxDistanceFromCenter: Property4.float(1),
+  // Increased to 1.0m (100cm tolerance)
   resetHeight: Property4.float(-2),
   dataManager: Property4.object(),
   statsText: Property4.object(),

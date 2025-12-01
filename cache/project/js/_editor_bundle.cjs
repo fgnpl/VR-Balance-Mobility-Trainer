@@ -12126,6 +12126,10 @@
       this.totalBalanceDuration = 0;
       this.bestDuration = 0;
       this._currentRunStart = 0;
+      if (!this.headObject && this.playerObject) {
+        console.log("[BeamWalk] Searching for head/camera object...");
+        this._findHeadObject(this.playerObject);
+      }
       this.movementData = [];
       this.currentRunNumber = 0;
       this.totalFalls = 0;
@@ -12138,6 +12142,23 @@
         console.log("[BeamWalk] statsText object found:", this.statsText.name);
         const textComp = this.statsText.getComponent("text");
         console.log("[BeamWalk] text component:", textComp);
+      }
+      if (this.headObject) {
+        console.log("[BeamWalk] Head object set:", this.headObject.name);
+      } else {
+        console.warn("[BeamWalk] No head object - will use playerObject for fall detection (may not work in VR!)");
+      }
+    }
+    _findHeadObject(parent) {
+      const children = parent.children;
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (child.getComponent("view")) {
+          this.headObject = child;
+          console.log("[BeamWalk] Auto-found head object:", child.name);
+          return;
+        }
+        this._findHeadObject(child);
       }
     }
     updateStats() {
@@ -12209,7 +12230,8 @@ Avg Dev: ${avgDev}m`;
     update(dt) {
       if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
         return;
-      const playerPos = this.playerObject.getPositionWorld();
+      const trackingObject = this.headObject || this.playerObject;
+      const playerPos = trackingObject.getPositionWorld();
       const a = this.startPosition.getPositionWorld();
       const b = this.endPosition.getPositionWorld();
       const ab = vec3_exports.sub(vec3_exports.create(), b, a);
@@ -12272,18 +12294,39 @@ Avg Dev: ${avgDev}m`;
     _resetToStart() {
       if (!this.playerObject || !this.startPosition)
         return;
-      const pos = this.startPosition.getPositionWorld();
-      this.playerObject.setPositionWorld(pos);
+      const startPos = this.startPosition.getPositionWorld();
+      const trackingObject = this.headObject || this.playerObject;
+      if (this.headObject) {
+        const currentPlayerPos = this.playerObject.getPositionWorld();
+        const currentHeadPos = this.headObject.getPositionWorld();
+        const offsetX = currentHeadPos[0] - currentPlayerPos[0];
+        const offsetZ = currentHeadPos[2] - currentPlayerPos[2];
+        const adjustedPos = [
+          startPos[0] - offsetX,
+          startPos[1],
+          // Use start position Y
+          startPos[2] - offsetZ
+        ];
+        console.log("[BeamWalk] Teleporting - Head offset:", [offsetX, 0, offsetZ]);
+        console.log("[BeamWalk] Target head pos:", startPos);
+        console.log("[BeamWalk] Setting player to:", adjustedPos);
+        this.playerObject.setPositionWorld(adjustedPos);
+      } else {
+        console.log("[BeamWalk] Teleporting player (no head offset) to:", startPos);
+        this.playerObject.setPositionWorld(startPos);
+      }
     }
   };
   __publicField(BeamWalkManager, "TypeName", "beam-walk-manager");
   __publicField(BeamWalkManager, "Properties", {
     playerObject: Property.object(),
+    headObject: Property.object(),
+    // VR camera/head for Y position checking
     beamWidth: Property.float(0.3),
     startPosition: Property.object(),
     endPosition: Property.object(),
-    maxDistanceFromCenter: Property.float(0.5),
-    // Increased from 0.15 to 0.5 (50cm tolerance)
+    maxDistanceFromCenter: Property.float(1),
+    // Increased to 1.0m (100cm tolerance)
     resetHeight: Property.float(-2),
     dataManager: Property.object(),
     statsText: Property.object(),
@@ -12605,6 +12648,55 @@ Avg Dev: ${avgDev}m`;
     hoverMaterial: Property.material()
   });
 
+  // js/collision-debug.js
+  var collision_debug_exports = {};
+  __export(collision_debug_exports, {
+    CollisionDebug: () => CollisionDebug
+  });
+  var CollisionDebug = class extends Component3 {
+    start() {
+      console.log(`[${this.logName}] Collision debug active on:`, this.object.name);
+      const collision = this.object.getComponent("collision");
+      if (!collision) {
+        console.error(`[${this.logName}] \u274C NO COLLISION COMPONENT on ${this.object.name}!`);
+        console.error(`[${this.logName}] Add a 'collision' component in the editor for physics to work!`);
+      } else {
+        console.log(`[${this.logName}] \u2705 Collision component found`);
+        console.log(`[${this.logName}] Collision settings:`, {
+          collider: collision.collider,
+          group: collision.group,
+          extents: collision.extents
+        });
+      }
+      console.log(`[${this.logName}] Components on ${this.object.name}:`);
+      const components = this.object.getComponents();
+      components.forEach((comp) => {
+        console.log(`  - ${comp.type}`);
+      });
+    }
+    onCollisionEnter(other) {
+      if (!this.showEnter)
+        return;
+      console.log(`[${this.logName}] \u{1F534} COLLISION ENTER!`);
+      console.log(`  This object: ${this.object.name}`);
+      console.log(`  Other object: ${other.object?.name || "unknown"}`);
+      console.log(`  Other components:`, other.object?.getComponents().map((c) => c.type));
+    }
+    onCollisionExit(other) {
+      if (!this.showExit)
+        return;
+      console.log(`[${this.logName}] \u{1F535} COLLISION EXIT`);
+      console.log(`  This object: ${this.object.name}`);
+      console.log(`  Other object: ${other.object?.name || "unknown"}`);
+    }
+  };
+  __publicField(CollisionDebug, "TypeName", "collision-debug");
+  __publicField(CollisionDebug, "Properties", {
+    logName: Property.string("CollisionDebug"),
+    showEnter: Property.bool(true),
+    showExit: Property.bool(false)
+  });
+
   // js/controller-hit.js
   var controller_hit_exports = {};
   __export(controller_hit_exports, {
@@ -12623,6 +12715,110 @@ Avg Dev: ${avgDev}m`;
   __publicField(ControllerHit, "Properties", {
     hand: Property.string("right")
   });
+
+  // js/cursor-debug.js
+  var cursor_debug_exports = {};
+  __export(cursor_debug_exports, {
+    CursorDebug: () => CursorDebug
+  });
+  var CursorDebug = class extends Component3 {
+    start() {
+      console.log("=== CURSOR DEBUG START ===");
+      setTimeout(() => this.checkCursors(), 2e3);
+    }
+    checkCursors() {
+      console.log("\n=== Checking Cursor Setup ===");
+      const cursorLeft = this.engine.scene.findByName("CursorLeft")[0];
+      const cursorRight = this.engine.scene.findByName("CursorRight")[0];
+      console.log("CursorLeft found:", !!cursorLeft);
+      console.log("CursorRight found:", !!cursorRight);
+      if (cursorLeft) {
+        this.debugCursor(cursorLeft, "LEFT");
+      } else {
+        console.error("\u274C CursorLeft object not found!");
+      }
+      if (cursorRight) {
+        this.debugCursor(cursorRight, "RIGHT");
+      } else {
+        console.error("\u274C CursorRight object not found!");
+      }
+      const controllerLeft = this.engine.scene.findByName("ControllerLeft")[0];
+      const controllerRight = this.engine.scene.findByName("ControllerRight")[0];
+      console.log("\n=== Controllers ===");
+      console.log("ControllerLeft found:", !!controllerLeft);
+      console.log("ControllerRight found:", !!controllerRight);
+      if (controllerLeft) {
+        const pos = controllerLeft.getPositionWorld();
+        console.log("ControllerLeft position:", pos);
+      }
+      if (controllerRight) {
+        const pos = controllerRight.getPositionWorld();
+        console.log("ControllerRight position:", pos);
+      }
+      console.log("\n=== Check Complete ===");
+      console.log("If rays not visible, see VR-CURSOR-TROUBLESHOOTING.md");
+    }
+    debugCursor(cursorObj, side) {
+      console.log(`
+--- Cursor ${side} ---`);
+      const cursorComp = cursorObj.getComponent("cursor");
+      const inputComp = cursorObj.getComponent("input");
+      const vrSwitch = cursorObj.getComponent("vr-mode-active-switch");
+      console.log(`Has cursor component: ${!!cursorComp}`);
+      console.log(`Has input component: ${!!inputComp}`);
+      console.log(`Has vr-mode-active-switch: ${!!vrSwitch}`);
+      if (cursorComp) {
+        console.log(`cursorRayObject set: ${cursorComp.cursorRayObject !== null}`);
+        if (cursorComp.cursorRayObject) {
+          const rayObj = cursorComp.cursorRayObject;
+          console.log(`Ray object name: ${rayObj.name}`);
+          console.log(`Ray object active: ${rayObj.active}`);
+          this.checkRayMesh(rayObj);
+        } else {
+          console.error(`\u274C No cursorRayObject assigned!`);
+        }
+      }
+      if (inputComp) {
+        console.log(`Input type: ${inputComp.type || "unknown"}`);
+      }
+      const pos = cursorObj.getPositionWorld();
+      console.log(`Position: [${pos[0].toFixed(3)}, ${pos[1].toFixed(3)}, ${pos[2].toFixed(3)}]`);
+      const parent = cursorObj.parent;
+      console.log(`Parent: ${parent ? parent.name : "null"}`);
+    }
+    checkRayMesh(rayObj) {
+      console.log(`
+Checking ray mesh hierarchy:`);
+      const rayMesh = rayObj.getComponent("mesh");
+      if (rayMesh) {
+        console.log(`\u2705 Ray object has mesh component`);
+        console.log(`  Material: ${rayMesh.material ? rayMesh.material.name || "unnamed" : "NULL"}`);
+        console.log(`  Mesh: ${rayMesh.mesh ? "assigned" : "NULL"}`);
+      } else {
+        console.log(`Ray object no mesh, checking children...`);
+      }
+      const children = rayObj.children;
+      console.log(`Ray object has ${children.length} children`);
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        console.log(`  Child ${i}: ${child.name}`);
+        const childMesh = child.getComponent("mesh");
+        if (childMesh) {
+          console.log(`    \u2705 Has mesh component`);
+          console.log(`    Material: ${childMesh.material ? childMesh.material.name || "unnamed" : "NULL"}`);
+          console.log(`    Active: ${child.active}`);
+          const scale6 = child.getScalingLocal();
+          console.log(`    Scale: [${scale6[0].toFixed(4)}, ${scale6[1].toFixed(4)}, ${scale6[2].toFixed(4)}]`);
+          if (scale6[1] < 0.01) {
+            console.warn(`    \u26A0\uFE0F Scale Y is very small (${scale6[1]}), ray might be invisible!`);
+          }
+        }
+      }
+    }
+    update(dt) {
+    }
+  };
+  __publicField(CursorDebug, "TypeName", "cursor-debug");
 
   // js/data-manager.js
   var data_manager_exports = {};
@@ -13278,6 +13474,103 @@ Active: ${this.activeTargets.length}`;
     greenMaterialId: Property.int(26)
   });
 
+  // js/ui-cursor-button.js
+  var ui_cursor_button_exports = {};
+  __export(ui_cursor_button_exports, {
+    UiCursorButton: () => UiCursorButton
+  });
+  var UiCursorButton = class extends Component3 {
+    start() {
+      this.target = this.object.getComponent("cursor-target");
+      if (!this.target) {
+        console.error("[UiCursorButton] cursor-target component not found on", this.object.name, "! Add cursor-target component in the editor.");
+        return;
+      }
+      const collision = this.object.getComponent("collision");
+      if (!collision) {
+        console.warn("[UiCursorButton] No collision component found on", this.object.name, ". Cursor raycasting may not work. Add collision component in the editor.");
+      }
+      this.target.onClick.add(this._onClick.bind(this));
+      if (this.debugMode) {
+        console.log(`[UiCursorButton] Initialized on ${this.object.name} with action: ${this.action}`);
+        this.target.onHover.add(() => {
+          console.log(`[UiCursorButton] Hover on button ${this.action}`);
+        });
+        this.target.onUnhover.add(() => {
+          console.log(`[UiCursorButton] Unhover from button ${this.action}`);
+        });
+      }
+    }
+    _onClick(_, cursor) {
+      if (this.debugMode) {
+        console.log(`[UiCursorButton] Button clicked: ${this.action} by cursor:`, cursor?.object?.name || "unknown");
+      }
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (!manager) {
+        console.warn("[UiCursorButton] Manager object not found");
+        return;
+      }
+      const gs = manager.getComponent("game-selector");
+      if (!gs) {
+        console.warn("[UiCursorButton] game-selector component not found on Manager");
+        return;
+      }
+      switch (this.action) {
+        case 0:
+          if (gs.switchToTennis)
+            gs.switchToTennis();
+          break;
+        case 1:
+          if (gs.switchToFootball)
+            gs.switchToFootball();
+          break;
+        case 2:
+          if (gs.switchToGym)
+            gs.switchToGym();
+          break;
+        case 3:
+          if (gs.startTargetDrill)
+            gs.startTargetDrill();
+          break;
+        case 4:
+          if (gs.startBeamWalk)
+            gs.startBeamWalk();
+          break;
+        case 5:
+          if (gs.startBallDrill)
+            gs.startBallDrill();
+          break;
+        case 6:
+          if (gs.stopAllDrills)
+            gs.stopAllDrills();
+          break;
+        case 7:
+          if (gs.showReport)
+            gs.showReport();
+          break;
+        default:
+          console.warn(`[UiCursorButton] Unknown action: ${this.action}`);
+      }
+    }
+  };
+  __publicField(UiCursorButton, "TypeName", "ui-cursor-button");
+  __publicField(UiCursorButton, "Properties", {
+    action: Property.enum(
+      [
+        "Tennis Environment",
+        "Football Environment",
+        "Gym Environment",
+        "Start Target Drill",
+        "Start Beam Walk",
+        "Start Ball Catching",
+        "Stop All Drills",
+        "Show Report"
+      ],
+      "Tennis Environment"
+    ),
+    debugMode: Property.bool(true)
+  });
+
   // js/ui-plane-button.js
   var ui_plane_button_exports = {};
   __export(ui_plane_button_exports, {
@@ -13442,13 +13735,16 @@ Active: ${this.activeTargets.length}`;
   _registerEditor(button_start_target_exports);
   _registerEditor(button_stop_drills_exports);
   _registerEditor(button_exports);
+  _registerEditor(collision_debug_exports);
   _registerEditor(controller_hit_exports);
+  _registerEditor(cursor_debug_exports);
   _registerEditor(data_manager_exports);
   _registerEditor(environment_switcher_exports);
   _registerEditor(game_selector_exports);
   _registerEditor(head_bob_exports);
   _registerEditor(target_collision_exports);
   _registerEditor(target_manager_exports);
+  _registerEditor(ui_cursor_button_exports);
   _registerEditor(ui_plane_button_exports);
   _registerEditor(ui_plane_env_tennis_button_exports);
 })();

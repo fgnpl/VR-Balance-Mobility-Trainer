@@ -666,10 +666,12 @@
                 {
                     "type": "cursor",
                     "cursor": {
-                        "cursorObject": null,
+                        "cursorObject": "376",
                         "collisionGroup": 0,
                         "cursorRayObject": "209",
-                        "cursorRayScalingAxis": "y"
+                        "cursorRayScalingAxis": "y",
+                        "inputObject": null,
+                        "viewObject": null
                     }
                 },
                 {
@@ -684,8 +686,8 @@
             ],
             "translation": [
                 2.384185791015625e-7,
-                1.1920928955078125e-7,
-                -2.384185791015625e-7
+                -0.0092358,
+                -2.086162567138672e-7
             ],
             "rotation": [
                 0.0,
@@ -1380,9 +1382,9 @@
                 1.0
             ],
             "scaling": [
-                7.8000001,
-                7.8000001,
-                7.8000001
+                3.0,
+                3.0,
+                3.0
             ]
         },
         "209": {
@@ -1441,10 +1443,12 @@
                 {
                     "type": "cursor",
                     "cursor": {
-                        "cursorObject": null,
+                        "cursorObject": "377",
                         "collisionGroup": 0,
                         "cursorRayObject": "213",
-                        "cursorRayScalingAxis": "y"
+                        "cursorRayScalingAxis": "y",
+                        "inputObject": null,
+                        "viewObject": null
                     }
                 },
                 {
@@ -1460,7 +1464,7 @@
             "translation": [
                 0.0,
                 0.0,
-                -2.384185791015625e-7
+                -2.086162567138672e-7
             ],
             "rotation": [
                 0.0,
@@ -1613,7 +1617,7 @@
                 {
                     "type": "beam-walk-manager",
                     "beam-walk-manager": {
-                        "playerObject": "237",
+                        "playerObject": "14",
                         "startPosition": "349",
                         "endPosition": "350",
                         "dataManager": "234",
@@ -2535,7 +2539,7 @@
                     "ball-thrower": {
                         "playerObject": "237",
                         "dataManager": "234",
-                        "ballPrefab": "27"
+                        "ballPrefab": "352"
                     }
                 }
             ]
@@ -2573,9 +2577,9 @@
                 0.2
             ],
             "translation": [
-                0.0099563,
+                0.0,
                 3.875,
-                0.9792991
+                -5.754795
             ],
             "rotation": [
                 0.0,
@@ -3316,6 +3320,92 @@
                 8.8999996,
                 8.9000291,
                 8.8999996
+            ]
+        },
+        "376": {
+            "name": "3DCursorHitLeft",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "128"
+                    }
+                }
+            ],
+            "scaling": [
+                0.0099999,
+                0.0099999,
+                0.0099999
+            ],
+            "translation": [
+                0.0,
+                0.0388117,
+                1.5585094
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "377": {
+            "name": "3DCursorHitRight",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "128"
+                    }
+                }
+            ],
+            "scaling": [
+                0.0099999,
+                0.0099999,
+                0.0099999
+            ],
+            "translation": [
+                0.0,
+                0.0388117,
+                1.5585094
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "378": {
+            "name": "STATPANEL",
+            "parent": "235",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                0.28,
+                7.0040001,
+                -16.9357242
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                13.8999996,
+                5.5,
+                4.9
             ]
         }
     },
