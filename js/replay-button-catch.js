@@ -1,18 +1,7 @@
 import { Component, InputComponent, MeshComponent, Property } from '@wonderlandengine/api';
 import { CursorTarget, AudioSource } from '@wonderlandengine/components';
 import { BouncingBall } from './bouncing-ball.js'; 
-
-/**
- * Helper function for haptics 
- */
-export function hapticFeedback(object, strength, duration) {
-    const input = object.getComponent(InputComponent);
-    if (input && input.xrInputSource) {
-        const gamepad = input.xrInputSource.gamepad;
-        if (gamepad && gamepad.hapticActuators)
-            gamepad.hapticActuators[0].pulse(strength, duration);
-    }
-}
+import { triggerHaptic, HapticPatterns } from './haptic-feedback.js';
 
 export class ReplayButtonCatch extends Component {
     static TypeName = 'replay-button-catch';
@@ -66,13 +55,13 @@ export class ReplayButtonCatch extends Component {
         if (cursor.type === 'finger-cursor') {
             this.onDown(_, cursor);
         }
-        hapticFeedback(cursor.object, 0.5, 50);
+        triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
 
     onDown = (_, cursor) => {
         this.soundClick.play();
         this.object.setPositionLocal([0.0, -0.1, 0.0]); // Visual press down
-        hapticFeedback(cursor.object, 1.0, 20);
+        triggerHaptic(cursor.object, HapticPatterns.BUTTON_DOWN);
 
         // Game reset logic
         if (this.gameController) {
@@ -89,7 +78,7 @@ export class ReplayButtonCatch extends Component {
     onUp = (_, cursor) => {
         this.soundUnClick.play();
         this.object.setPositionLocal(this.returnPos); // Return to original pos
-        hapticFeedback(cursor.object, 0.7, 20);
+        triggerHaptic(cursor.object, HapticPatterns.BUTTON_UP);
     };
 
     onUnhover = (_, cursor) => {
@@ -99,6 +88,6 @@ export class ReplayButtonCatch extends Component {
         if (cursor.type === 'finger-cursor') {
             this.onUp(_, cursor);
         }
-        hapticFeedback(cursor.object, 0.3, 50);
+        triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
 }

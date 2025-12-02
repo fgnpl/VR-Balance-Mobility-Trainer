@@ -1,5 +1,6 @@
 import {Component, Property} from '@wonderlandengine/api';
 import {vec3} from 'gl-matrix';
+import {triggerHaptic, HapticPatterns} from './haptic-feedback.js';
 
 export class BeamWalkManager extends Component {
     static TypeName = 'beam-walk-manager';
@@ -14,6 +15,9 @@ export class BeamWalkManager extends Component {
         dataManager: Property.object(),
         statsText: Property.object(), // Text component to display live stats
         successRadius: Property.float(1.0), // Radius around end point to count as success
+        // Controller references for haptic feedback
+        leftController: Property.object(),
+        rightController: Property.object(),
     };
 
     start() {
@@ -28,6 +32,16 @@ export class BeamWalkManager extends Component {
             this._findHeadObject(this.playerObject);
         }
         
+        // Auto-find controllers if not set
+        if (!this.leftController) {
+            this.leftController = this.engine.scene.findByName('HandLeft')[0] || 
+                                  this.engine.scene.findByName('ControllerLeft')[0];
+        }
+        if (!this.rightController) {
+            this.rightController = this.engine.scene.findByName('HandRight')[0] || 
+                                   this.engine.scene.findByName('ControllerRight')[0];
+        }
+        
         // Movement tracking
         this.movementData = [];
         this.currentRunNumber = 0;
@@ -36,6 +50,7 @@ export class BeamWalkManager extends Component {
         this.maxDistanceReached = 0;
         this.avgDeviation = 0;
         this.deviationSamples = [];
+        this.lastWarningTime = 0; // For throttling warning haptics
         
         // Debug: Check if statsText is assigned
         console.log('[BeamWalk] start() - statsText:', this.statsText);
@@ -102,7 +117,6 @@ Max Dist: ${this.maxDistanceReached.toFixed(2)}m
 Avg Dev: ${avgDev}m`;
 
         textComp.text = stats;
-        console.log('[BeamWalk] Stats updated:', stats);
     }
 
     startDrill() {
@@ -201,6 +215,10 @@ Avg Dev: ${avgDev}m`;
             // Success! Player reached the end
             console.log('[BeamWalk] SUCCESS! Reached end of beam');
             this.successfulRuns++;
+            
+            // Haptic feedback: Success! (both controllers)
+            this._triggerBothControllers(HapticPatterns.BEAM_SUCCESS);
+            
             this._commitRun(true);
             this._resetToStart();
             this.currentRunNumber++;
@@ -213,6 +231,10 @@ Avg Dev: ${avgDev}m`;
             // fell off - commit the run and reset
             console.log('[BeamWalk] FALL detected');
             this.totalFalls++;
+            
+            // Haptic feedback: Fall warning (strong, both controllers)
+            this._triggerBothControllers(HapticPatterns.BEAM_FALL);
+            
             this._commitRun(false);
             this._resetToStart();
             this.currentRunNumber++;
@@ -222,6 +244,14 @@ Avg Dev: ${avgDev}m`;
             // still balancing - update total duration
             const currentRunDuration = performance.now() - this._currentRunStart;
             this.totalBalanceDuration += dt * 1000; // accumulate total time across all runs
+            
+            // Warning haptic if getting close to edge (throttled to once per 2 seconds)
+            const warningThreshold = this.maxDistanceFromCenter * 0.7; // 70% of max distance
+            const now = performance.now();
+            if (dist > warningThreshold && now - this.lastWarningTime > 2000) {
+                this._triggerBothControllers(HapticPatterns.BEAM_WARNING);
+                this.lastWarningTime = now;
+            }
         }
     }
 
@@ -274,6 +304,18 @@ Avg Dev: ${avgDev}m`;
             // Fallback: no head tracking, just teleport the player root
             console.log('[BeamWalk] Teleporting player (no head offset) to:', startPos);
             this.playerObject.setPositionWorld(startPos);
+        }
+    }
+
+    /**
+     * Trigger haptic feedback on both controllers
+     */
+    _triggerBothControllers(pattern) {
+        if (this.leftController) {
+            triggerHaptic(this.leftController, pattern);
+        }
+        if (this.rightController) {
+            triggerHaptic(this.rightController, pattern);
         }
     }
 }

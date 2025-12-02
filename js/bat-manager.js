@@ -1,13 +1,16 @@
 import {CollisionEventType, Component, Property} from '@wonderlandengine/api';
+import {triggerHaptic, HapticPatterns} from './haptic-feedback.js';
 
 /**
  * bat-manager
+ * 
+ * Handles bat collisions with balls and provides haptic feedback to the controller.
  */
 export class BatManager extends Component {
     static TypeName = 'bat-manager';
-    /* Properties that are configurable in the editor */
+    
     static Properties = {
-
+        debugMode: Property.bool(false),       // Enable console logging
     };
 
     start() {
@@ -19,12 +22,16 @@ export class BatManager extends Component {
             if (type === CollisionEventType.Touch) {
                 this.onCollision(other);
             }
-        })
+        });
     }
 
     onCollision(other) {
         if (other.object.name === 'Sphere') {
+            // Play collision sound
             this.soundSource.play();
+            
+            // Trigger haptic feedback on controller using centralized system
+            triggerHaptic(this.object, HapticPatterns.BALL_HIT_BAT, null, this.debugMode);
         }
     }
 }

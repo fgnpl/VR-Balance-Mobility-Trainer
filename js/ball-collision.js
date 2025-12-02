@@ -1,5 +1,6 @@
 import {Component, Property} from '@wonderlandengine/api';
 import {vec3} from 'gl-matrix';
+import {triggerHaptic, HapticPatterns} from './haptic-feedback.js';
 
 /**
  * BallCollision: Handles collision detection for thrown balls
@@ -149,6 +150,9 @@ export class BallCollision extends Component {
 
         console.log(`[BallCollision] Caught by ${controller.name}!`);
         
+        // Trigger catch haptic feedback (soft, satisfying)
+        triggerHaptic(controller, HapticPatterns.BALL_CATCH, null, this.debugMode);
+        
         // Notify thrower
         const throwerComp = this.thrower?.getComponent('ball-thrower');
         throwerComp?.onBallCaught(this.object);
@@ -167,6 +171,9 @@ export class BallCollision extends Component {
         this.handled = true;
 
         console.log(`[BallCollision] Deflected by ${controller.name} (vel: ${velocity.toFixed(2)})!`);
+        
+        // Trigger deflect haptic feedback (strong impact)
+        triggerHaptic(controller, HapticPatterns.BALL_DEFLECT, null, this.debugMode);
         
         // Notify thrower
         const throwerComp = this.thrower?.getComponent('ball-thrower');

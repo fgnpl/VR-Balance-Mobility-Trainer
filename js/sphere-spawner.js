@@ -1,15 +1,6 @@
 import { Component, Property, InputComponent } from '@wonderlandengine/api';
 import { CursorTarget } from '@wonderlandengine/components'; 
-
-// Utility: haptics
-export function hapticFeedback(object, strength, duration) {
-    const input = object.getComponent(InputComponent);
-    if (input && input.xrInputSource) {
-        const gamepad = input.xrInputSource.gamepad;
-        if (gamepad && gamepad.hapticActuators)
-            gamepad.hapticActuators[0].pulse(strength, duration);
-    }
-}
+import { triggerHaptic, HapticPatterns } from './haptic-feedback.js';
 
 export class ReactionGame extends Component {
     static TypeName = 'reaction-game';
@@ -99,13 +90,13 @@ export class ReactionGame extends Component {
 
     onTargetDown = (_, cursor) => {
         if (!this.currentTargetActive) return;
-        hapticFeedback(cursor.object, 1.0, 20);
+        triggerHaptic(cursor.object, HapticPatterns.TARGET_HIT);
         this.onTargetHit();
     };
 
     onTargetHover = (_, cursor) => {
         if (!this.currentTargetActive) return;
-        hapticFeedback(cursor.object, 0.5, 10);
+        triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
 
     /**

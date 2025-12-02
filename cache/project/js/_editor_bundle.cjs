@@ -11811,6 +11811,132 @@
   __export(ball_collision_exports, {
     BallCollision: () => BallCollision
   });
+
+  // js/haptic-feedback.js
+  var haptic_feedback_exports = {};
+  __export(haptic_feedback_exports, {
+    HapticPatterns: () => HapticPatterns,
+    hapticFeedback: () => hapticFeedback,
+    triggerHaptic: () => triggerHaptic
+  });
+  var HapticPatterns = {
+    // Light touch/hover feedback (subtle)
+    HOVER: { intensity: 0.3, duration: 20 },
+    // Button click feedback (quick, medium)
+    BUTTON_DOWN: { intensity: 0.8, duration: 50 },
+    BUTTON_UP: { intensity: 0.5, duration: 30 },
+    // Ball interactions
+    BALL_CATCH: { intensity: 0.6, duration: 80 },
+    // Soft catch
+    BALL_DEFLECT: { intensity: 0.9, duration: 100 },
+    // Hard deflect
+    BALL_HIT_BAT: { intensity: 0.8, duration: 100 },
+    // Bat hit
+    BALL_MISS: { intensity: 0.4, duration: 150 },
+    // Missed catch (longer, softer)
+    // Target interactions
+    TARGET_HIT: { intensity: 0.7, duration: 60 },
+    // Successfully hit target
+    TARGET_TIMEOUT: { intensity: 0.3, duration: 200 },
+    // Target timed out (warning)
+    // Beam walk events
+    BEAM_FALL: { intensity: 1, duration: 300 },
+    // Fell off beam (strong, long)
+    BEAM_SUCCESS: { intensity: 0.5, duration: 150 },
+    // Reached end successfully
+    BEAM_WARNING: { intensity: 0.4, duration: 100 },
+    // Getting too far from center
+    // Game state changes
+    GAME_START: { intensity: 0.6, duration: 100 },
+    GAME_END: { intensity: 0.7, duration: 150 },
+    // Generic feedback levels
+    LIGHT: { intensity: 0.3, duration: 40 },
+    MEDIUM: { intensity: 0.6, duration: 80 },
+    STRONG: { intensity: 1, duration: 120 }
+  };
+  function triggerHaptic(controllerObject, intensityOrPattern = 0.5, duration = 50, debugMode = false) {
+    if (!controllerObject) {
+      if (debugMode)
+        console.warn("[Haptic] No controller object provided");
+      return;
+    }
+    let intensity, actualDuration;
+    if (typeof intensityOrPattern === "object") {
+      intensity = intensityOrPattern.intensity;
+      actualDuration = intensityOrPattern.duration;
+      if (debugMode) {
+        const patternName = Object.keys(HapticPatterns).find(
+          (key) => HapticPatterns[key] === intensityOrPattern
+        ) || "CUSTOM";
+        console.log(`[Haptic] Using pattern: ${patternName}`);
+      }
+    } else {
+      intensity = intensityOrPattern;
+      actualDuration = duration;
+    }
+    intensity = Math.max(0, Math.min(1, intensity));
+    try {
+      let inputComponent = controllerObject.getComponent("input");
+      if (!inputComponent) {
+        inputComponent = findInputComponent(controllerObject);
+      }
+      if (!inputComponent) {
+        if (debugMode)
+          console.warn("[Haptic] No input component found");
+        return;
+      }
+      const xrInputSource = inputComponent.xrInputSource;
+      if (!xrInputSource) {
+        if (debugMode)
+          console.warn("[Haptic] Not in VR session");
+        return;
+      }
+      const gamepad = xrInputSource.gamepad;
+      if (!gamepad) {
+        if (debugMode)
+          console.warn("[Haptic] No gamepad available");
+        return;
+      }
+      if (gamepad.hapticActuators && gamepad.hapticActuators.length > 0) {
+        gamepad.hapticActuators[0].pulse(intensity, actualDuration);
+        if (debugMode) {
+          console.log(`[Haptic] \u2713 Pulse: ${intensity.toFixed(2)} intensity, ${actualDuration}ms on ${inputComponent.handedness} hand`);
+        }
+      } else if (gamepad.vibrationActuator) {
+        gamepad.vibrationActuator.playEffect("dual-rumble", {
+          startDelay: 0,
+          duration: actualDuration,
+          weakMagnitude: intensity,
+          strongMagnitude: intensity
+        });
+        if (debugMode) {
+          console.log(`[Haptic] \u2713 Vibration (fallback): ${intensity.toFixed(2)} intensity, ${actualDuration}ms`);
+        }
+      } else {
+        if (debugMode)
+          console.warn("[Haptic] No haptic actuators available");
+      }
+    } catch (error) {
+      console.error("[Haptic] Error triggering feedback:", error);
+    }
+  }
+  function findInputComponent(obj) {
+    if (!obj)
+      return null;
+    const input = obj.getComponent("input");
+    if (input)
+      return input;
+    const parent = obj.parent;
+    if (parent) {
+      return findInputComponent(parent);
+    }
+    return null;
+  }
+  function hapticFeedback(object, strength, duration) {
+    triggerHaptic(object, strength, duration);
+  }
+
+  // js/ball-collision.js
   var BallCollision = class extends Component3 {
     start() {
       this.handled = false;
@@ -11911,6 +12037,7 @@
         return;
       this.handled = true;
       console.log(`[BallCollision] Caught by ${controller.name}!`);
+      triggerHaptic(controller, HapticPatterns.BALL_CATCH, null, this.debugMode);
       const throwerComp = this.thrower?.getComponent("ball-thrower");
       throwerComp?.onBallCaught(this.object);
       this.object.velocity = [0, 0, 0];
@@ -11925,6 +12052,7 @@
         return;
       this.handled = true;
       console.log(`[BallCollision] Deflected by ${controller.name} (vel: ${velocity.toFixed(2)})!`);
+      triggerHaptic(controller, HapticPatterns.BALL_DEFLECT, null, this.debugMode);
       const throwerComp = this.thrower?.getComponent("ball-thrower");
       throwerComp?.onBallDeflected(this.object);
       const ctrlPos = controller.getPositionWorld();
@@ -12132,12 +12260,15 @@
     onCollision(other) {
       if (other.object.name === "Sphere") {
         this.soundSource.play();
+        triggerHaptic(this.object, HapticPatterns.BALL_HIT_BAT, null, this.debugMode);
       }
     }
   };
   __publicField(BatManager, "TypeName", "bat-manager");
-  /* Properties that are configurable in the editor */
-  __publicField(BatManager, "Properties", {});
+  __publicField(BatManager, "Properties", {
+    debugMode: Property.bool(false)
+    // Enable console logging
+  });
 
   // js/beam-walk-manager.js
   var beam_walk_manager_exports = {};
@@ -12154,6 +12285,12 @@
         console.log("[BeamWalk] Searching for head/camera object...");
         this._findHeadObject(this.playerObject);
       }
+      if (!this.leftController) {
+        this.leftController = this.engine.scene.findByName("HandLeft")[0] || this.engine.scene.findByName("ControllerLeft")[0];
+      }
+      if (!this.rightController) {
+        this.rightController = this.engine.scene.findByName("HandRight")[0] || this.engine.scene.findByName("ControllerRight")[0];
+      }
       this.movementData = [];
       this.currentRunNumber = 0;
       this.totalFalls = 0;
@@ -12161,6 +12298,7 @@
       this.maxDistanceReached = 0;
       this.avgDeviation = 0;
       this.deviationSamples = [];
+      this.lastWarningTime = 0;
       console.log("[BeamWalk] start() - statsText:", this.statsText);
       if (this.statsText) {
         console.log("[BeamWalk] statsText object found:", this.statsText.name);
@@ -12210,7 +12348,6 @@ Falls: ${this.totalFalls}
 Max Dist: ${this.maxDistanceReached.toFixed(2)}m
 Avg Dev: ${avgDev}m`;
       textComp.text = stats;
-      console.log("[BeamWalk] Stats updated:", stats);
     }
     startDrill() {
       this.running = true;
@@ -12283,6 +12420,7 @@ Avg Dev: ${avgDev}m`;
       if (distToEnd <= this.successRadius) {
         console.log("[BeamWalk] SUCCESS! Reached end of beam");
         this.successfulRuns++;
+        this._triggerBothControllers(HapticPatterns.BEAM_SUCCESS);
         this._commitRun(true);
         this._resetToStart();
         this.currentRunNumber++;
@@ -12293,6 +12431,7 @@ Avg Dev: ${avgDev}m`;
       if (playerPos[1] < this.resetHeight || dist2 > this.maxDistanceFromCenter) {
         console.log("[BeamWalk] FALL detected");
         this.totalFalls++;
+        this._triggerBothControllers(HapticPatterns.BEAM_FALL);
         this._commitRun(false);
         this._resetToStart();
         this.currentRunNumber++;
@@ -12301,6 +12440,12 @@ Avg Dev: ${avgDev}m`;
       } else {
         const currentRunDuration = performance.now() - this._currentRunStart;
         this.totalBalanceDuration += dt * 1e3;
+        const warningThreshold = this.maxDistanceFromCenter * 0.7;
+        const now = performance.now();
+        if (dist2 > warningThreshold && now - this.lastWarningTime > 2e3) {
+          this._triggerBothControllers(HapticPatterns.BEAM_WARNING);
+          this.lastWarningTime = now;
+        }
       }
     }
     _commitRun(isSuccess = false) {
@@ -12340,6 +12485,17 @@ Avg Dev: ${avgDev}m`;
         this.playerObject.setPositionWorld(startPos);
       }
     }
+    /**
+     * Trigger haptic feedback on both controllers
+     */
+    _triggerBothControllers(pattern) {
+      if (this.leftController) {
+        triggerHaptic(this.leftController, pattern);
+      }
+      if (this.rightController) {
+        triggerHaptic(this.rightController, pattern);
+      }
+    }
   };
   __publicField(BeamWalkManager, "TypeName", "beam-walk-manager");
   __publicField(BeamWalkManager, "Properties", {
@@ -12355,8 +12511,11 @@ Avg Dev: ${avgDev}m`;
     dataManager: Property.object(),
     statsText: Property.object(),
     // Text component to display live stats
-    successRadius: Property.float(1)
+    successRadius: Property.float(1),
     // Radius around end point to count as success
+    // Controller references for haptic feedback
+    leftController: Property.object(),
+    rightController: Property.object()
   });
 
   // js/bouncing-ball.js
@@ -12775,9 +12934,9 @@ Avg Dev: ${avgDev}m`;
   var button_exports = {};
   __export(button_exports, {
     ButtonComponent: () => ButtonComponent,
-    hapticFeedback: () => hapticFeedback
+    hapticFeedback: () => hapticFeedback2
   });
-  function hapticFeedback(object, strength, duration) {
+  function hapticFeedback2(object, strength, duration) {
     const input = object.getComponent(InputComponent);
     if (input && input.xrInputSource) {
       const gamepad = input.xrInputSource.gamepad;
@@ -12824,19 +12983,19 @@ Avg Dev: ${avgDev}m`;
       if (cursor.type === "finger-cursor") {
         this.onDown(_, cursor);
       }
-      hapticFeedback(cursor.object, 0.5, 50);
+      hapticFeedback2(cursor.object, 0.5, 50);
     };
     /* Called by 'cursor-target' */
     onDown = (_, cursor) => {
       this.soundClick.play();
       this.buttonMeshObject.translate([0, -0.1, 0]);
-      hapticFeedback(cursor.object, 1, 20);
+      hapticFeedback2(cursor.object, 1, 20);
     };
     /* Called by 'cursor-target' */
     onUp = (_, cursor) => {
       this.soundUnClick.play();
       this.buttonMeshObject.setTranslationLocal(this.returnPos);
-      hapticFeedback(cursor.object, 0.7, 20);
+      hapticFeedback2(cursor.object, 0.7, 20);
     };
     /* Called by 'cursor-target' */
     onUnhover = (_, cursor) => {
@@ -12844,7 +13003,7 @@ Avg Dev: ${avgDev}m`;
       if (cursor.type === "finger-cursor") {
         this.onUp(_, cursor);
       }
-      hapticFeedback(cursor.object, 0.3, 50);
+      hapticFeedback2(cursor.object, 0.3, 50);
     };
   };
   __publicField(ButtonComponent, "TypeName", "button");
@@ -13475,17 +13634,8 @@ Checking ray mesh hierarchy:`);
   // js/replay-button-catch.js
   var replay_button_catch_exports = {};
   __export(replay_button_catch_exports, {
-    ReplayButtonCatch: () => ReplayButtonCatch,
-    hapticFeedback: () => hapticFeedback2
+    ReplayButtonCatch: () => ReplayButtonCatch
   });
-  function hapticFeedback2(object, strength, duration) {
-    const input = object.getComponent(InputComponent);
-    if (input && input.xrInputSource) {
-      const gamepad = input.xrInputSource.gamepad;
-      if (gamepad && gamepad.hapticActuators)
-        gamepad.hapticActuators[0].pulse(strength, duration);
-    }
-  }
   var ReplayButtonCatch = class extends Component3 {
     static onRegister(engine) {
       engine.registerComponent(AudioSource);
@@ -13521,12 +13671,12 @@ Checking ray mesh hierarchy:`);
       if (cursor.type === "finger-cursor") {
         this.onDown(_, cursor);
       }
-      hapticFeedback2(cursor.object, 0.5, 50);
+      triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
     onDown = (_, cursor) => {
       this.soundClick.play();
       this.object.setPositionLocal([0, -0.1, 0]);
-      hapticFeedback2(cursor.object, 1, 20);
+      triggerHaptic(cursor.object, HapticPatterns.BUTTON_DOWN);
       if (this.gameController) {
         const ballLogic = this.gameController.getComponent(BouncingBall);
         if (ballLogic) {
@@ -13539,7 +13689,7 @@ Checking ray mesh hierarchy:`);
     onUp = (_, cursor) => {
       this.soundUnClick.play();
       this.object.setPositionLocal(this.returnPos);
-      hapticFeedback2(cursor.object, 0.7, 20);
+      triggerHaptic(cursor.object, HapticPatterns.BUTTON_UP);
     };
     onUnhover = (_, cursor) => {
       if (this.mesh && this.defaultMaterial) {
@@ -13548,7 +13698,7 @@ Checking ray mesh hierarchy:`);
       if (cursor.type === "finger-cursor") {
         this.onUp(_, cursor);
       }
-      hapticFeedback2(cursor.object, 0.3, 50);
+      triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
   };
   __publicField(ReplayButtonCatch, "TypeName", "replay-button-catch");
@@ -13562,24 +13712,14 @@ Checking ray mesh hierarchy:`);
   // js/replay-button-react.js
   var replay_button_react_exports = {};
   __export(replay_button_react_exports, {
-    ReplayButtonReact: () => ReplayButtonReact,
-    hapticFeedback: () => hapticFeedback4
+    ReplayButtonReact: () => ReplayButtonReact
   });
 
   // js/sphere-spawner.js
   var sphere_spawner_exports = {};
   __export(sphere_spawner_exports, {
-    ReactionGame: () => ReactionGame,
-    hapticFeedback: () => hapticFeedback3
+    ReactionGame: () => ReactionGame
   });
-  function hapticFeedback3(object, strength, duration) {
-    const input = object.getComponent(InputComponent);
-    if (input && input.xrInputSource) {
-      const gamepad = input.xrInputSource.gamepad;
-      if (gamepad && gamepad.hapticActuators)
-        gamepad.hapticActuators[0].pulse(strength, duration);
-    }
-  }
   var ReactionGame = class extends Component3 {
     init() {
       this.hiddenPosition = [0, -50, 0];
@@ -13635,13 +13775,13 @@ Checking ray mesh hierarchy:`);
     onTargetDown = (_, cursor) => {
       if (!this.currentTargetActive)
         return;
-      hapticFeedback3(cursor.object, 1, 20);
+      triggerHaptic(cursor.object, HapticPatterns.TARGET_HIT);
       this.onTargetHit();
     };
     onTargetHover = (_, cursor) => {
       if (!this.currentTargetActive)
         return;
-      hapticFeedback3(cursor.object, 0.5, 10);
+      triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
     /**
      * Dedicated function to start the game
@@ -13732,14 +13872,6 @@ Checking ray mesh hierarchy:`);
   });
 
   // js/replay-button-react.js
-  function hapticFeedback4(object, strength, duration) {
-    const input = object.getComponent(InputComponent);
-    if (input && input.xrInputSource) {
-      const gamepad = input.xrInputSource.gamepad;
-      if (gamepad && gamepad.hapticActuators)
-        gamepad.hapticActuators[0].pulse(strength, duration);
-    }
-  }
   var ReplayButtonReact = class extends Component3 {
     static onRegister(engine) {
       engine.registerComponent(AudioSource);
@@ -13775,12 +13907,12 @@ Checking ray mesh hierarchy:`);
       if (cursor.type === "finger-cursor") {
         this.onDown(_, cursor);
       }
-      hapticFeedback4(cursor.object, 0.5, 50);
+      triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
     onDown = (_, cursor) => {
       this.soundClick.play();
       this.object.setPositionLocal([0, -0.1, 0]);
-      hapticFeedback4(cursor.object, 1, 20);
+      triggerHaptic(cursor.object, HapticPatterns.BUTTON_DOWN);
       if (this.gameController) {
         const game = this.gameController.getComponent(ReactionGame);
         if (game) {
@@ -13793,7 +13925,7 @@ Checking ray mesh hierarchy:`);
     onUp = (_, cursor) => {
       this.soundUnClick.play();
       this.object.setPositionLocal(this.returnPos);
-      hapticFeedback4(cursor.object, 0.7, 20);
+      triggerHaptic(cursor.object, HapticPatterns.BUTTON_UP);
     };
     onUnhover = (_, cursor) => {
       if (this.mesh && this.defaultMaterial) {
@@ -13802,7 +13934,7 @@ Checking ray mesh hierarchy:`);
       if (cursor.type === "finger-cursor") {
         this.onUp(_, cursor);
       }
-      hapticFeedback4(cursor.object, 0.3, 50);
+      triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
   };
   __publicField(ReplayButtonReact, "TypeName", "replay-button-react");
@@ -14352,9 +14484,6 @@ Active: ${this.activeTargets.length}`;
     autoStartBeamDrill: Property.bool(false)
   });
 
-  // js/ui-plane-env-tennis-button.js
-  var ui_plane_env_tennis_button_exports = {};
-
   // js/vr-motion-tracker.js
   var vr_motion_tracker_exports = {};
   __export(vr_motion_tracker_exports, {
@@ -14747,6 +14876,7 @@ Active: ${this.activeTargets.length}`;
   _registerEditor(data_manager_exports);
   _registerEditor(environment_switcher_exports);
   _registerEditor(game_selector_exports);
+  _registerEditor(haptic_feedback_exports);
   _registerEditor(head_bob_exports);
   _registerEditor(replay_button_catch_exports);
   _registerEditor(replay_button_react_exports);
@@ -14755,6 +14885,5 @@ Active: ${this.activeTargets.length}`;
   _registerEditor(target_manager_exports);
   _registerEditor(ui_cursor_button_exports);
   _registerEditor(ui_plane_button_exports);
-  _registerEditor(ui_plane_env_tennis_button_exports);
   _registerEditor(vr_motion_tracker_exports);
 })();

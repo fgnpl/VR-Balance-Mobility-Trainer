@@ -44,6 +44,8 @@ import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_environment_switcher_js fr
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_environment_switcher_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_game_selector_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/game-selector.js';
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_game_selector_js);
+import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_haptic_feedback_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/haptic-feedback.js';
+_registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_haptic_feedback_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_head_bob_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/head-bob.js';
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_head_bob_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_replay_button_catch_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/replay-button-catch.js';
@@ -60,7 +62,5 @@ import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_ui_cursor_button_js from '
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_ui_cursor_button_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_ui_plane_button_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/ui-plane-button.js';
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_ui_plane_button_js);
-import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_ui_plane_env_tennis_button_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/ui-plane-env-tennis-button.js';
-_registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_ui_plane_env_tennis_button_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_vr_motion_tracker_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/vr-motion-tracker.js';
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_vr_motion_tracker_js);
