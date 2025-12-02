@@ -1640,7 +1640,9 @@
                         "endPosition": "350",
                         "dataManager": "234",
                         "statsText": "374",
-                        "headObject": "233"
+                        "headObject": "233",
+                        "leftController": "130",
+                        "rightController": "129"
                     }
                 },
                 {
