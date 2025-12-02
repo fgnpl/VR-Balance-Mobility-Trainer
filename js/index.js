@@ -16,19 +16,26 @@ import {FingerCursor} from '@wonderlandengine/components';
 import {HandTracking} from '@wonderlandengine/components';
 import {MouseLookComponent} from '@wonderlandengine/components';
 import {PlayerHeight} from '@wonderlandengine/components';
+import {Trail} from '@wonderlandengine/components';
 import {VrModeActiveSwitch} from '@wonderlandengine/components';
 import {WasdControlsComponent} from '@wonderlandengine/components';
 import {BallCollision} from './ball-collision.js';
 import {BallThrower} from './ball-thrower.js';
+import {BatManager} from './bat-manager.js';
 import {BeamWalkManager} from './beam-walk-manager.js';
+import {BouncingBall} from './bouncing-ball.js';
 import {CollisionDebug} from './collision-debug.js';
 import {ControllerHit} from './controller-hit.js';
 import {DataManager} from './data-manager.js';
 import {GameSelector} from './game-selector.js';
 import {HeadBob} from './head-bob.js';
+import {ReplayButtonCatch} from './replay-button-catch.js';
+import {ReplayButtonReact} from './replay-button-react.js';
+import {ReactionGame} from './sphere-spawner.js';
 import {TargetCollision} from './target-collision.js';
 import {TargetManager} from './target-manager.js';
 import {UiPlaneButton} from './ui-plane-button.js';
+import {VrMotionTracker} from './vr-motion-tracker.js';
 /* wle:auto-imports:end */
 
 export default function(engine) {
@@ -40,19 +47,26 @@ engine.registerComponent(FingerCursor);
 engine.registerComponent(HandTracking);
 engine.registerComponent(MouseLookComponent);
 engine.registerComponent(PlayerHeight);
+engine.registerComponent(Trail);
 engine.registerComponent(VrModeActiveSwitch);
 engine.registerComponent(WasdControlsComponent);
 engine.registerComponent(BallCollision);
 engine.registerComponent(BallThrower);
+engine.registerComponent(BatManager);
 engine.registerComponent(BeamWalkManager);
+engine.registerComponent(BouncingBall);
 engine.registerComponent(CollisionDebug);
 engine.registerComponent(ControllerHit);
 engine.registerComponent(DataManager);
 engine.registerComponent(GameSelector);
 engine.registerComponent(HeadBob);
+engine.registerComponent(ReplayButtonCatch);
+engine.registerComponent(ReplayButtonReact);
+engine.registerComponent(ReactionGame);
 engine.registerComponent(TargetCollision);
 engine.registerComponent(TargetManager);
 engine.registerComponent(UiPlaneButton);
+engine.registerComponent(VrMotionTracker);
 /* wle:auto-register:end */
 
 

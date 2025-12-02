@@ -12115,6 +12115,30 @@
     // Wait for ball to be hit before spawning next
   });
 
+  // js/bat-manager.js
+  var bat_manager_exports = {};
+  __export(bat_manager_exports, {
+    BatManager: () => BatManager
+  });
+  var BatManager = class extends Component3 {
+    start() {
+      this.soundSource = this.object.addComponent("audio-source", { src: "sfx/click.wav", spatial: true });
+      this.object.getComponent("physx").onCollision((type, other) => {
+        if (type === CollisionEventType.Touch) {
+          this.onCollision(other);
+        }
+      });
+    }
+    onCollision(other) {
+      if (other.object.name === "Sphere") {
+        this.soundSource.play();
+      }
+    }
+  };
+  __publicField(BatManager, "TypeName", "bat-manager");
+  /* Properties that are configurable in the editor */
+  __publicField(BatManager, "Properties", {});
+
   // js/beam-walk-manager.js
   var beam_walk_manager_exports = {};
   __export(beam_walk_manager_exports, {
@@ -12333,6 +12357,189 @@ Avg Dev: ${avgDev}m`;
     // Text component to display live stats
     successRadius: Property.float(1)
     // Radius around end point to count as success
+  });
+
+  // js/bouncing-ball.js
+  var bouncing_ball_exports = {};
+  __export(bouncing_ball_exports, {
+    BouncingBall: () => BouncingBall
+  });
+  var BouncingBall = class extends Component3 {
+    init() {
+      this.groundTimer = 0;
+      this.nSpawned = 0;
+      this.hitCount = 0;
+      this.isSpawning = false;
+      this.canRegisterHit = false;
+      this.gameRunning = false;
+      this.hiddenPosition = [0, -50, 0];
+    }
+    start() {
+      this.rigidBody = this.object.getComponent("physx");
+      this.setGameComponentsActive(false);
+      if (this.endPanel) {
+        this.endPanel.active = true;
+        if (this.panelVisiblePos) {
+          this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
+        }
+      }
+      if (this.scoreText) {
+        const textComp = this.scoreText.getComponent("text");
+        if (textComp) {
+          textComp.text = "Ready?";
+        }
+      }
+      this.object.getComponent("physx").onCollision((type, other) => {
+        if (type === CollisionEventType.Touch) {
+          this.onCollision(other);
+        }
+      });
+    }
+    /**
+     * Dedicated function to start the game.
+     * Called by resetGame() when the button is clicked.
+     */
+    startGame() {
+      this.nSpawned = 0;
+      this.hitCount = 0;
+      this.isSpawning = false;
+      this.gameRunning = true;
+      this.hideGameOverPanel();
+      this.respawn();
+      this.setGameComponentsActive(true);
+    }
+    /**
+     * Helper to toggle Mesh and PhysX components on Ball and Bat.
+     */
+    setGameComponentsActive(isActive) {
+      const ballMesh = this.object.getComponent("mesh");
+      const ballPhysx = this.object.getComponent("physx");
+      const ballTrail = this.object.getComponent("trail");
+      if (ballMesh)
+        ballMesh.active = isActive;
+      if (ballPhysx)
+        ballPhysx.active = isActive;
+      if (ballTrail)
+        ballTrail.active = isActive;
+      if (this.batObject) {
+        const batMesh = this.batObject.getComponent("mesh");
+        const batPhysx = this.batObject.getComponent("physx");
+        if (batMesh)
+          batMesh.active = isActive;
+        if (batPhysx)
+          batPhysx.active = isActive;
+      }
+    }
+    onCollision(other) {
+      if (other.object.name === "Baseball Bat") {
+        if (this.canRegisterHit) {
+          console.log("Bat hit");
+          this.hitCount++;
+          this.canRegisterHit = false;
+        }
+      }
+    }
+    update(dt) {
+      if (!this.gameRunning)
+        return;
+      if (this.isSpawning)
+        return;
+      if (this.isStill()) {
+        this.canRegisterHit = false;
+        this.groundTimer += dt;
+        if (this.groundTimer >= 0.1) {
+          const trail = this.object.getComponent("trail");
+          if (trail)
+            trail.active = false;
+          this.respawn();
+        }
+      } else {
+        this.groundTimer = 0;
+      }
+    }
+    respawn() {
+      if (this.nSpawned >= this.maxSpawn) {
+        this.showGameOver();
+        return;
+      }
+      this.isSpawning = true;
+      this.groundTimer = 0;
+      this.canRegisterHit = false;
+      const randomX = Math.random() * (this.maxX - this.minX) + this.minX;
+      const randomY = Math.random() * (this.maxY - this.minY) + this.minY;
+      this.rigidBody.kinematic = true;
+      this.object.setPositionWorld([randomX, randomY, this.spawnZ]);
+      const trail = this.object.getComponent("trail");
+      if (trail)
+        trail.active = true;
+      setTimeout(() => {
+        if (this.rigidBody && this.gameRunning) {
+          this.rigidBody.kinematic = false;
+          this.applyRandomForce();
+          this.isSpawning = false;
+          this.canRegisterHit = true;
+        }
+      }, 100);
+      this.nSpawned++;
+    }
+    applyRandomForce() {
+      const randomForceX = (Math.random() * (this.maxForceX - this.minForceX) + this.minForceX) * (Math.random() < 0.5 ? -1 : 1);
+      const randomForceZ = Math.random() * (this.maxForceZ - this.minForceZ) + this.minForceZ;
+      this.rigidBody.addForce([randomForceX, 0, randomForceZ]);
+    }
+    // Logic for panel teleporting
+    showGameOver() {
+      console.log("Game over. Hits: " + this.hitCount);
+      this.gameRunning = false;
+      this.setGameComponentsActive(false);
+      if (this.scoreText) {
+        const textComp = this.scoreText.getComponent("text");
+        if (textComp) {
+          textComp.text = `Hits: ${this.hitCount} / ${this.maxSpawn}`;
+        }
+      }
+      if (this.endPanel && this.panelVisiblePos) {
+        this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
+      }
+    }
+    hideGameOverPanel() {
+      if (this.endPanel) {
+        this.endPanel.setPositionWorld(this.hiddenPosition);
+      }
+    }
+    resetGame() {
+      this.startGame();
+    }
+    isStill() {
+      if (!this.rigidBody)
+        return false;
+      const v = this.rigidBody.linearVelocity;
+      return v[0] == 0 && v[1] == 0 && v[2] == 0;
+    }
+  };
+  __publicField(BouncingBall, "TypeName", "bouncing-ball");
+  // Configuration for where the ball can spawn and forces
+  __publicField(BouncingBall, "Properties", {
+    maxSpawn: Property.int(2),
+    minX: Property.float(-0.5),
+    maxX: Property.float(0.5),
+    minY: Property.float(1.5),
+    maxY: Property.float(2.5),
+    spawnZ: Property.float(-3),
+    minForceX: Property.float(50),
+    maxForceX: Property.float(100),
+    minForceZ: Property.float(250),
+    maxForceZ: Property.float(300),
+    // UI properties
+    endPanel: Property.object(),
+    // Parent object (the panel)
+    scoreText: Property.object(),
+    // Text object (child of the panel)
+    panelVisiblePos: Property.object(),
+    // Location object where panel should appear
+    // Game Objects
+    batObject: Property.object()
+    // Reference to the Bat
   });
 
   // js/button-3d.js
@@ -13265,6 +13472,347 @@ Checking ray mesh hierarchy:`);
     epsilon: Property.float(1e-3)
   });
 
+  // js/replay-button-catch.js
+  var replay_button_catch_exports = {};
+  __export(replay_button_catch_exports, {
+    ReplayButtonCatch: () => ReplayButtonCatch,
+    hapticFeedback: () => hapticFeedback2
+  });
+  function hapticFeedback2(object, strength, duration) {
+    const input = object.getComponent(InputComponent);
+    if (input && input.xrInputSource) {
+      const gamepad = input.xrInputSource.gamepad;
+      if (gamepad && gamepad.hapticActuators)
+        gamepad.hapticActuators[0].pulse(strength, duration);
+    }
+  }
+  var ReplayButtonCatch = class extends Component3 {
+    static onRegister(engine) {
+      engine.registerComponent(AudioSource);
+      engine.registerComponent(CursorTarget);
+    }
+    init() {
+      this.returnPos = new Float32Array(3);
+    }
+    start() {
+      this.mesh = this.object.getComponent(MeshComponent);
+      this.defaultMaterial = this.mesh ? this.mesh.material : null;
+      this.object.getPositionLocal(this.returnPos);
+      this.target = this.object.getComponent(CursorTarget) || this.object.addComponent(CursorTarget);
+      this.soundClick = this.object.addComponent(AudioSource, { src: "sfx/click.wav", spatial: true });
+      this.soundUnClick = this.object.addComponent(AudioSource, { src: "sfx/unclick.wav", spatial: true });
+    }
+    onActivate() {
+      this.target.onHover.add(this.onHover);
+      this.target.onUnhover.add(this.onUnhover);
+      this.target.onDown.add(this.onDown);
+      this.target.onUp.add(this.onUp);
+    }
+    onDeactivate() {
+      this.target.onHover.remove(this.onHover);
+      this.target.onUnhover.remove(this.onUnhover);
+      this.target.onDown.remove(this.onDown);
+      this.target.onUp.remove(this.onUp);
+    }
+    onHover = (_, cursor) => {
+      if (this.mesh && this.hoverMaterial) {
+        this.mesh.material = this.hoverMaterial;
+      }
+      if (cursor.type === "finger-cursor") {
+        this.onDown(_, cursor);
+      }
+      hapticFeedback2(cursor.object, 0.5, 50);
+    };
+    onDown = (_, cursor) => {
+      this.soundClick.play();
+      this.object.setPositionLocal([0, -0.1, 0]);
+      hapticFeedback2(cursor.object, 1, 20);
+      if (this.gameController) {
+        const ballLogic = this.gameController.getComponent(BouncingBall);
+        if (ballLogic) {
+          ballLogic.resetGame();
+        } else {
+          console.warn("ReplayButton: No BouncingBall component found on gameController object");
+        }
+      }
+    };
+    onUp = (_, cursor) => {
+      this.soundUnClick.play();
+      this.object.setPositionLocal(this.returnPos);
+      hapticFeedback2(cursor.object, 0.7, 20);
+    };
+    onUnhover = (_, cursor) => {
+      if (this.mesh && this.defaultMaterial) {
+        this.mesh.material = this.defaultMaterial;
+      }
+      if (cursor.type === "finger-cursor") {
+        this.onUp(_, cursor);
+      }
+      hapticFeedback2(cursor.object, 0.3, 50);
+    };
+  };
+  __publicField(ReplayButtonCatch, "TypeName", "replay-button-catch");
+  __publicField(ReplayButtonCatch, "Properties", {
+    // Object that has the BouncingBall component
+    gameController: Property.object(),
+    // Material to apply when hover 
+    hoverMaterial: Property.material()
+  });
+
+  // js/replay-button-react.js
+  var replay_button_react_exports = {};
+  __export(replay_button_react_exports, {
+    ReplayButtonReact: () => ReplayButtonReact,
+    hapticFeedback: () => hapticFeedback4
+  });
+
+  // js/sphere-spawner.js
+  var sphere_spawner_exports = {};
+  __export(sphere_spawner_exports, {
+    ReactionGame: () => ReactionGame,
+    hapticFeedback: () => hapticFeedback3
+  });
+  function hapticFeedback3(object, strength, duration) {
+    const input = object.getComponent(InputComponent);
+    if (input && input.xrInputSource) {
+      const gamepad = input.xrInputSource.gamepad;
+      if (gamepad && gamepad.hapticActuators)
+        gamepad.hapticActuators[0].pulse(strength, duration);
+    }
+  }
+  var ReactionGame = class extends Component3 {
+    init() {
+      this.hiddenPosition = [0, -50, 0];
+      this.isGameActive = false;
+    }
+    start() {
+      this.textComponent = this.statusText.getComponent("text");
+      this.resultTextComponent = this.resultText.getComponent("text");
+      this.score = 0;
+      this.targetsSpawned = 0;
+      this.reactionTimes = [];
+      this.isGameActive = false;
+      this.currentTimer = 0;
+      this.currentTargetActive = false;
+      this.cursorTargetComp = this.targetTemplate.getComponent(CursorTarget);
+      if (!this.cursorTargetComp) {
+        this.cursorTargetComp = this.targetTemplate.addComponent(CursorTarget);
+      }
+      if (this.endPanel) {
+        this.endPanel.active = true;
+        if (this.panelVisibleLocation) {
+          const pos = this.panelVisibleLocation.getTranslationWorld([]);
+          this.endPanel.setTranslationWorld(pos);
+        }
+      }
+      if (this.resultTextComponent) {
+        this.resultTextComponent.text = "Ready?";
+      }
+      if (this.targetTemplate) {
+        this.targetTemplate.active = false;
+      }
+    }
+    onActivate() {
+      if (this.cursorTargetComp) {
+        this.cursorTargetComp.onDown.add(this.onTargetDown);
+        this.cursorTargetComp.onHover.add(this.onTargetHover);
+      }
+    }
+    onDeactivate() {
+      if (this.cursorTargetComp) {
+        this.cursorTargetComp.onDown.remove(this.onTargetDown);
+        this.cursorTargetComp.onHover.remove(this.onTargetHover);
+      }
+    }
+    update(dt) {
+      if (!this.isGameActive || !this.currentTargetActive)
+        return;
+      this.currentTimer += dt;
+      if (this.currentTimer >= this.timeoutDuration) {
+        this.handleTimeout();
+      }
+    }
+    onTargetDown = (_, cursor) => {
+      if (!this.currentTargetActive)
+        return;
+      hapticFeedback3(cursor.object, 1, 20);
+      this.onTargetHit();
+    };
+    onTargetHover = (_, cursor) => {
+      if (!this.currentTargetActive)
+        return;
+      hapticFeedback3(cursor.object, 0.5, 10);
+    };
+    /**
+     * Dedicated function to start the game
+     */
+    startGame() {
+      console.log("Starting game...");
+      this.hideGameOverPanel();
+      this.score = 0;
+      this.targetsSpawned = 0;
+      this.reactionTimes = [];
+      this.isGameActive = true;
+      this.currentTimer = 0;
+      this.currentTargetActive = false;
+      this.spawnNextTarget();
+    }
+    spawnNextTarget() {
+      if (this.targetsSpawned >= this.maxTargets) {
+        this.endGame();
+        return;
+      }
+      this.targetsSpawned++;
+      this.updateText(`Target: ${this.targetsSpawned}/${this.maxTargets}`);
+      const rangeX = this.spawnArea.scalingWorld[0];
+      const rangeY = this.spawnArea.scalingWorld[1];
+      const randX = (Math.random() - 0.5) * 2 * rangeX;
+      const randY = (Math.random() - 0.5) * 2 * rangeY;
+      this.targetTemplate.setTranslationWorld(this.spawnArea.getTranslationWorld([]));
+      this.targetTemplate.translateObject([randX, randY, 0.1]);
+      this.targetTemplate.active = true;
+      this.currentTargetActive = true;
+      this.currentTimer = 0;
+      this.sphereStartTime = Date.now() / 1e3;
+    }
+    onTargetHit() {
+      const hitTime = Date.now() / 1e3;
+      const reactionTime = hitTime - this.sphereStartTime;
+      this.reactionTimes.push(reactionTime);
+      this.targetTemplate.active = false;
+      this.currentTargetActive = false;
+      this.spawnNextTarget();
+    }
+    handleTimeout() {
+      this.reactionTimes.push(this.timeoutDuration);
+      this.targetTemplate.active = false;
+      this.currentTargetActive = false;
+      this.spawnNextTarget();
+    }
+    endGame() {
+      this.isGameActive = false;
+      this.currentTargetActive = false;
+      this.targetTemplate.active = false;
+      const total = this.reactionTimes.reduce((a, b) => a + b, 0);
+      const avg = total / (this.reactionTimes.length || 1);
+      if (this.resultTextComponent) {
+        this.resultTextComponent.text = `Avg. Time: ${avg.toFixed(3)}s`;
+      }
+      if (this.endPanel && this.panelVisibleLocation) {
+        const pos = this.panelVisibleLocation.getTranslationWorld([]);
+        this.endPanel.setTranslationWorld(pos);
+      }
+    }
+    hideGameOverPanel() {
+      if (this.endPanel) {
+        this.endPanel.setPositionWorld(this.hiddenPosition);
+      }
+    }
+    // Called by the button
+    resetGame() {
+      this.startGame();
+    }
+    updateText(msg) {
+      if (this.textComponent)
+        this.textComponent.text = msg;
+    }
+  };
+  __publicField(ReactionGame, "TypeName", "reaction-game");
+  __publicField(ReactionGame, "Properties", {
+    spawnArea: Property.object(),
+    targetTemplate: Property.object(),
+    statusText: Property.object(),
+    maxTargets: Property.int(20),
+    timeoutDuration: Property.float(10),
+    // UI references
+    endPanel: Property.object(),
+    resultText: Property.object(),
+    // Where should the panel appear when the game ends/starts?
+    panelVisibleLocation: Property.object()
+  });
+
+  // js/replay-button-react.js
+  function hapticFeedback4(object, strength, duration) {
+    const input = object.getComponent(InputComponent);
+    if (input && input.xrInputSource) {
+      const gamepad = input.xrInputSource.gamepad;
+      if (gamepad && gamepad.hapticActuators)
+        gamepad.hapticActuators[0].pulse(strength, duration);
+    }
+  }
+  var ReplayButtonReact = class extends Component3 {
+    static onRegister(engine) {
+      engine.registerComponent(AudioSource);
+      engine.registerComponent(CursorTarget);
+    }
+    init() {
+      this.returnPos = new Float32Array(3);
+    }
+    start() {
+      this.mesh = this.object.getComponent(MeshComponent);
+      this.defaultMaterial = this.mesh ? this.mesh.material : null;
+      this.object.getPositionLocal(this.returnPos);
+      this.target = this.object.getComponent(CursorTarget) || this.object.addComponent(CursorTarget);
+      this.soundClick = this.object.addComponent(AudioSource, { src: "sfx/click.wav", spatial: true });
+      this.soundUnClick = this.object.addComponent(AudioSource, { src: "sfx/unclick.wav", spatial: true });
+    }
+    onActivate() {
+      this.target.onHover.add(this.onHover);
+      this.target.onUnhover.add(this.onUnhover);
+      this.target.onDown.add(this.onDown);
+      this.target.onUp.add(this.onUp);
+    }
+    onDeactivate() {
+      this.target.onHover.remove(this.onHover);
+      this.target.onUnhover.remove(this.onUnhover);
+      this.target.onDown.remove(this.onDown);
+      this.target.onUp.remove(this.onUp);
+    }
+    onHover = (_, cursor) => {
+      if (this.mesh && this.hoverMaterial) {
+        this.mesh.material = this.hoverMaterial;
+      }
+      if (cursor.type === "finger-cursor") {
+        this.onDown(_, cursor);
+      }
+      hapticFeedback4(cursor.object, 0.5, 50);
+    };
+    onDown = (_, cursor) => {
+      this.soundClick.play();
+      this.object.setPositionLocal([0, -0.1, 0]);
+      hapticFeedback4(cursor.object, 1, 20);
+      if (this.gameController) {
+        const game = this.gameController.getComponent(ReactionGame);
+        if (game) {
+          game.resetGame();
+        } else {
+          console.error("ReplayButton: No 'reaction-game' component found on the referenced Game Container object.");
+        }
+      }
+    };
+    onUp = (_, cursor) => {
+      this.soundUnClick.play();
+      this.object.setPositionLocal(this.returnPos);
+      hapticFeedback4(cursor.object, 0.7, 20);
+    };
+    onUnhover = (_, cursor) => {
+      if (this.mesh && this.defaultMaterial) {
+        this.mesh.material = this.defaultMaterial;
+      }
+      if (cursor.type === "finger-cursor") {
+        this.onUp(_, cursor);
+      }
+      hapticFeedback4(cursor.object, 0.3, 50);
+    };
+  };
+  __publicField(ReplayButtonReact, "TypeName", "replay-button-react");
+  __publicField(ReplayButtonReact, "Properties", {
+    // Object that has the ReactionGame component
+    gameController: Property.object(),
+    // Material to apply when hover 
+    hoverMaterial: Property.material()
+  });
+
   // js/target-collision.js
   var target_collision_exports = {};
   __export(target_collision_exports, {
@@ -13807,12 +14355,382 @@ Active: ${this.activeTargets.length}`;
   // js/ui-plane-env-tennis-button.js
   var ui_plane_env_tennis_button_exports = {};
 
+  // js/vr-motion-tracker.js
+  var vr_motion_tracker_exports = {};
+  __export(vr_motion_tracker_exports, {
+    VrMotionTracker: () => VrMotionTracker
+  });
+  var VrMotionTracker = class extends Component3 {
+    init() {
+      this.sessionId = this._generateSessionId();
+      this.sessionData = {
+        sessionId: this.sessionId,
+        startTime: null,
+        endTime: null,
+        samplingRate: 1 / this.recordingInterval,
+        devices: {
+          head: {
+            enabled: this.trackHead,
+            samples: []
+          },
+          leftController: {
+            enabled: this.trackLeftController,
+            samples: []
+          },
+          rightController: {
+            enabled: this.trackRightController,
+            samples: []
+          }
+        }
+      };
+      this.prevData = {
+        head: { position: vec3_exports.create(), velocity: vec3_exports.create(), time: 0 },
+        leftController: { position: vec3_exports.create(), velocity: vec3_exports.create(), time: 0 },
+        rightController: { position: vec3_exports.create(), velocity: vec3_exports.create(), time: 0 }
+      };
+      this.isRecording = false;
+      this.lastSampleTime = 0;
+      this.sessionStartTime = 0;
+      this.lastAutoSaveTime = 0;
+      this.autoSaveInterval = 1;
+      this.isSaving = false;
+      console.log(`[VrMotionTracker] Initialized - Session ID: ${this.sessionId}`);
+    }
+    start() {
+      this._validateSetup();
+      if (this.autoStart) {
+        setTimeout(() => {
+          this.startRecording();
+        }, 1e3);
+      }
+    }
+    _validateSetup() {
+      const warnings = [];
+      if (this.trackHead && !this.headObject) {
+        warnings.push("Head tracking enabled but headObject not linked");
+      }
+      if (this.trackLeftController && !this.leftController) {
+        warnings.push("Left controller tracking enabled but leftController not linked");
+      }
+      if (this.trackRightController && !this.rightController) {
+        warnings.push("Right controller tracking enabled but rightController not linked");
+      }
+      if (warnings.length > 0) {
+        console.warn("[VrMotionTracker] Setup warnings:", warnings.join(", "));
+      }
+    }
+    update(dt) {
+      if (!this.isRecording)
+        return;
+      const currentTime = performance.now() / 1e3;
+      const timeSinceLastSample = currentTime - this.lastSampleTime;
+      if (timeSinceLastSample >= this.recordingInterval) {
+        this._recordSample(currentTime, dt);
+        this.lastSampleTime = currentTime;
+      }
+      const timeSinceLastSave = currentTime - this.lastAutoSaveTime;
+      if (timeSinceLastSave >= this.autoSaveInterval) {
+        this._autoSaveToServer();
+        this.lastAutoSaveTime = currentTime;
+      }
+    }
+    _recordSample(currentTime, dt) {
+      const sessionTime = currentTime - this.sessionStartTime;
+      if (this.trackHead && this.headObject) {
+        const data = this._calculateMotionData("head", this.headObject, currentTime, dt);
+        if (data) {
+          this.sessionData.devices.head.samples.push({
+            time: sessionTime,
+            ...data
+          });
+        }
+      }
+      if (this.trackLeftController && this.leftController) {
+        const data = this._calculateMotionData("leftController", this.leftController, currentTime, dt);
+        if (data) {
+          this.sessionData.devices.leftController.samples.push({
+            time: sessionTime,
+            ...data
+          });
+        }
+      }
+      if (this.trackRightController && this.rightController) {
+        const data = this._calculateMotionData("rightController", this.rightController, currentTime, dt);
+        if (data) {
+          this.sessionData.devices.rightController.samples.push({
+            time: sessionTime,
+            ...data
+          });
+        }
+      }
+      if (this.debugMode && Math.floor(sessionTime) % 5 === 0 && sessionTime > 0) {
+        const totalSamples = this.sessionData.devices.head.samples.length + this.sessionData.devices.leftController.samples.length + this.sessionData.devices.rightController.samples.length;
+        console.log(`[VrMotionTracker] Recording... ${totalSamples} total samples at ${sessionTime.toFixed(1)}s`);
+      }
+    }
+    _calculateMotionData(deviceName, object, currentTime, dt) {
+      const prev = this.prevData[deviceName];
+      const position = vec3_exports.create();
+      object.getPositionWorld(position);
+      const rotation = quat_exports.create();
+      object.getRotationWorld(rotation);
+      const velocity = vec3_exports.create();
+      if (prev.time > 0) {
+        const timeDelta = currentTime - prev.time;
+        if (timeDelta > 0) {
+          vec3_exports.subtract(velocity, position, prev.position);
+          vec3_exports.scale(velocity, velocity, 1 / timeDelta);
+        }
+      }
+      const acceleration = vec3_exports.create();
+      if (prev.time > 0) {
+        const timeDelta = currentTime - prev.time;
+        if (timeDelta > 0) {
+          vec3_exports.subtract(acceleration, velocity, prev.velocity);
+          vec3_exports.scale(acceleration, acceleration, 1 / timeDelta);
+        }
+      }
+      const speed = vec3_exports.length(velocity);
+      const accelerationMagnitude = vec3_exports.length(acceleration);
+      vec3_exports.copy(prev.position, position);
+      vec3_exports.copy(prev.velocity, velocity);
+      prev.time = currentTime;
+      return {
+        position: {
+          x: parseFloat(position[0].toFixed(4)),
+          y: parseFloat(position[1].toFixed(4)),
+          z: parseFloat(position[2].toFixed(4))
+        },
+        rotation: {
+          x: parseFloat(rotation[0].toFixed(4)),
+          y: parseFloat(rotation[1].toFixed(4)),
+          z: parseFloat(rotation[2].toFixed(4)),
+          w: parseFloat(rotation[3].toFixed(4))
+        },
+        velocity: {
+          x: parseFloat(velocity[0].toFixed(4)),
+          y: parseFloat(velocity[1].toFixed(4)),
+          z: parseFloat(velocity[2].toFixed(4)),
+          magnitude: parseFloat(speed.toFixed(4))
+        },
+        acceleration: {
+          x: parseFloat(acceleration[0].toFixed(4)),
+          y: parseFloat(acceleration[1].toFixed(4)),
+          z: parseFloat(acceleration[2].toFixed(4)),
+          magnitude: parseFloat(accelerationMagnitude.toFixed(4))
+        }
+      };
+    }
+    startRecording() {
+      if (this.isRecording) {
+        console.warn("[VrMotionTracker] Already recording");
+        return;
+      }
+      this.isRecording = true;
+      this.sessionStartTime = performance.now() / 1e3;
+      this.lastSampleTime = this.sessionStartTime;
+      this.lastAutoSaveTime = this.sessionStartTime;
+      this.sessionData.startTime = (/* @__PURE__ */ new Date()).toISOString();
+      this.prevData.head.time = 0;
+      this.prevData.leftController.time = 0;
+      this.prevData.rightController.time = 0;
+      console.log("[VrMotionTracker] Recording started at", this.sessionData.startTime);
+      console.log("[VrMotionTracker] Auto-saving every", this.autoSaveInterval, "second(s)");
+    }
+    stopRecording() {
+      if (!this.isRecording) {
+        console.warn("[VrMotionTracker] Not currently recording");
+        return;
+      }
+      this.isRecording = false;
+      this.sessionData.endTime = (/* @__PURE__ */ new Date()).toISOString();
+      const duration = performance.now() / 1e3 - this.sessionStartTime;
+      console.log(`[VrMotionTracker] Recording stopped. Duration: ${duration.toFixed(2)}s`);
+      this.saveToFile();
+    }
+    async _autoSaveToServer() {
+      if (this.isSaving)
+        return;
+      this.isSaving = true;
+      try {
+        this.sessionData.endTime = (/* @__PURE__ */ new Date()).toISOString();
+        const serverUrl = "/api/save-motion-data";
+        if (this.debugMode) {
+          const sampleCount = this.getSampleCount();
+          console.log(`[VrMotionTracker] Auto-saving... (${sampleCount} samples)`);
+        }
+        const response = await fetch(serverUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(this.sessionData)
+        });
+        if (!response.ok) {
+          throw new Error(`Server responded with ${response.status}`);
+        }
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.error || "Unknown server error");
+        }
+      } catch (error) {
+        console.error("[VrMotionTracker] Auto-save failed:", error.message);
+      } finally {
+        this.isSaving = false;
+      }
+    }
+    async saveToFile() {
+      const filename = `vr-motion-${this.sessionData.sessionId}.json`;
+      const stats = this._calculateStatistics();
+      console.log("[VrMotionTracker] Session Statistics:", stats);
+      await this._sendToServer(filename);
+      console.log(`[VrMotionTracker] Session data saved to server: ${filename}`);
+      console.log(`Total samples: ${stats.totalSamples}`);
+    }
+    _calculateStatistics() {
+      const stats = {
+        totalSamples: 0,
+        duration: 0,
+        devices: {}
+      };
+      for (const [deviceName, deviceData] of Object.entries(this.sessionData.devices)) {
+        if (!deviceData.enabled || deviceData.samples.length === 0) {
+          stats.devices[deviceName] = { enabled: false };
+          continue;
+        }
+        const samples = deviceData.samples;
+        stats.totalSamples += samples.length;
+        let maxSpeed = 0;
+        let maxAcceleration = 0;
+        let avgSpeed = 0;
+        let avgAcceleration = 0;
+        samples.forEach((sample) => {
+          const speed = sample.velocity.magnitude;
+          const accel = sample.acceleration.magnitude;
+          if (speed > maxSpeed)
+            maxSpeed = speed;
+          if (accel > maxAcceleration)
+            maxAcceleration = accel;
+          avgSpeed += speed;
+          avgAcceleration += accel;
+        });
+        avgSpeed /= samples.length;
+        avgAcceleration /= samples.length;
+        stats.devices[deviceName] = {
+          enabled: true,
+          sampleCount: samples.length,
+          maxSpeed: parseFloat(maxSpeed.toFixed(4)),
+          avgSpeed: parseFloat(avgSpeed.toFixed(4)),
+          maxAcceleration: parseFloat(maxAcceleration.toFixed(4)),
+          avgAcceleration: parseFloat(avgAcceleration.toFixed(4))
+        };
+      }
+      if (this.sessionData.startTime && this.sessionData.endTime) {
+        const start = new Date(this.sessionData.startTime);
+        const end = new Date(this.sessionData.endTime);
+        stats.duration = (end - start) / 1e3;
+      }
+      return stats;
+    }
+    async _sendToServer(filename) {
+      try {
+        const serverUrl = "/api/save-motion-data";
+        console.log(`[VrMotionTracker] Sending data to server...`);
+        const response = await fetch(serverUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(this.sessionData)
+        });
+        if (!response.ok) {
+          throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+        }
+        const result = await response.json();
+        if (result.success) {
+          console.log(`[VrMotionTracker] Successfully saved to server: ${result.filename}`);
+          console.log(`[VrMotionTracker] Server filepath: ${result.filepath}`);
+        } else {
+          throw new Error(result.error || "Unknown server error");
+        }
+      } catch (error) {
+        console.error("[VrMotionTracker] Failed to send data to server:", error);
+        console.error("[VrMotionTracker] Falling back to browser download...");
+        this._downloadJSON(filename, JSON.stringify(this.sessionData, null, 2));
+      }
+    }
+    _downloadJSON(filename, jsonData) {
+      try {
+        const blob = new Blob([jsonData], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        console.log(`[VrMotionTracker] Fallback: Browser download initiated: ${filename}`);
+      } catch (error) {
+        console.error("[VrMotionTracker] Failed to download file:", error);
+        console.log("[VrMotionTracker] JSON data:", jsonData);
+      }
+    }
+    _generateSessionId() {
+      const timestamp = Date.now();
+      const random3 = Math.random().toString(36).substring(2, 9);
+      return `${timestamp}-${random3}`;
+    }
+    // Public API methods
+    getSessionData() {
+      return this.sessionData;
+    }
+    clearSessionData() {
+      console.log("[VrMotionTracker] Clearing session data");
+      this.sessionData.devices.head.samples = [];
+      this.sessionData.devices.leftController.samples = [];
+      this.sessionData.devices.rightController.samples = [];
+      this.sessionData.sessionId = this._generateSessionId();
+      this.sessionData.startTime = null;
+      this.sessionData.endTime = null;
+    }
+    getSampleCount() {
+      return this.sessionData.devices.head.samples.length + this.sessionData.devices.leftController.samples.length + this.sessionData.devices.rightController.samples.length;
+    }
+    onDestroy() {
+      if (this.isRecording) {
+        console.log("[VrMotionTracker] Component destroyed while recording, auto-saving...");
+        this.stopRecording();
+      }
+    }
+  };
+  __publicField(VrMotionTracker, "TypeName", "vr-motion-tracker");
+  __publicField(VrMotionTracker, "Properties", {
+    // Objects to track
+    headObject: Property.object(),
+    leftController: Property.object(),
+    rightController: Property.object(),
+    // Recording settings
+    recordingInterval: Property.float(0.1),
+    // Sample every 100ms (10Hz)
+    trackHead: Property.bool(true),
+    trackLeftController: Property.bool(true),
+    trackRightController: Property.bool(true),
+    // Auto-start recording when VR starts
+    autoStart: Property.bool(true),
+    // Debug logging
+    debugMode: Property.bool(false)
+  });
+
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
   _registerEditor(ball_collision_exports);
   _registerEditor(ball_thrower_exports);
+  _registerEditor(bat_manager_exports);
   _registerEditor(beam_walk_manager_exports);
+  _registerEditor(bouncing_ball_exports);
   _registerEditor(button_3d_exports);
   _registerEditor(button_env_football_exports);
   _registerEditor(button_env_gym_exports);
@@ -13830,9 +14748,13 @@ Active: ${this.activeTargets.length}`;
   _registerEditor(environment_switcher_exports);
   _registerEditor(game_selector_exports);
   _registerEditor(head_bob_exports);
+  _registerEditor(replay_button_catch_exports);
+  _registerEditor(replay_button_react_exports);
+  _registerEditor(sphere_spawner_exports);
   _registerEditor(target_collision_exports);
   _registerEditor(target_manager_exports);
   _registerEditor(ui_cursor_button_exports);
   _registerEditor(ui_plane_button_exports);
   _registerEditor(ui_plane_env_tennis_button_exports);
+  _registerEditor(vr_motion_tracker_exports);
 })();

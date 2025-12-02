@@ -6,7 +6,10 @@
   "type": "module",
   "module": "js/index.js",
   "scripts": {
-    "build": "echo \"The 'build' script is run by the editor and should produce your application bundle\""
+    "build": "echo \"The 'build' script is run by the editor and should produce your application bundle\"",
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test-server.js"
   },
   "keywords": [
     "wonderland-engine"
@@ -14,6 +17,8 @@
   "dependencies": {
     "@wonderlandengine/api": "^1.4.7",
     "@wonderlandengine/components": "^1.2.1",
-    "gl-matrix": "^3.4.3"
+    "gl-matrix": "^3.4.3",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
   }
 }

@@ -1,1 +1,1 @@
-@wonderlandengine/api:^1.4.7@wonderlandengine/components:^1.2.1gl-matrix:^3.4.3
+@wonderlandengine/api:^1.4.7@wonderlandengine/components:^1.2.1cors:^2.8.5express:^4.18.2gl-matrix:^3.4.3

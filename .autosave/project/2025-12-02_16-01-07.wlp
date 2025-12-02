@@ -44,6 +44,9 @@
                         "playerObject": "237",
                         "bobAmount": 0.15
                     }
+                },
+                {
+                    "type": "cursor"
                 }
             ],
             "translation": [
@@ -1621,7 +1624,9 @@
                         "beamWalkManager": "234",
                         "dataManager": "234",
                         "uiStatusText": "347",
-                        "ballThrower": "351"
+                        "ballThrower": "351",
+                        "deflectBall": null,
+                        "strikeBall": null
                     }
                 },
                 {
@@ -1737,20 +1742,20 @@
                 }
             ],
             "translation": [
-                0.0,
-                0.4487664,
+                0.0001091,
+                0.5672428,
                 4.7758533128217096e-8
             ],
             "scaling": [
-                0.999997,
-                0.9999978,
+                0.5863192,
+                0.9999977,
                 1.0000019
             ],
             "rotation": [
                 0.0,
                 0.0,
-                0.70728,
-                0.7069334
+                0.7072799,
+                0.7069335
             ]
         },
         "240": {
@@ -2277,106 +2282,6 @@
                 0.0
             ]
         },
-        "325": {
-            "link": {
-                "name": "760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "324",
-            "scaling": [
-                1.0,
-                0.2481927,
-                0.9999999
-            ],
-            "translation": [
-                0.0,
-                2.0,
-                0.0
-            ],
-            "rotation": [
-                0.7071068,
-                0.0,
-                0.0,
-                0.7071066
-            ]
-        },
-        "326": {
-            "link": {
-                "name": "RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "325"
-        },
-        "327": {
-            "link": {
-                "name": "Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "326"
-        },
-        "328": {
-            "link": {
-                "name": "Group1<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "327"
-        },
-        "329": {
-            "link": {
-                "name": "Mesh1<Group1<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "328"
-        },
-        "330": {
-            "link": {
-                "name": "Mesh1_Material4_0<Mesh1<Group1<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "329"
-        },
-        "331": {
-            "link": {
-                "name": "Group2<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "327"
-        },
-        "332": {
-            "link": {
-                "name": "Mesh2<Group2<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "331"
-        },
-        "333": {
-            "link": {
-                "name": "Mesh2_Tatami_black_0<Mesh2<Group2<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "332"
-        },
-        "334": {
-            "link": {
-                "name": "Group3<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "327"
-        },
-        "335": {
-            "link": {
-                "name": "Mesh3<Group3<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "334"
-        },
-        "336": {
-            "link": {
-                "name": "Mesh3_Material4_0<Mesh3<Group3<Model<RootNode<760101c4bf0443cfa6229e80b3d21641.fbx<Sketchfab_model",
-                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
-            },
-            "parent": "335"
-        },
         "342": {
             "link": {
                 "name": "Sketchfab_model",
@@ -2480,16 +2385,16 @@
         },
         "347": {
             "name": "uiStatus",
-            "parent": "235",
+            "parent": "378",
             "components": [
                 {
                     "type": "text"
                 }
             ],
             "translation": [
-                0.0,
-                2.8906078,
-                -16.3583908
+                -0.0201438,
+                -0.7478896,
+                0.1178231
             ],
             "rotation": [
                 0.0,
@@ -2498,14 +2403,14 @@
                 1.0
             ],
             "scaling": [
-                20.7000007,
-                20.7000007,
-                20.7000007
+                1.4892086,
+                3.7636363,
+                4.2244896
             ]
         },
         "346": {
             "name": "uiCue",
-            "parent": "235",
+            "parent": "378",
             "components": [
                 {
                     "type": "text",
@@ -2515,9 +2420,9 @@
                 }
             ],
             "translation": [
-                0.0,
-                6.1630482,
-                -16.3583908
+                -0.0201438,
+                -0.1529004,
+                0.1178231
             ],
             "rotation": [
                 0.0,
@@ -2526,9 +2431,9 @@
                 1.0
             ],
             "scaling": [
-                20.7000007,
-                20.7000007,
-                20.7000007
+                1.4892086,
+                3.7636363,
+                4.2244896
             ]
         },
         "351": {
@@ -2553,9 +2458,9 @@
                 {
                     "type": "ball-thrower",
                     "ball-thrower": {
-                        "playerObject": "237",
+                        "playerObject": "14",
                         "dataManager": "234",
-                        "ballPrefab": "352"
+                        "ballPrefab": "27"
                     }
                 }
             ]
@@ -2911,15 +2816,16 @@
                                 0.05
                             ]
                         }
-                    }
+                    },
+                    "active": true
                 },
                 {
                     "type": "cursor-target"
                 }
             ],
             "translation": [
-                0.4711279,
-                0.4395904,
+                0.4711278,
+                0.1452068,
                 0.0821392
             ],
             "rotation": [
@@ -2999,8 +2905,8 @@
                 }
             ],
             "translation": [
-                -0.4509174,
-                0.1827082,
+                0.4709999,
+                -0.8118425,
                 0.0821392
             ],
             "rotation": [
@@ -3288,7 +3194,7 @@
         },
         "375": {
             "name": "uiStats",
-            "parent": "235",
+            "parent": "378",
             "components": [
                 {
                     "type": "text",
@@ -3298,9 +3204,9 @@
                 }
             ],
             "translation": [
-                0.0,
-                10.5919246,
-                -16.4906978
+                -0.0201438,
+                0.6523497,
+                0.0908215
             ],
             "rotation": [
                 0.0,
@@ -3309,9 +3215,9 @@
                 1.0
             ],
             "scaling": [
-                10.3000001,
-                10.3000001,
-                10.3000001
+                0.7410072,
+                1.8727271,
+                2.1020407
             ]
         },
         "374": {
@@ -3409,9 +3315,9 @@
                 }
             ],
             "translation": [
-                0.28,
-                7.0040001,
-                -16.9357242
+                -3.42,
+                6.104,
+                -3.236
             ],
             "rotation": [
                 0.0,
@@ -3420,9 +3326,9 @@
                 1.0
             ],
             "scaling": [
-                13.8999996,
-                5.5,
-                4.9
+                0.8,
+                0.3165467,
+                0.2820144
             ]
         },
         "393": {
@@ -3470,7 +3376,7 @@
                 0.0,
                 1.0,
                 0.0,
-                1.1148004119831967e-7
+                1.114800411983197e-7
             ],
             "scaling": [
                 1.2009999,
@@ -3520,8 +3426,8 @@
             ],
             "translation": [
                 0.0,
-                3.2202551,
-                -0.7451277
+                2.8619492,
+                -0.7451276
             ],
             "rotation": [
                 0.0,
@@ -3533,6 +3439,899 @@
                 1.7,
                 1.7,
                 1.7
+            ]
+        },
+        "395": {
+            "name": "SpawnPlane",
+            "components": [
+                {
+                    "type": "reaction-game",
+                    "reaction-game": {
+                        "spawnArea": "398",
+                        "targetTemplate": "397",
+                        "statusText": "396",
+                        "endPanel": "399",
+                        "resultText": "404",
+                        "panelVisibleLocation": "406"
+                    }
+                }
+            ],
+            "translation": [
+                2.4445276,
+                3.1893315,
+                -1.2959239
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "396": {
+            "name": "ScoreText",
+            "components": [
+                {
+                    "type": "text"
+                }
+            ],
+            "translation": [
+                0.0,
+                0.870741,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "parent": "395"
+        },
+        "397": {
+            "name": "SphereTarget",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "26"
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.1
+                        }
+                    },
+                    "active": true
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "parent": "395",
+            "scaling": [
+                0.1,
+                0.1,
+                0.1
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "398": {
+            "name": "Plane",
+            "parent": "395",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "20"
+                    },
+                    "active": false
+                }
+            ],
+            "scaling": [
+                1.5,
+                0.8,
+                1.0
+            ]
+        },
+        "399": {
+            "name": "EndPanelReact",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "195",
+                        "material": "202"
+                    },
+                    "active": true
+                }
+            ],
+            "translation": [
+                -0.9217872,
+                3.6525492,
+                -3.3528871
+            ],
+            "rotation": [
+                0.7072799,
+                0.0,
+                0.0,
+                0.7069335
+            ],
+            "scaling": [
+                0.7279999,
+                0.363999,
+                0.7279992
+            ]
+        },
+        "400": {
+            "link": {
+                "name": "Cube",
+                "file": "models\\button.glb"
+            },
+            "parent": "399",
+            "components": [
+                {
+                    "mesh": {
+                        "material": "26"
+                    }
+                }
+            ],
+            "name": "ButtonMeshReact",
+            "translation": [
+                -0.0000036,
+                0.2201098,
+                0.282
+            ],
+            "rotation": [
+                2.9804547807543713e-7,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.3319678,
+                0.4149592,
+                0.2489756
+            ]
+        },
+        "401": {
+            "name": "ButtonLabel",
+            "parent": "400",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Replay!"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0001563,
+                0.1084579,
+                0.0000046
+            ],
+            "rotation": [
+                -0.7068095,
+                0.0,
+                0.0,
+                0.7074038
+            ],
+            "scaling": [
+                2.5,
+                3.7999999,
+                4.8000063
+            ]
+        },
+        "402": {
+            "name": "ButtonReact",
+            "parent": "399",
+            "components": [
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "box",
+                        "box": {
+                            "extents": [
+                                0.6029999,
+                                0.0214438,
+                                0.2693342
+                            ]
+                        },
+                        "groups": 251
+                    }
+                },
+                {
+                    "type": "replay-button-react",
+                    "replay-button-react": {
+                        "gameController": "395",
+                        "hoverMaterial": "26"
+                    }
+                }
+            ],
+            "translation": [
+                7.78578737481439e-7,
+                0.2183122,
+                0.3891578
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.4999999,
+                0.3
+            ]
+        },
+        "403": {
+            "name": "Title_TextReact",
+            "parent": "399",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Target Striking",
+                        "material": "201"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0000021,
+                0.1553434,
+                -0.460638
+            ],
+            "rotation": [
+                -0.7068622,
+                0.0,
+                0.0,
+                0.7073512
+            ],
+            "scaling": [
+                1.5122998,
+                3.0246069,
+                1.5123034
+            ]
+        },
+        "404": {
+            "name": "Time_TextReact",
+            "parent": "399",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Avg Time:",
+                        "material": "DefaultFontMaterial",
+                        "alignment": "left"
+                    }
+                }
+            ],
+            "translation": [
+                -0.8649411,
+                0.1558917,
+                -0.0602596
+            ],
+            "rotation": [
+                -0.7068635,
+                0.0,
+                0.0,
+                0.7073499
+            ],
+            "scaling": [
+                1.4696999,
+                2.9394047,
+                1.4697022
+            ]
+        },
+        "405": {
+            "name": "Line_TextReact",
+            "parent": "399",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "______________",
+                        "material": "201"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0000014,
+                0.1555416,
+                -0.4434533
+            ],
+            "rotation": [
+                -0.7068622,
+                0.0,
+                0.0,
+                0.7073512
+            ],
+            "scaling": [
+                1.5122998,
+                3.0246069,
+                1.5123034
+            ]
+        },
+        "406": {
+            "name": "PanelVisibleLocReact",
+            "translation": [
+                0.9666485,
+                3.8810212,
+                -0.3384441
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "407": {
+            "name": "SphereDeflect",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "26"
+                    }
+                },
+                {
+                    "type": "physx",
+                    "physx": {
+                        "sphere": {
+                            "radius": 0.075
+                        },
+                        "gravity": true,
+                        "static": false,
+                        "linearDamping": 1.5,
+                        "angularDamping": 1.0,
+                        "mass": 0.5
+                    }
+                },
+                {
+                    "type": "bouncing-ball",
+                    "bouncing-ball": {
+                        "endPanel": "408",
+                        "scoreText": "414",
+                        "panelVisiblePos": "416"
+                    }
+                },
+                {
+                    "type": "trail",
+                    "trail": {
+                        "material": "20",
+                        "width": 0.125,
+                        "segments": 50,
+                        "interval": 0.025
+                    }
+                }
+            ],
+            "translation": [
+                3.5309169,
+                4.0574007,
+                -1.25
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.075,
+                0.075,
+                0.075
+            ]
+        },
+        "408": {
+            "name": "EndPanelDeflect",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "195",
+                        "material": "202"
+                    },
+                    "active": true
+                }
+            ],
+            "translation": [
+                0.7617626,
+                3.657979,
+                -3.3693921
+            ],
+            "rotation": [
+                0.7072799,
+                0.0,
+                0.0,
+                0.7069335
+            ],
+            "scaling": [
+                0.7279999,
+                0.363999,
+                0.7279992
+            ]
+        },
+        "410": {
+            "link": {
+                "name": "Cube",
+                "file": "models\\button.glb"
+            },
+            "parent": "408",
+            "components": [
+                {
+                    "mesh": {
+                        "material": "26"
+                    }
+                }
+            ],
+            "name": "ButtonMesh",
+            "translation": [
+                -0.0000036,
+                0.2201098,
+                0.282
+            ],
+            "rotation": [
+                2.9804547807543713e-7,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.3319678,
+                0.4149592,
+                0.2489756
+            ]
+        },
+        "411": {
+            "name": "ButtonLabel",
+            "parent": "410",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Replay!"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0001563,
+                0.1084579,
+                0.0000046
+            ],
+            "rotation": [
+                -0.7068095,
+                0.0,
+                0.0,
+                0.7074038
+            ],
+            "scaling": [
+                2.5,
+                3.7999999,
+                4.8000063
+            ]
+        },
+        "412": {
+            "name": "ButtonDeflect",
+            "parent": "408",
+            "components": [
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "box",
+                        "box": {
+                            "extents": [
+                                0.6029999,
+                                0.0214438,
+                                0.2693342
+                            ]
+                        },
+                        "groups": 251
+                    }
+                },
+                {
+                    "type": "replay-button-catch",
+                    "replay-button-catch": {
+                        "gameController": "407",
+                        "hoverMaterial": "26"
+                    }
+                }
+            ],
+            "translation": [
+                7.78578737481439e-7,
+                0.2183122,
+                0.3891578
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4,
+                0.4999999,
+                0.3
+            ]
+        },
+        "413": {
+            "name": "Title_Text_Deflect",
+            "parent": "408",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Deflect the Ball",
+                        "material": "201"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0000021,
+                0.1553434,
+                -0.460638
+            ],
+            "rotation": [
+                -0.7068622,
+                0.0,
+                0.0,
+                0.7073512
+            ],
+            "scaling": [
+                1.5122998,
+                3.0246069,
+                1.5123034
+            ]
+        },
+        "414": {
+            "name": "HitsNum_Text_Deflect",
+            "parent": "408",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Hit Number: ",
+                        "material": "DefaultFontMaterial",
+                        "alignment": "left"
+                    }
+                }
+            ],
+            "translation": [
+                -0.8649411,
+                0.1558917,
+                -0.0602596
+            ],
+            "rotation": [
+                -0.7068635,
+                0.0,
+                0.0,
+                0.7073499
+            ],
+            "scaling": [
+                1.4696999,
+                2.9394047,
+                1.4697022
+            ]
+        },
+        "415": {
+            "name": "Line_Text_Deflect",
+            "parent": "408",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "______________",
+                        "material": "201"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0000014,
+                0.1555416,
+                -0.4434533
+            ],
+            "rotation": [
+                -0.7068622,
+                0.0,
+                0.0,
+                0.7073512
+            ],
+            "scaling": [
+                1.5122998,
+                3.0246069,
+                1.5123034
+            ]
+        },
+        "416": {
+            "name": "PanelVisibleLocDeflect",
+            "translation": [
+                0.0218627,
+                3.6119654,
+                -3.0898847
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "417": {
+            "name": "button-start-deflect",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Deflect Game",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4509173,
+                0.165,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "418": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Deflect"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "417"
+        },
+        "419": {
+            "name": "button-start-strike",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Strike Game",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false,
+                        "autoStartBeamDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                0.4711278,
+                0.4367584,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "420": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Strike"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "419"
+        },
+        "424": {
+            "link": {
+                "name": "Object_2<BaseballBat.obj.cleaner.materialmerger.gles<Sketchfab_model",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            },
+            "parent": "129",
+            "translation": [
+                0.0035616,
+                -0.0947091,
+                -0.0048059
+            ],
+            "rotation": [
+                -0.7071068,
+                0.0,
+                0.0,
+                0.7071067
+            ],
+            "scaling": [
+                0.0249999,
+                0.0249972,
+                0.0249972
+            ],
+            "name": "Baseball Bat",
+            "components": [
+                {
+                    "originalIndex": 0
+                },
+                {
+                    "type": "physx",
+                    "physx": {
+                        "shape": "capsule",
+                        "capsule": {
+                            "radius": 0.07,
+                            "halfHeight": 0.6499999
+                        },
+                        "rotationOffset": [
+                            -0.5,
+                            0.4999999,
+                            0.5,
+                            0.4999999
+                        ],
+                        "translationOffset": [
+                            0.0,
+                            0.0,
+                            0.8
+                        ]
+                    }
+                },
+                {
+                    "type": "bat-manager"
+                }
+            ]
+        },
+        "325": {
+            "name": "Mesh",
+            "parent": "324",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "morphTargets": null,
+                        "material": "230"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                -0.0,
+                0.0529632
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
             ]
         }
     },
@@ -3995,6 +4794,12 @@
                 "name": "defaultMaterial",
                 "file": "assets\\OurModels\\balance beam model\\scene.gltf"
             }
+        },
+        "262": {
+            "link": {
+                "name": "Object_0",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
         }
     },
     "textures": {
@@ -4068,6 +4873,30 @@
             "link": {
                 "name": "texture_1",
                 "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "96": {
+            "link": {
+                "name": "texture_0",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "97": {
+            "link": {
+                "name": "texture_1",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "98": {
+            "link": {
+                "name": "texture_2",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "99": {
+            "link": {
+                "name": "wood_planks_diff_2k.jpg",
+                "file": "models\\wood_planks_diff_2k.jpg"
             }
         }
     },
@@ -4158,6 +4987,30 @@
             "link": {
                 "name": "image_1",
                 "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "94": {
+            "link": {
+                "name": "image_0",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "95": {
+            "link": {
+                "name": "image_1",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "96": {
+            "link": {
+                "name": "image_2",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "97": {
+            "link": {
+                "name": "wood_planks_diff_2k.jpg",
+                "file": "models\\wood_planks_diff_2k.jpg"
             }
         }
     },
@@ -4541,6 +5394,24 @@
             "link": {
                 "name": "Material",
                 "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "230": {
+            "link": {
+                "name": "initialShadingGroup",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            },
+            "pipeline": "223",
+            "Physical": {
+                "albedoTexture": "99",
+                "metallicFactor": 0.8999999,
+                "albedoColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "roughnessFactor": 0.3
             }
         }
     },
@@ -5104,6 +5975,16 @@
         },
         "265": {
             "fileName": "assets/OurModels/balance beam model/scene.bin",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "266": {
+            "fileName": "models/baseball_bat_gltf/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "267": {
+            "fileName": "models/wood_planks_diff_2k.jpg",
             "importerName": "",
             "importPhysicalAsPhongMaterials": true
         }
