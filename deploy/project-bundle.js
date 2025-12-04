@@ -8052,14 +8052,15 @@ var BouncingBall = class extends Component31 {
    * Called by game-selector when the button is clicked.
    */
   startGame() {
+    this.setGameComponentsActive(false);
     setTimeout(() => {
       this.nSpawned = 0;
       this.hitCount = 0;
       this.isSpawning = false;
       this.gameRunning = true;
+      this.setGameComponentsActive(true);
       this.updateUI();
       this.respawn();
-      this.setGameComponentsActive(true);
     }, 1e3);
   }
   /**
@@ -8243,6 +8244,20 @@ import { Component as Component33 } from "@wonderlandengine/api";
 var DataManager = class extends Component33 {
   start() {
     this.resetSession();
+    this.hideDeflectGameComponents();
+  }
+  /**
+   * Hide the deflect game (bouncing ball) components when not in use
+   */
+  hideDeflectGameComponents() {
+    const bouncingBall = this.engine.scene.findByName("BouncingBall")[0];
+    if (bouncingBall) {
+      const ballComponent = bouncingBall.getComponent("bouncing-ball");
+      if (ballComponent && ballComponent.setGameComponentsActive) {
+        ballComponent.setGameComponentsActive(false);
+        console.log("[DataManager] Deflect game components hidden on init");
+      }
+    }
   }
   resetSession() {
     this.session = {

@@ -12441,14 +12441,15 @@ Avg Dev: ${avgDev}m`;
      * Called by game-selector when the button is clicked.
      */
     startGame() {
+      this.setGameComponentsActive(false);
       setTimeout(() => {
         this.nSpawned = 0;
         this.hitCount = 0;
         this.isSpawning = false;
         this.gameRunning = true;
+        this.setGameComponentsActive(true);
         this.updateUI();
         this.respawn();
-        this.setGameComponentsActive(true);
       }, 1e3);
     }
     /**
@@ -12943,6 +12944,20 @@ Checking ray mesh hierarchy:`);
   var DataManager = class extends Component3 {
     start() {
       this.resetSession();
+      this.hideDeflectGameComponents();
+    }
+    /**
+     * Hide the deflect game (bouncing ball) components when not in use
+     */
+    hideDeflectGameComponents() {
+      const bouncingBall = this.engine.scene.findByName("BouncingBall")[0];
+      if (bouncingBall) {
+        const ballComponent = bouncingBall.getComponent("bouncing-ball");
+        if (ballComponent && ballComponent.setGameComponentsActive) {
+          ballComponent.setGameComponentsActive(false);
+          console.log("[DataManager] Deflect game components hidden on init");
+        }
+      }
     }
     resetSession() {
       this.session = {
@@ -13144,61 +13159,6 @@ Checking ray mesh hierarchy:`);
 
   // js/force-cursor-rays.js
   var force_cursor_rays_exports = {};
-  __export(force_cursor_rays_exports, {
-    ForceCursorRays: () => ForceCursorRays
-  });
-  var ForceCursorRays = class extends Component3 {
-    start() {
-      console.log("[ForceCursorRays] Starting cursor ray force-enable...");
-      setTimeout(() => this.enableRays(), 2e3);
-    }
-    enableRays() {
-      const cursors = ["CursorLeft", "CursorRight"];
-      for (const name of cursors) {
-        const cursor = this.engine.scene.findByName(name)[0];
-        if (!cursor) {
-          console.error(`[ForceCursorRays] ${name} not found!`);
-          continue;
-        }
-        console.log(`[ForceCursorRays] Processing ${name}...`);
-        cursor.active = true;
-        const cursorComp = cursor.getComponent("cursor");
-        if (!cursorComp) {
-          console.error(`[ForceCursorRays] ${name} has no cursor component!`);
-          continue;
-        }
-        if (!cursorComp.cursorRayObject) {
-          console.error(`[ForceCursorRays] ${name} has no cursorRayObject assigned!`);
-          continue;
-        }
-        const ray = cursorComp.cursorRayObject;
-        console.log(`[ForceCursorRays] Ray object: ${ray.name}`);
-        ray.active = true;
-        const mesh = ray.getComponent("mesh");
-        if (!mesh) {
-          console.error(`[ForceCursorRays] Ray object ${ray.name} has no mesh component!`);
-          continue;
-        }
-        mesh.active = true;
-        if (!mesh.material) {
-          console.error(`[ForceCursorRays] Ray mesh has no material!`);
-        } else {
-          console.log(`[ForceCursorRays] Ray material: ${mesh.material.name || "unnamed"}`);
-        }
-        const scale6 = ray.getScalingLocal();
-        console.log(`[ForceCursorRays] Ray scale: [${scale6[0]}, ${scale6[1]}, ${scale6[2]}]`);
-        if (scale6[1] < 0.1) {
-          console.warn(`[ForceCursorRays] Ray Y-scale is very small (${scale6[1]})! Setting to 10.0`);
-          ray.setScalingLocal([scale6[0], 10, scale6[2]]);
-        }
-        console.log(`[ForceCursorRays] \u2705 ${name} ray enabled and visible`);
-      }
-      console.log("[ForceCursorRays] Complete! Rays should be visible now.");
-    }
-    update(dt) {
-    }
-  };
-  __publicField(ForceCursorRays, "TypeName", "force-cursor-rays");
 
   // js/game-selector.js
   var game_selector_exports = {};

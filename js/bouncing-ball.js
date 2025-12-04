@@ -71,20 +71,23 @@ export class BouncingBall extends Component {
      * Called by game-selector when the button is clicked.
      */
     startGame() {
+        // Make sure components are hidden before starting
+        this.setGameComponentsActive(false);
+        
         setTimeout(() => {
             this.nSpawned = 0;
             this.hitCount = 0;
             this.isSpawning = false;
             this.gameRunning = true;
 
+            // Enable Bat and Ball visuals/physics
+            this.setGameComponentsActive(true);
+
             // Update UI
             this.updateUI();
 
             // Start the loop
             this.respawn();
-            
-            // Enable Bat and Ball visuals/physics
-            this.setGameComponentsActive(true);
         }, 1000);
     }
 

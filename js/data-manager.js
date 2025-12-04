@@ -9,6 +9,24 @@ export class DataManager extends Component {
 
     start() {
         this.resetSession();
+        
+        // Hide deflect game components on initialization
+        this.hideDeflectGameComponents();
+    }
+    
+    /**
+     * Hide the deflect game (bouncing ball) components when not in use
+     */
+    hideDeflectGameComponents() {
+        // Find the bouncing ball object
+        const bouncingBall = this.engine.scene.findByName('BouncingBall')[0];
+        if (bouncingBall) {
+            const ballComponent = bouncingBall.getComponent('bouncing-ball');
+            if (ballComponent && ballComponent.setGameComponentsActive) {
+                ballComponent.setGameComponentsActive(false);
+                console.log('[DataManager] Deflect game components hidden on init');
+            }
+        }
     }
 
     resetSession() {
