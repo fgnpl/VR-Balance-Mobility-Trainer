@@ -13142,6 +13142,64 @@ Checking ray mesh hierarchy:`);
     defaultEnvironment: Property.enum(["football", "tennis", "gym"], "football")
   });
 
+  // js/force-cursor-rays.js
+  var force_cursor_rays_exports = {};
+  __export(force_cursor_rays_exports, {
+    ForceCursorRays: () => ForceCursorRays
+  });
+  var ForceCursorRays = class extends Component3 {
+    start() {
+      console.log("[ForceCursorRays] Starting cursor ray force-enable...");
+      setTimeout(() => this.enableRays(), 2e3);
+    }
+    enableRays() {
+      const cursors = ["CursorLeft", "CursorRight"];
+      for (const name of cursors) {
+        const cursor = this.engine.scene.findByName(name)[0];
+        if (!cursor) {
+          console.error(`[ForceCursorRays] ${name} not found!`);
+          continue;
+        }
+        console.log(`[ForceCursorRays] Processing ${name}...`);
+        cursor.active = true;
+        const cursorComp = cursor.getComponent("cursor");
+        if (!cursorComp) {
+          console.error(`[ForceCursorRays] ${name} has no cursor component!`);
+          continue;
+        }
+        if (!cursorComp.cursorRayObject) {
+          console.error(`[ForceCursorRays] ${name} has no cursorRayObject assigned!`);
+          continue;
+        }
+        const ray = cursorComp.cursorRayObject;
+        console.log(`[ForceCursorRays] Ray object: ${ray.name}`);
+        ray.active = true;
+        const mesh = ray.getComponent("mesh");
+        if (!mesh) {
+          console.error(`[ForceCursorRays] Ray object ${ray.name} has no mesh component!`);
+          continue;
+        }
+        mesh.active = true;
+        if (!mesh.material) {
+          console.error(`[ForceCursorRays] Ray mesh has no material!`);
+        } else {
+          console.log(`[ForceCursorRays] Ray material: ${mesh.material.name || "unnamed"}`);
+        }
+        const scale6 = ray.getScalingLocal();
+        console.log(`[ForceCursorRays] Ray scale: [${scale6[0]}, ${scale6[1]}, ${scale6[2]}]`);
+        if (scale6[1] < 0.1) {
+          console.warn(`[ForceCursorRays] Ray Y-scale is very small (${scale6[1]})! Setting to 10.0`);
+          ray.setScalingLocal([scale6[0], 10, scale6[2]]);
+        }
+        console.log(`[ForceCursorRays] \u2705 ${name} ray enabled and visible`);
+      }
+      console.log("[ForceCursorRays] Complete! Rays should be visible now.");
+    }
+    update(dt) {
+    }
+  };
+  __publicField(ForceCursorRays, "TypeName", "force-cursor-rays");
+
   // js/game-selector.js
   var game_selector_exports = {};
   __export(game_selector_exports, {
@@ -14787,6 +14845,7 @@ Checking ray mesh hierarchy:`);
   _registerEditor(cursor_debug_exports);
   _registerEditor(data_manager_exports);
   _registerEditor(environment_switcher_exports);
+  _registerEditor(force_cursor_rays_exports);
   _registerEditor(game_selector_exports);
   _registerEditor(haptic_feedback_exports);
   _registerEditor(head_bob_exports);

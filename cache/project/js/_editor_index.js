@@ -22,6 +22,8 @@ import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_data_manager_js from 'T:/G
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_data_manager_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_environment_switcher_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/environment-switcher.js';
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_environment_switcher_js);
+import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_force_cursor_rays_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/force-cursor-rays.js';
+_registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_force_cursor_rays_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_game_selector_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/game-selector.js';
 _registerEditor(_T__GitHub_VR_Balance_Mobility_Trainer_js_game_selector_js);
 import * as _T__GitHub_VR_Balance_Mobility_Trainer_js_haptic_feedback_js from 'T:/GitHub/VR-Balance-Mobility-Trainer/js/haptic-feedback.js';
