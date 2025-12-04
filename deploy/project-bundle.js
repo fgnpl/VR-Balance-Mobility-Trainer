@@ -8052,16 +8052,14 @@ var BouncingBall = class extends Component31 {
    * Called by game-selector when the button is clicked.
    */
   startGame() {
-    this.nSpawned = 0;
-    this.hitCount = 0;
-    this.isSpawning = false;
-    this.gameRunning = true;
-    this.setGameComponentsActive(true);
-    this.updateUI();
     setTimeout(() => {
-      if (this.gameRunning) {
-        this.respawn();
-      }
+      this.nSpawned = 0;
+      this.hitCount = 0;
+      this.isSpawning = false;
+      this.gameRunning = true;
+      this.updateUI();
+      this.respawn();
+      this.setGameComponentsActive(true);
     }, 1e3);
   }
   /**
