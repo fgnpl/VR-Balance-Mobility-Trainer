@@ -8043,7 +8043,7 @@ var BouncingBall = class extends Component31 {
   updateUI() {
     const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
     if (gs) {
-      gs.updateCue?.(`Ball ${this.nSpawned + 1} / ${this.maxSpawn}`);
+      gs.updateCue?.(`Ball ${this.nSpawned} / ${this.maxSpawn}`);
       gs.updateStats?.(`Hits: ${this.hitCount} / ${this.nSpawned}`);
     }
   }
@@ -8056,9 +8056,13 @@ var BouncingBall = class extends Component31 {
     this.hitCount = 0;
     this.isSpawning = false;
     this.gameRunning = true;
-    this.updateUI();
-    this.respawn();
     this.setGameComponentsActive(true);
+    this.updateUI();
+    setTimeout(() => {
+      if (this.gameRunning) {
+        this.respawn();
+      }
+    }, 1e3);
   }
   /**
    * Helper to toggle Mesh and PhysX components on Ball and Bat.
@@ -8343,10 +8347,10 @@ var GameSelector = class extends Component34 {
     this.updateStatus("Select a drill");
     this.updateCue("");
     this.updateStats("");
-    this.updateReport("");
     this._storeOriginalScales();
     this._applyDefaultEnvironment();
     this._validateSetup();
+    this._updateLiveReport();
   }
   _validateSetup() {
     if (!this.footballField && !this.tennisCourt && !this.gymFloor) {
@@ -8404,6 +8408,7 @@ var GameSelector = class extends Component34 {
         textComp.text = text;
       }
     }
+    this._updateLiveReport();
   }
   updateReport(text) {
     if (this._lastReport === text)
@@ -8588,6 +8593,41 @@ var GameSelector = class extends Component34 {
       report += left + separator + right + "\n";
     }
     console.log(report);
+    this.updateReport(report);
+  }
+  /**
+   * Automatically update the report text mesh with current stats
+   * Called whenever any activity updates its stats
+   */
+  _updateLiveReport() {
+    const dm = this.dataManager?.getComponent("data-manager");
+    if (!dm) {
+      return;
+    }
+    const r = dm.getReport();
+    let hasData = false;
+    const targetStats = r.reaction.total > 0 || r.accuracy.total > 0 ? this._buildTargetStats(r) : null;
+    const beamStats = r.beam.runs.length > 0 ? this._buildBeamStats(r) : null;
+    const deflectStats = r.deflect.gamesPlayed > 0 ? this._buildDeflectStats(r) : null;
+    const reactStats = r.react.total > 0 ? this._buildReactStats(r) : null;
+    hasData = targetStats || beamStats || deflectStats || reactStats;
+    if (!hasData) {
+      this.updateReport("LIVE STATS\n\nNo data yet\nStart a drill!");
+      return;
+    }
+    const colWidth = 20;
+    const separator = " | ";
+    const leftCol = [targetStats, beamStats].filter((s) => s);
+    const rightCol = [deflectStats, reactStats].filter((s) => s);
+    const leftLines = this._getColumnLines(leftCol, colWidth);
+    const rightLines = this._getColumnLines(rightCol, colWidth);
+    const maxLines = Math.max(leftLines.length, rightLines.length);
+    let report = "====== LIVE STATS ======\n\n";
+    for (let i = 0; i < maxLines; i++) {
+      const left = (leftLines[i] || "").padEnd(colWidth);
+      const right = (rightLines[i] || "").padEnd(colWidth);
+      report += left + separator + right + "\n";
+    }
     this.updateReport(report);
   }
   _buildTargetStats(r) {

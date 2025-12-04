@@ -50,10 +50,12 @@ export class GameSelector extends Component {
         this.updateStatus('Select a drill');
         this.updateCue('');
         this.updateStats('');
-        this.updateReport('');
         this._storeOriginalScales();
         this._applyDefaultEnvironment();
         this._validateSetup();
+        
+        // Initialize live report display
+        this._updateLiveReport();
     }
 
     _validateSetup() {
@@ -116,6 +118,9 @@ export class GameSelector extends Component {
                 textComp.text = text;
             }
         }
+        
+        // Also update the report display with current stats
+        this._updateLiveReport();
     }
 
     updateReport(text) {
@@ -314,6 +319,59 @@ export class GameSelector extends Component {
         }
         
         console.log(report);
+        this.updateReport(report);
+    }
+    
+    /**
+     * Automatically update the report text mesh with current stats
+     * Called whenever any activity updates its stats
+     */
+    _updateLiveReport() {
+        const dm = this.dataManager?.getComponent('data-manager');
+        if (!dm) {
+            return; // Silently fail - data manager not ready yet
+        }
+        
+        const r = dm.getReport();
+        
+        let hasData = false;
+        
+        // Build individual game stat blocks
+        const targetStats = (r.reaction.total > 0 || r.accuracy.total > 0) ? this._buildTargetStats(r) : null;
+        const beamStats = (r.beam.runs.length > 0) ? this._buildBeamStats(r) : null;
+        const deflectStats = (r.deflect.gamesPlayed > 0) ? this._buildDeflectStats(r) : null;
+        const reactStats = (r.react.total > 0) ? this._buildReactStats(r) : null;
+        
+        hasData = targetStats || beamStats || deflectStats || reactStats;
+        
+        if (!hasData) {
+            this.updateReport('LIVE STATS\n\nNo data yet\nStart a drill!');
+            return;
+        }
+        
+        // Build 2x2 grid layout
+        const colWidth = 20;
+        const separator = ' | ';
+        
+        // Prepare columns
+        const leftCol = [targetStats, beamStats].filter(s => s);
+        const rightCol = [deflectStats, reactStats].filter(s => s);
+        
+        // Get lines from each column
+        const leftLines = this._getColumnLines(leftCol, colWidth);
+        const rightLines = this._getColumnLines(rightCol, colWidth);
+        const maxLines = Math.max(leftLines.length, rightLines.length);
+        
+        // Build report
+        let report = '====== LIVE STATS ======\n\n';
+        
+        // Build grid rows
+        for (let i = 0; i < maxLines; i++) {
+            const left = (leftLines[i] || '').padEnd(colWidth);
+            const right = (rightLines[i] || '').padEnd(colWidth);
+            report += left + separator + right + '\n';
+        }
+        
         this.updateReport(report);
     }
     

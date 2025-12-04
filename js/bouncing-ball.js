@@ -61,7 +61,7 @@ export class BouncingBall extends Component {
     updateUI() {
         const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
         if (gs) {
-            gs.updateCue?.(`Ball ${this.nSpawned + 1} / ${this.maxSpawn}`);
+            gs.updateCue?.(`Ball ${this.nSpawned} / ${this.maxSpawn}`);
             gs.updateStats?.(`Hits: ${this.hitCount} / ${this.nSpawned}`);
         }
     }
@@ -76,14 +76,18 @@ export class BouncingBall extends Component {
         this.isSpawning = false;
         this.gameRunning = true;
 
+        // Enable Bat and Ball visuals/physics
+        this.setGameComponentsActive(true);
+
         // Update UI
         this.updateUI();
 
-        // Start the loop
-        this.respawn();
-        
-        // Enable Bat and Ball visuals/physics
-        this.setGameComponentsActive(true);
+        // Wait 1 second before starting the first ball
+        setTimeout(() => {
+            if (this.gameRunning) {
+                this.respawn();
+            }
+        }, 1000);
     }
 
     /**
