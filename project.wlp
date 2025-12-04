@@ -662,48 +662,6 @@
             },
             "parent": "124"
         },
-        "126": {
-            "name": "CursorLeft",
-            "parent": "205",
-            "components": [
-                {
-                    "type": "cursor",
-                    "cursor": {
-                        "cursorObject": "376",
-                        "collisionGroup": 0,
-                        "cursorRayObject": null,
-                        "cursorRayScalingAxis": "y",
-                        "inputObject": null,
-                        "viewObject": null
-                    }
-                },
-                {
-                    "type": "input",
-                    "input": {
-                        "type": "ray left"
-                    }
-                },
-                {
-                    "type": "vr-mode-active-switch"
-                }
-            ],
-            "translation": [
-                2.384185791015625e-7,
-                -0.0092358,
-                -2.086162567138672e-7
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "scaling": [
-                1.0,
-                1.0,
-                1.0
-            ]
-        },
         "129": {
             "name": "ControllerRight",
             "parent": "205",
@@ -1400,48 +1358,6 @@
                 3.0,
                 3.0,
                 3.0
-            ]
-        },
-        "212": {
-            "name": "CursorRight",
-            "parent": "205",
-            "components": [
-                {
-                    "type": "cursor",
-                    "cursor": {
-                        "cursorObject": "377",
-                        "collisionGroup": 0,
-                        "cursorRayObject": null,
-                        "cursorRayScalingAxis": "y",
-                        "inputObject": null,
-                        "viewObject": null
-                    }
-                },
-                {
-                    "type": "input",
-                    "input": {
-                        "type": "ray right"
-                    }
-                },
-                {
-                    "type": "vr-mode-active-switch"
-                }
-            ],
-            "translation": [
-                0.0,
-                0.0,
-                -2.086162567138672e-7
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "scaling": [
-                1.0,
-                1.0,
-                1.0
             ]
         },
         "233": {
@@ -3848,17 +3764,37 @@
                 2.4
             ]
         },
-        "505": {
-            "name": "CursorRayLeft",
+        "512": {
+            "name": "CursorLeft",
             "scaling": [
-                1.0,
-                1.0,
-                1.0
+                3.0,
+                2.9999997,
+                3.0
+            ],
+            "components": [
+                {
+                    "type": "cursor",
+                    "cursor": {
+                        "cursorObject": "376",
+                        "collisionGroup": 0,
+                        "cursorRayObject": "513",
+                        "cursorRayScalingAxis": "y"
+                    }
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "ray left"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch"
+                }
             ],
             "translation": [
-                -0.0017655,
-                -0.045236,
-                0.1279514
+                -0.0017652,
+                -1.0654815,
+                -0.385858
             ],
             "rotation": [
                 0.0,
@@ -3866,11 +3802,31 @@
                 0.0,
                 1.0
             ],
-            "parent": "126"
+            "parent": "205"
         },
-        "506": {
+        "513": {
+            "name": "CursorRayLeft",
+            "parent": "512",
+            "translation": [
+                0.0,
+                0.0,
+                2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "514": {
             "name": "CursorRayMeshLeft",
-            "parent": "505",
+            "parent": "513",
             "components": [
                 {
                     "type": "mesh",
@@ -3897,17 +3853,37 @@
                 0.0049999
             ]
         },
-        "507": {
-            "name": "CursorRayRight",
+        "509": {
+            "name": "CursorRight",
             "scaling": [
-                1.0,
-                1.0,
-                1.0
+                3.0,
+                2.9999997,
+                3.0
+            ],
+            "components": [
+                {
+                    "type": "cursor",
+                    "cursor": {
+                        "cursorObject": "377",
+                        "collisionGroup": 0,
+                        "cursorRayObject": "510",
+                        "cursorRayScalingAxis": "y"
+                    }
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "ray right"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch"
+                }
             ],
             "translation": [
                 -0.0017653,
-                -0.0544719,
-                0.1279514
+                -1.0654815,
+                -0.385858
             ],
             "rotation": [
                 0.0,
@@ -3915,11 +3891,31 @@
                 0.0,
                 1.0
             ],
-            "parent": "212"
+            "parent": "205"
         },
-        "508": {
+        "510": {
+            "name": "CursorRayRight",
+            "parent": "509",
+            "translation": [
+                0.0,
+                0.0,
+                2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "511": {
             "name": "CursorRayMeshRight",
-            "parent": "507",
+            "parent": "510",
             "components": [
                 {
                     "type": "mesh",
