@@ -19,6 +19,8 @@ export class GameSelector extends Component {
         deflectManager: Property.object(), // Bouncing ball game (catch/deflect)
         reactManager: Property.object(), // Reaction game (strike/click)
         dataManager: Property.object(),
+        // Player/Camera
+        player: Property.object(), // Reference to Player object for teleportation
         // UI elements
         uiStatusText: Property.object(),
         uiCueText: Property.object(),
@@ -32,6 +34,19 @@ export class GameSelector extends Component {
         this._lastCue = '';
         this._lastStats = '';
         this._lastReport = '';
+        
+        // Store initial player position for teleporting back
+        if (!this.player) {
+            this.player = this.engine.scene.findByName('Player')[0];
+        }
+        if (this.player) {
+            this.initialPlayerPosition = vec3.clone(this.player.getPositionWorld());
+            console.log('[GameSelector] Stored initial player position:', this.initialPlayerPosition);
+        } else {
+            console.warn('[GameSelector] Player object not found! Teleport will not work.');
+            this.initialPlayerPosition = vec3.fromValues(-2.5, 0.0, 1.1575535);
+        }
+        
         this.updateStatus('Select a drill');
         this.updateCue('');
         this.updateStats('');
@@ -226,10 +241,27 @@ export class GameSelector extends Component {
                 }
             }
         }
+        
+        // Teleport player back to initial position
+        this.teleportPlayerToStart();
+        
         this.currentDrill = null;
         this.updateStatus('Drills stopped');
         this.updateCue('');
         this.updateStats('');
+    }
+    
+    teleportPlayerToStart() {
+        if (!this.player) {
+            this.player = this.engine.scene.findByName('Player')[0];
+        }
+        
+        if (this.player && this.initialPlayerPosition) {
+            this.player.setPositionWorld(this.initialPlayerPosition);
+            console.log('[GameSelector] Teleported player to initial position:', this.initialPlayerPosition);
+        } else {
+            console.warn('[GameSelector] Cannot teleport - player or initial position not found');
+        }
     }
 
     // Report
@@ -243,66 +275,105 @@ export class GameSelector extends Component {
         const r = dm.getReport();
         console.log('[GameSelector] Report data:', r); // Debug log
         
-        // Build comprehensive report string
-        let report = '=== SESSION REPORT ===\n\n';
         let hasData = false;
         
-        // Target Striking results - check for either reaction times or accuracy data
-        if (r.reaction.total > 0 || r.accuracy.total > 0) {
-            hasData = true;
-            report += `TARGET DRILL\n`;
-            
-            if (r.reaction.total > 0) {
-                report += `  Targets Hit: ${r.reaction.total}\n`;
-                report += `  Avg Reaction Time: ${r.reaction.average.toFixed(3)}s\n`;
-                report += `  Fastest: ${r.reaction.fastest.toFixed(3)}s\n`;
-                report += `  Slowest: ${r.reaction.slowest.toFixed(3)}s\n`;
-            }
-            
-            if (r.accuracy.total > 0) {
-                report += `  Accuracy: ${r.accuracy.percent.toFixed(1)}% (${r.accuracy.correct}/${r.accuracy.total})\n`;
-            }
-            report += '\n';
-        }
+        // Build individual game stat blocks (without emojis for better compatibility)
+        const targetStats = (r.reaction.total > 0 || r.accuracy.total > 0) ? this._buildTargetStats(r) : null;
+        const beamStats = (r.beam.runs.length > 0) ? this._buildBeamStats(r) : null;
+        const deflectStats = (r.deflect.gamesPlayed > 0) ? this._buildDeflectStats(r) : null;
+        const reactStats = (r.react.total > 0) ? this._buildReactStats(r) : null;
         
-        // Beam Walk results
-        if (r.beam.runs.length > 0) {
-            hasData = true;
-            const avgBeam = r.beam.runs.reduce((a,b)=>a+b,0)/r.beam.runs.length;
-            report += `BEAM WALK\n`;
-            report += `  Total Runs: ${r.beam.runs.length}\n`;
-            report += `  Best Time: ${r.beam.best.toFixed(2)}s\n`;
-            report += `  Average Time: ${avgBeam.toFixed(2)}s\n`;
-            report += '\n';
-        }
-        
-        // Deflect & Catch results
-        if (r.deflect.gamesPlayed > 0) {
-            hasData = true;
-            report += `DEFLECT & CATCH\n`;
-            report += `  Games Played: ${r.deflect.gamesPlayed}\n`;
-            report += `  Total Balls: ${r.deflect.totalBalls}\n`;
-            report += `  Total Hits: ${r.deflect.hits}\n`;
-            report += `  Accuracy: ${r.deflect.accuracy.toFixed(1)}%\n`;
-            report += '\n';
-        }
-        
-        // Strike & React results
-        if (r.react.total > 0) {
-            hasData = true;
-            report += `STRIKE & REACT\n`;
-            report += `  Targets Hit: ${r.react.total}\n`;
-            report += `  Avg Reaction Time: ${r.react.average.toFixed(3)}s\n`;
-            report += `  Fastest: ${r.react.fastest.toFixed(3)}s\n`;
-            report += `  Slowest: ${r.react.slowest.toFixed(3)}s\n`;
-            report += '\n';
-        }
+        hasData = targetStats || beamStats || deflectStats || reactStats;
         
         if (!hasData) {
-            report = 'No data yet - complete some drills first!';
+            this.updateReport('No data yet - complete some drills first!');
+            return;
+        }
+        
+        // Build 2x2 grid layout with simple formatting
+        const colWidth = 20; // characters per column
+        const separator = ' | ';
+        
+        // Prepare columns
+        const leftCol = [targetStats, beamStats].filter(s => s);
+        const rightCol = [deflectStats, reactStats].filter(s => s);
+        
+        // Get lines from each column
+        const leftLines = this._getColumnLines(leftCol, colWidth);
+        const rightLines = this._getColumnLines(rightCol, colWidth);
+        const maxLines = Math.max(leftLines.length, rightLines.length);
+        
+        // Build report header
+        let report = '====== SESSION REPORT ======\n\n';
+        
+        // Build grid rows
+        for (let i = 0; i < maxLines; i++) {
+            const left = (leftLines[i] || '').padEnd(colWidth);
+            const right = (rightLines[i] || '').padEnd(colWidth);
+            report += left + separator + right + '\n';
         }
         
         console.log(report);
         this.updateReport(report);
+    }
+    
+    _buildTargetStats(r) {
+        const lines = ['TARGET DRILL', '------------'];
+        if (r.reaction.total > 0) {
+            lines.push(`Hits: ${r.reaction.total}`);
+            lines.push(`RT: ${r.reaction.average.toFixed(2)}s`);
+        }
+        if (r.accuracy.total > 0) {
+            lines.push(`Acc: ${r.accuracy.percent.toFixed(1)}%`);
+        }
+        return lines;
+    }
+    
+    _buildBeamStats(r) {
+        const avgBeam = r.beam.runs.reduce((a,b)=>a+b,0)/r.beam.runs.length;
+        return [
+            'BEAM WALK',
+            '---------',
+            `Runs: ${r.beam.runs.length}`,
+            `Best: ${r.beam.best.toFixed(1)}s`,
+            `Avg: ${avgBeam.toFixed(1)}s`
+        ];
+    }
+    
+    _buildDeflectStats(r) {
+        return [
+            'DEFLECT & CATCH',
+            '---------------',
+            `Games: ${r.deflect.gamesPlayed}`,
+            `Balls: ${r.deflect.totalBalls}`,
+            `Hits: ${r.deflect.hits}`,
+            `Acc: ${r.deflect.accuracy.toFixed(1)}%`
+        ];
+    }
+    
+    _buildReactStats(r) {
+        return [
+            'STRIKE & REACT',
+            '--------------',
+            `Hits: ${r.react.total}`,
+            `RT: ${r.react.average.toFixed(2)}s`,
+            `Best: ${r.react.fastest.toFixed(2)}s`
+        ];
+    }
+    
+    _getColumnLines(blocks, colWidth) {
+        const lines = [];
+        for (let i = 0; i < blocks.length; i++) {
+            const blockLines = blocks[i];
+            for (const line of blockLines) {
+                // Truncate if too long
+                const truncated = line.length > colWidth ? line.substring(0, colWidth - 3) + '...' : line;
+                lines.push(truncated);
+            }
+            if (i < blocks.length - 1) {
+                lines.push(''); // Add spacing between blocks
+            }
+        }
+        return lines;
     }
 }

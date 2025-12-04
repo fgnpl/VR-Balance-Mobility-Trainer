@@ -12097,24 +12097,28 @@
   });
   var BatManager = class extends Component3 {
     start() {
-      this.soundSource = this.object.addComponent("audio-source", { src: "sfx/click.wav", spatial: true });
       this.object.getComponent("physx").onCollision((type, other) => {
         if (type === CollisionEventType.Touch) {
           this.onCollision(other);
         }
       });
+      if (this.debugMode) {
+        console.log("[BatManager] Initialized on object:", this.object.name);
+      }
     }
     onCollision(other) {
       if (other.object.name === "Sphere") {
-        this.soundSource.play();
+        if (this.debugMode) {
+          console.log("[BatManager] Ball collision detected!");
+        }
         triggerHaptic(this.object, HapticPatterns.BALL_HIT_BAT, null, this.debugMode);
       }
     }
   };
   __publicField(BatManager, "TypeName", "bat-manager");
   __publicField(BatManager, "Properties", {
-    debugMode: Property.bool(false)
-    // Enable console logging
+    debugMode: Property.bool(true)
+    // Enable console logging (set to true for debugging)
   });
 
   // js/beam-walk-manager.js
@@ -12146,7 +12150,15 @@
       this.avgDeviation = 0;
       this.deviationSamples = [];
       this.lastWarningTime = 0;
+      if (!this.gameSelector) {
+        const manager = this.engine.scene.findByName("Manager")[0];
+        if (manager) {
+          this.gameSelector = manager.getComponent("game-selector");
+          console.log("[BeamWalk] Auto-found game-selector");
+        }
+      }
       console.log("[BeamWalk] start() - statsText:", this.statsText);
+      console.log("[BeamWalk] start() - gameSelector:", this.gameSelector);
       if (this.statsText) {
         console.log("[BeamWalk] statsText object found:", this.statsText.name);
         const textComp = this.statsText.getComponent("text");
@@ -12171,21 +12183,12 @@
       }
     }
     updateStats() {
-      if (!this.statsText) {
-        console.warn("[BeamWalk] statsText not assigned - check editor property");
-        return;
-      }
-      const textComp = this.statsText.getComponent("text");
-      if (!textComp) {
-        console.warn("[BeamWalk] text component not found on:", this.statsText.name);
-        console.warn("[BeamWalk] Available components:", this.statsText);
-        return;
-      }
       const currentRunTime = this.running ? ((performance.now() - this._currentRunStart) / 1e3).toFixed(2) : "0.00";
       const avgDev = this.deviationSamples.length > 0 ? (this.deviationSamples.reduce((a, b) => a + b, 0) / this.deviationSamples.length).toFixed(3) : "0.000";
       const totalTime = (this.totalBalanceDuration / 1e3).toFixed(2);
       const bestTime = (this.bestDuration / 1e3).toFixed(2);
-      const stats = `BEAM WALK STATS
+      const conciseStats = `Run #${this.currentRunNumber} | Current: ${currentRunTime}s | Best: ${bestTime}s | Success: ${this.successfulRuns} | Falls: ${this.totalFalls}`;
+      const detailedStats = `BEAM WALK STATS
 Run #: ${this.currentRunNumber}
 Current: ${currentRunTime}s
 Total Time: ${totalTime}s
@@ -12194,9 +12197,32 @@ Success: ${this.successfulRuns}
 Falls: ${this.totalFalls}
 Max Dist: ${this.maxDistanceReached.toFixed(2)}m
 Avg Dev: ${avgDev}m`;
-      textComp.text = stats;
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs && gs.updateStats) {
+        gs.updateStats(conciseStats);
+      }
+      if (this.statsText) {
+        const textComp = this.statsText.getComponent("text");
+        if (textComp) {
+          textComp.text = detailedStats;
+        }
+      }
     }
     startDrill() {
+      console.log("[BeamWalk] startDrill() called");
+      console.log("[BeamWalk] playerObject:", this.playerObject?.name);
+      console.log("[BeamWalk] headObject:", this.headObject?.name);
+      console.log("[BeamWalk] startPosition:", this.startPosition?.name);
+      console.log("[BeamWalk] endPosition:", this.endPosition?.name);
+      console.log("[BeamWalk] statsText:", this.statsText?.name);
+      if (!this.playerObject) {
+        console.error("[BeamWalk] ERROR: playerObject not set! Cannot start drill.");
+        return;
+      }
+      if (!this.startPosition || !this.endPosition) {
+        console.error("[BeamWalk] ERROR: Start or End position not set!");
+        return;
+      }
       this.running = true;
       this.totalBalanceDuration = 0;
       this.currentRunNumber = 1;
@@ -12208,6 +12234,7 @@ Avg Dev: ${avgDev}m`;
       this._currentRunStart = performance.now();
       this._resetToStart();
       this.updateStats();
+      console.log("[BeamWalk] Drill started successfully! running=", this.running);
     }
     endDrill() {
       if (!this.running)
@@ -12236,8 +12263,14 @@ Avg Dev: ${avgDev}m`;
       };
     }
     update(dt) {
-      if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
+      if (!this.running)
         return;
+      if (!this.playerObject || !this.startPosition || !this.endPosition) {
+        if (this.running) {
+          console.warn("[BeamWalk] Missing required objects in update! playerObject:", !!this.playerObject, "start:", !!this.startPosition, "end:", !!this.endPosition);
+        }
+        return;
+      }
       const trackingObject = this.headObject || this.playerObject;
       const playerPos = trackingObject.getPositionWorld();
       const a = this.startPosition.getPositionWorld();
@@ -12356,8 +12389,10 @@ Avg Dev: ${avgDev}m`;
     // Increased to 1.0m (100cm tolerance)
     resetHeight: Property.float(-2),
     dataManager: Property.object(),
+    gameSelector: Property.object(),
+    // Reference to game-selector for unified UI
     statsText: Property.object(),
-    // Text component to display live stats
+    // Text component to display live stats (legacy, prefer gameSelector)
     successRadius: Property.float(1),
     // Radius around end point to count as success
     // Controller references for haptic feedback
@@ -13117,6 +13152,16 @@ Checking ray mesh hierarchy:`);
       this._lastCue = "";
       this._lastStats = "";
       this._lastReport = "";
+      if (!this.player) {
+        this.player = this.engine.scene.findByName("Player")[0];
+      }
+      if (this.player) {
+        this.initialPlayerPosition = vec3_exports.clone(this.player.getPositionWorld());
+        console.log("[GameSelector] Stored initial player position:", this.initialPlayerPosition);
+      } else {
+        console.warn("[GameSelector] Player object not found! Teleport will not work.");
+        this.initialPlayerPosition = vec3_exports.fromValues(-2.5, 0, 1.1575535);
+      }
       this.updateStatus("Select a drill");
       this.updateCue("");
       this.updateStats("");
@@ -13315,10 +13360,22 @@ Checking ray mesh hierarchy:`);
           }
         }
       }
+      this.teleportPlayerToStart();
       this.currentDrill = null;
       this.updateStatus("Drills stopped");
       this.updateCue("");
       this.updateStats("");
+    }
+    teleportPlayerToStart() {
+      if (!this.player) {
+        this.player = this.engine.scene.findByName("Player")[0];
+      }
+      if (this.player && this.initialPlayerPosition) {
+        this.player.setPositionWorld(this.initialPlayerPosition);
+        console.log("[GameSelector] Teleported player to initial position:", this.initialPlayerPosition);
+      } else {
+        console.warn("[GameSelector] Cannot teleport - player or initial position not found");
+      }
     }
     // Report
     showReport() {
@@ -13329,74 +13386,85 @@ Checking ray mesh hierarchy:`);
       }
       const r = dm.getReport();
       console.log("[GameSelector] Report data:", r);
-      let report = "=== SESSION REPORT ===\n\n";
       let hasData = false;
-      if (r.reaction.total > 0 || r.accuracy.total > 0) {
-        hasData = true;
-        report += `TARGET DRILL
-`;
-        if (r.reaction.total > 0) {
-          report += `  Targets Hit: ${r.reaction.total}
-`;
-          report += `  Avg Reaction Time: ${r.reaction.average.toFixed(3)}s
-`;
-          report += `  Fastest: ${r.reaction.fastest.toFixed(3)}s
-`;
-          report += `  Slowest: ${r.reaction.slowest.toFixed(3)}s
-`;
-        }
-        if (r.accuracy.total > 0) {
-          report += `  Accuracy: ${r.accuracy.percent.toFixed(1)}% (${r.accuracy.correct}/${r.accuracy.total})
-`;
-        }
-        report += "\n";
-      }
-      if (r.beam.runs.length > 0) {
-        hasData = true;
-        const avgBeam = r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length;
-        report += `BEAM WALK
-`;
-        report += `  Total Runs: ${r.beam.runs.length}
-`;
-        report += `  Best Time: ${r.beam.best.toFixed(2)}s
-`;
-        report += `  Average Time: ${avgBeam.toFixed(2)}s
-`;
-        report += "\n";
-      }
-      if (r.deflect.gamesPlayed > 0) {
-        hasData = true;
-        report += `DEFLECT & CATCH
-`;
-        report += `  Games Played: ${r.deflect.gamesPlayed}
-`;
-        report += `  Total Balls: ${r.deflect.totalBalls}
-`;
-        report += `  Total Hits: ${r.deflect.hits}
-`;
-        report += `  Accuracy: ${r.deflect.accuracy.toFixed(1)}%
-`;
-        report += "\n";
-      }
-      if (r.react.total > 0) {
-        hasData = true;
-        report += `STRIKE & REACT
-`;
-        report += `  Targets Hit: ${r.react.total}
-`;
-        report += `  Avg Reaction Time: ${r.react.average.toFixed(3)}s
-`;
-        report += `  Fastest: ${r.react.fastest.toFixed(3)}s
-`;
-        report += `  Slowest: ${r.react.slowest.toFixed(3)}s
-`;
-        report += "\n";
-      }
+      const targetStats = r.reaction.total > 0 || r.accuracy.total > 0 ? this._buildTargetStats(r) : null;
+      const beamStats = r.beam.runs.length > 0 ? this._buildBeamStats(r) : null;
+      const deflectStats = r.deflect.gamesPlayed > 0 ? this._buildDeflectStats(r) : null;
+      const reactStats = r.react.total > 0 ? this._buildReactStats(r) : null;
+      hasData = targetStats || beamStats || deflectStats || reactStats;
       if (!hasData) {
-        report = "No data yet - complete some drills first!";
+        this.updateReport("No data yet - complete some drills first!");
+        return;
+      }
+      const colWidth = 20;
+      const separator = " | ";
+      const leftCol = [targetStats, beamStats].filter((s) => s);
+      const rightCol = [deflectStats, reactStats].filter((s) => s);
+      const leftLines = this._getColumnLines(leftCol, colWidth);
+      const rightLines = this._getColumnLines(rightCol, colWidth);
+      const maxLines = Math.max(leftLines.length, rightLines.length);
+      let report = "====== SESSION REPORT ======\n\n";
+      for (let i = 0; i < maxLines; i++) {
+        const left = (leftLines[i] || "").padEnd(colWidth);
+        const right = (rightLines[i] || "").padEnd(colWidth);
+        report += left + separator + right + "\n";
       }
       console.log(report);
       this.updateReport(report);
+    }
+    _buildTargetStats(r) {
+      const lines = ["TARGET DRILL", "------------"];
+      if (r.reaction.total > 0) {
+        lines.push(`Hits: ${r.reaction.total}`);
+        lines.push(`RT: ${r.reaction.average.toFixed(2)}s`);
+      }
+      if (r.accuracy.total > 0) {
+        lines.push(`Acc: ${r.accuracy.percent.toFixed(1)}%`);
+      }
+      return lines;
+    }
+    _buildBeamStats(r) {
+      const avgBeam = r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length;
+      return [
+        "BEAM WALK",
+        "---------",
+        `Runs: ${r.beam.runs.length}`,
+        `Best: ${r.beam.best.toFixed(1)}s`,
+        `Avg: ${avgBeam.toFixed(1)}s`
+      ];
+    }
+    _buildDeflectStats(r) {
+      return [
+        "DEFLECT & CATCH",
+        "---------------",
+        `Games: ${r.deflect.gamesPlayed}`,
+        `Balls: ${r.deflect.totalBalls}`,
+        `Hits: ${r.deflect.hits}`,
+        `Acc: ${r.deflect.accuracy.toFixed(1)}%`
+      ];
+    }
+    _buildReactStats(r) {
+      return [
+        "STRIKE & REACT",
+        "--------------",
+        `Hits: ${r.react.total}`,
+        `RT: ${r.react.average.toFixed(2)}s`,
+        `Best: ${r.react.fastest.toFixed(2)}s`
+      ];
+    }
+    _getColumnLines(blocks, colWidth) {
+      const lines = [];
+      for (let i = 0; i < blocks.length; i++) {
+        const blockLines = blocks[i];
+        for (const line of blockLines) {
+          const truncated = line.length > colWidth ? line.substring(0, colWidth - 3) + "..." : line;
+          lines.push(truncated);
+        }
+        if (i < blocks.length - 1) {
+          lines.push("");
+        }
+      }
+      return lines;
     }
   };
   __publicField(GameSelector, "TypeName", "game-selector");
@@ -13414,6 +13482,9 @@ Checking ray mesh hierarchy:`);
     reactManager: Property.object(),
     // Reaction game (strike/click)
     dataManager: Property.object(),
+    // Player/Camera
+    player: Property.object(),
+    // Reference to Player object for teleportation
     // UI elements
     uiStatusText: Property.object(),
     uiCueText: Property.object(),

@@ -13,7 +13,8 @@ export class BeamWalkManager extends Component {
         maxDistanceFromCenter: Property.float(1.0), // Increased to 1.0m (100cm tolerance)
         resetHeight: Property.float(-2.0),
         dataManager: Property.object(),
-        statsText: Property.object(), // Text component to display live stats
+        gameSelector: Property.object(), // Reference to game-selector for unified UI
+        statsText: Property.object(), // Text component to display live stats (legacy, prefer gameSelector)
         successRadius: Property.float(1.0), // Radius around end point to count as success
         // Controller references for haptic feedback
         leftController: Property.object(),
@@ -52,8 +53,18 @@ export class BeamWalkManager extends Component {
         this.deviationSamples = [];
         this.lastWarningTime = 0; // For throttling warning haptics
         
+        // Get game selector reference if not provided
+        if (!this.gameSelector) {
+            const manager = this.engine.scene.findByName('Manager')[0];
+            if (manager) {
+                this.gameSelector = manager.getComponent('game-selector');
+                console.log('[BeamWalk] Auto-found game-selector');
+            }
+        }
+        
         // Debug: Check if statsText is assigned
         console.log('[BeamWalk] start() - statsText:', this.statsText);
+        console.log('[BeamWalk] start() - gameSelector:', this.gameSelector);
         if (this.statsText) {
             console.log('[BeamWalk] statsText object found:', this.statsText.name);
             const textComp = this.statsText.getComponent('text');
@@ -83,18 +94,6 @@ export class BeamWalkManager extends Component {
     }
 
     updateStats() {
-        if (!this.statsText) {
-            console.warn('[BeamWalk] statsText not assigned - check editor property');
-            return;
-        }
-        
-        const textComp = this.statsText.getComponent('text');
-        if (!textComp) {
-            console.warn('[BeamWalk] text component not found on:', this.statsText.name);
-            console.warn('[BeamWalk] Available components:', this.statsText);
-            return;
-        }
-
         const currentRunTime = this.running 
             ? ((performance.now() - this._currentRunStart) / 1000).toFixed(2)
             : '0.00';
@@ -106,7 +105,11 @@ export class BeamWalkManager extends Component {
         const totalTime = (this.totalBalanceDuration / 1000).toFixed(2);
         const bestTime = (this.bestDuration / 1000).toFixed(2);
 
-        const stats = `BEAM WALK STATS
+        // Concise stats for unified UI (game-selector)
+        const conciseStats = `Run #${this.currentRunNumber} | Current: ${currentRunTime}s | Best: ${bestTime}s | Success: ${this.successfulRuns} | Falls: ${this.totalFalls}`;
+
+        // Detailed stats for legacy statsText
+        const detailedStats = `BEAM WALK STATS
 Run #: ${this.currentRunNumber}
 Current: ${currentRunTime}s
 Total Time: ${totalTime}s
@@ -116,10 +119,38 @@ Falls: ${this.totalFalls}
 Max Dist: ${this.maxDistanceReached.toFixed(2)}m
 Avg Dev: ${avgDev}m`;
 
-        textComp.text = stats;
+        // Update unified UI (via game-selector)
+        const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
+        if (gs && gs.updateStats) {
+            gs.updateStats(conciseStats);
+        }
+        
+        // ALSO update legacy statsText (show in both places)
+        if (this.statsText) {
+            const textComp = this.statsText.getComponent('text');
+            if (textComp) {
+                textComp.text = detailedStats;
+            }
+        }
     }
 
     startDrill() {
+        console.log('[BeamWalk] startDrill() called');
+        console.log('[BeamWalk] playerObject:', this.playerObject?.name);
+        console.log('[BeamWalk] headObject:', this.headObject?.name);
+        console.log('[BeamWalk] startPosition:', this.startPosition?.name);
+        console.log('[BeamWalk] endPosition:', this.endPosition?.name);
+        console.log('[BeamWalk] statsText:', this.statsText?.name);
+        
+        if (!this.playerObject) {
+            console.error('[BeamWalk] ERROR: playerObject not set! Cannot start drill.');
+            return;
+        }
+        if (!this.startPosition || !this.endPosition) {
+            console.error('[BeamWalk] ERROR: Start or End position not set!');
+            return;
+        }
+        
         this.running = true;
         this.totalBalanceDuration = 0;
         this.currentRunNumber = 1;
@@ -131,6 +162,8 @@ Avg Dev: ${avgDev}m`;
         this._currentRunStart = performance.now();
         this._resetToStart();
         this.updateStats();
+        
+        console.log('[BeamWalk] Drill started successfully! running=', this.running);
     }
 
     endDrill() {
@@ -168,7 +201,14 @@ Avg Dev: ${avgDev}m`;
     }
 
     update(dt) {
-        if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition) return;
+        if (!this.running) return;
+        
+        if (!this.playerObject || !this.startPosition || !this.endPosition) {
+            if (this.running) {
+                console.warn('[BeamWalk] Missing required objects in update! playerObject:', !!this.playerObject, 'start:', !!this.startPosition, 'end:', !!this.endPosition);
+            }
+            return;
+        }
         
         // Use head position for XZ tracking (lateral movement) and Y (fall detection)
         // This is critical for VR where the player's head moves independently

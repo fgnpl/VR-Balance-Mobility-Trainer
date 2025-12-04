@@ -10,11 +10,12 @@ export class BatManager extends Component {
     static TypeName = 'bat-manager';
     
     static Properties = {
-        debugMode: Property.bool(false),       // Enable console logging
+        debugMode: Property.bool(true),       // Enable console logging (set to true for debugging)
     };
 
     start() {
-        this.soundSource = this.object.addComponent('audio-source', {src: 'sfx/click.wav', spatial: true});
+        // Skip audio component - it doesn't exist in this Wonderland Engine version
+        // this.soundSource = this.object.addComponent('audio-source', {src: 'sfx/click.wav', spatial: true});
 
         // Physx collision
         this.object.getComponent('physx').onCollision((type, other) => {
@@ -23,14 +24,23 @@ export class BatManager extends Component {
                 this.onCollision(other);
             }
         });
+        
+        if (this.debugMode) {
+            console.log('[BatManager] Initialized on object:', this.object.name);
+        }
     }
 
     onCollision(other) {
         if (other.object.name === 'Sphere') {
-            // Play collision sound
-            this.soundSource.play();
+            if (this.debugMode) {
+                console.log('[BatManager] Ball collision detected!');
+            }
+            
+            // Skip audio playback - component doesn't exist
+            // if (this.soundSource) this.soundSource.play();
             
             // Trigger haptic feedback on controller using centralized system
+            // Pass the bat object - triggerHaptic will search up the hierarchy for the input component
             triggerHaptic(this.object, HapticPatterns.BALL_HIT_BAT, null, this.debugMode);
         }
     }
