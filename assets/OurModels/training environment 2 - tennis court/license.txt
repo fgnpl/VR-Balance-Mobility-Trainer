@@ -1,0 +1,11 @@
+Model Information:
+* title:	Tennis Court
+* source:	https://sketchfab.com/3d-models/tennis-court-b64072d941ac46afb26cab8274daf5ca
+* author:	rohitmalakar (https://sketchfab.com/rohitmalakar)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Tennis Court" (https://sketchfab.com/3d-models/tennis-court-b64072d941ac46afb26cab8274daf5ca) by rohitmalakar (https://sketchfab.com/rohitmalakar) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

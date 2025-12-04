@@ -1,0 +1,11 @@
+Model Information:
+* title:	Stylized Low-poly Wooden beam
+* source:	https://sketchfab.com/3d-models/stylized-low-poly-wooden-beam-01b16abea26646c8ba334c905374f83e
+* author:	Rocco Giandomenico (https://sketchfab.com/Rocco.Giandomenico)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Stylized Low-poly Wooden beam" (https://sketchfab.com/3d-models/stylized-low-poly-wooden-beam-01b16abea26646c8ba334c905374f83e) by Rocco Giandomenico (https://sketchfab.com/Rocco.Giandomenico) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

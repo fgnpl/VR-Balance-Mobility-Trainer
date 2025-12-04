@@ -1,0 +1,6244 @@
+{
+    "objects": {
+        "14": {
+            "name": "Player",
+            "translation": [
+                -2.5,
+                0.0,
+                1.1575535
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.9999998,
+                1.0,
+                0.9999998
+            ]
+        },
+        "17": {
+            "name": "NonVrCamera",
+            "parent": "237",
+            "components": [
+                {
+                    "type": "view"
+                },
+                {
+                    "type": "mouse-look"
+                },
+                {
+                    "type": "audio-listener"
+                },
+                {
+                    "type": "vr-mode-active-switch",
+                    "vr-mode-active-switch": {
+                        "activateComponents": "in non-VR"
+                    }
+                },
+                {
+                    "type": "head-bob",
+                    "head-bob": {
+                        "playerObject": "237",
+                        "bobAmount": 0.15
+                    }
+                },
+                {
+                    "type": "cursor"
+                }
+            ],
+            "translation": [
+                0.000351,
+                1.2780845,
+                -0.2608584
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "18": {
+            "name": "EyeLeft",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "view"
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "eye left"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                -2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "19": {
+            "name": "EyeRight",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "view"
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "eye right"
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                -2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "21": {
+            "name": "Light",
+            "components": [
+                {
+                    "type": "light",
+                    "light": {
+                        "intensity": 100000.0
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                16.9236488,
+                -11.235898
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                50.0,
+                50.0,
+                50.0
+            ],
+            "parent": "360"
+        },
+        "23": {
+            "name": "Light.000",
+            "components": [
+                {
+                    "type": "light",
+                    "light": {
+                        "intensity": 1000.0
+                    }
+                }
+            ],
+            "translation": [
+                -1.0,
+                14.1643886,
+                -1.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                50.0,
+                50.0,
+                50.0
+            ],
+            "parent": "360"
+        },
+        "53": {
+            "scaling": [
+                0.9999998,
+                0.9999999,
+                0.9999997
+            ],
+            "parent": "130",
+            "name": "ControllerModelLeft",
+            "translation": [
+                -0.0117514,
+                0.0008869,
+                0.0161192
+            ],
+            "rotation": [
+                -0.0,
+                0.7316615,
+                0.6816681,
+                3.196286257889369e-8
+            ],
+            "link": {
+                "name": "root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "54": {
+            "link": {
+                "name": "controller<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53",
+            "components": [
+                {
+                    "active": true
+                }
+            ]
+        },
+        "55": {
+            "link": {
+                "name": "thumbrest_pressed_max<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "56": {
+            "link": {
+                "name": "thumbrest_pressed_min<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "57": {
+            "link": {
+                "name": "thumbrest_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "58": {
+            "link": {
+                "name": "x_button_pressed_max<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "59": {
+            "link": {
+                "name": "x_button_pressed_min<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "60": {
+            "link": {
+                "name": "x_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "61": {
+            "link": {
+                "name": "x_button<x_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "60"
+        },
+        "62": {
+            "link": {
+                "name": "xr_standard_squeeze_pressed_max<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "63": {
+            "link": {
+                "name": "xr_standard_squeeze_pressed_min<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "64": {
+            "link": {
+                "name": "xr_standard_squeeze_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "65": {
+            "link": {
+                "name": "squeeze<xr_standard_squeeze_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "64"
+        },
+        "66": {
+            "link": {
+                "name": "xr_standard_thumbstick_pressed_max<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "67": {
+            "link": {
+                "name": "xr_standard_thumbstick_pressed_min<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "68": {
+            "link": {
+                "name": "xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "69": {
+            "link": {
+                "name": "xr_standard_thumbstick_xaxis_pressed_max<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "68"
+        },
+        "70": {
+            "link": {
+                "name": "xr_standard_thumbstick_xaxis_pressed_min<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "68"
+        },
+        "71": {
+            "link": {
+                "name": "xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "68"
+        },
+        "72": {
+            "link": {
+                "name": "xr_standard_thumbstick_yaxis_pressed_max<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "71"
+        },
+        "73": {
+            "link": {
+                "name": "xr_standard_thumbstick_yaxis_pressed_min<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "71"
+        },
+        "74": {
+            "link": {
+                "name": "xr_standard_thumbstick_yaxis_pressed_value<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "71"
+        },
+        "75": {
+            "link": {
+                "name": "thumbstick<xr_standard_thumbstick_yaxis_pressed_value<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "74"
+        },
+        "76": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_max<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "77": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_min<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "78": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "79": {
+            "link": {
+                "name": "trigger<xr_standard_trigger_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "78"
+        },
+        "80": {
+            "link": {
+                "name": "y_button_pressed_max<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "81": {
+            "link": {
+                "name": "y_button_pressed_min<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "82": {
+            "link": {
+                "name": "y_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "53"
+        },
+        "83": {
+            "link": {
+                "name": "y_button<y_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "parent": "82"
+        },
+        "95": {
+            "scaling": [
+                0.9993978,
+                0.9993963,
+                1.0000015
+            ],
+            "parent": "129",
+            "name": "ControllerModelRight",
+            "translation": [
+                0.0097994,
+                -0.0006203,
+                0.0177838
+            ],
+            "rotation": [
+                -0.0,
+                0.999921,
+                -0.0125658,
+                -4.174509058429976e-7
+            ],
+            "link": {
+                "name": "root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "96": {
+            "link": {
+                "name": "a_button_pressed_max<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "97": {
+            "link": {
+                "name": "a_button_pressed_min<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "98": {
+            "link": {
+                "name": "a_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "99": {
+            "link": {
+                "name": "a_button<a_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "98"
+        },
+        "100": {
+            "link": {
+                "name": "b_button_pressed_max<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "101": {
+            "link": {
+                "name": "b_button_pressed_min<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "102": {
+            "link": {
+                "name": "b_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "103": {
+            "link": {
+                "name": "b_button<b_button_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "102"
+        },
+        "104": {
+            "link": {
+                "name": "controller<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95",
+            "components": [
+                {
+                    "active": true
+                }
+            ]
+        },
+        "105": {
+            "link": {
+                "name": "thumbrest_pressed_max<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "106": {
+            "link": {
+                "name": "thumbrest_pressed_min<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "107": {
+            "link": {
+                "name": "thumbrest_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "108": {
+            "link": {
+                "name": "xr_standard_squeeze_pressed_max<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "109": {
+            "link": {
+                "name": "xr_standard_squeeze_pressed_min<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "110": {
+            "link": {
+                "name": "xr_standard_squeeze_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "111": {
+            "link": {
+                "name": "squeeze<xr_standard_squeeze_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "110"
+        },
+        "112": {
+            "link": {
+                "name": "xr_standard_thumbstick_pressed_max<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "113": {
+            "link": {
+                "name": "xr_standard_thumbstick_pressed_min<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "114": {
+            "link": {
+                "name": "xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "115": {
+            "link": {
+                "name": "xr_standard_thumbstick_xaxis_pressed_max<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "114"
+        },
+        "116": {
+            "link": {
+                "name": "xr_standard_thumbstick_xaxis_pressed_min<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "114"
+        },
+        "117": {
+            "link": {
+                "name": "xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "114"
+        },
+        "118": {
+            "link": {
+                "name": "xr_standard_thumbstick_yaxis_pressed_max<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "117"
+        },
+        "119": {
+            "link": {
+                "name": "xr_standard_thumbstick_yaxis_pressed_min<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "117"
+        },
+        "120": {
+            "link": {
+                "name": "xr_standard_thumbstick_yaxis_pressed_value<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "117"
+        },
+        "121": {
+            "link": {
+                "name": "thumbstick<xr_standard_thumbstick_yaxis_pressed_value<xr_standard_thumbstick_xaxis_pressed_value<xr_standard_thumbstick_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "120"
+        },
+        "122": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_max<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "123": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_min<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "124": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "95"
+        },
+        "125": {
+            "link": {
+                "name": "trigger<xr_standard_trigger_pressed_value<root",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "parent": "124"
+        },
+        "126": {
+            "name": "CursorLeft",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "cursor",
+                    "cursor": {
+                        "cursorObject": "376",
+                        "collisionGroup": 0,
+                        "cursorRayObject": "209",
+                        "cursorRayScalingAxis": "y",
+                        "inputObject": null,
+                        "viewObject": null
+                    }
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "ray left"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch"
+                }
+            ],
+            "translation": [
+                2.384185791015625e-7,
+                -0.0092358,
+                -2.086162567138672e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "129": {
+            "name": "ControllerRight",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "hand right"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch",
+                    "active": true
+                },
+                {
+                    "type": "controller-hit"
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "sphere",
+                        "box": {
+                            "extents": [
+                                0.07,
+                                0.15,
+                                0.1
+                            ]
+                        },
+                        "sphere": {
+                            "radius": 0.15
+                        }
+                    }
+                },
+                {
+                    "type": "collision-debug",
+                    "collision-debug": {
+                        "showExit": true
+                    }
+                }
+            ],
+            "translation": [
+                0.1003172,
+                0.0,
+                -2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "130": {
+            "name": "ControllerLeft",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "hand left"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch",
+                    "active": true
+                },
+                {
+                    "type": "controller-hit",
+                    "controller-hit": {
+                        "hand": "left"
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "sphere",
+                        "box": {
+                            "extents": [
+                                0.07,
+                                0.15,
+                                0.1
+                            ]
+                        },
+                        "sphere": {
+                            "radius": 0.15
+                        }
+                    }
+                },
+                {
+                    "type": "collision-debug",
+                    "collision-debug": {
+                        "showExit": true
+                    }
+                }
+            ],
+            "translation": [
+                -0.1002006,
+                0.0,
+                -2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "134": {
+            "link": {
+                "name": "Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "205",
+            "name": "HandLeft",
+            "components": [
+                {
+                    "type": "hand-tracking",
+                    "hand-tracking": {
+                        "handedness": "left",
+                        "handSkin": "133",
+                        "controllerToDeactivate": "130",
+                        "deactivateChildrenWithoutPose": true
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch",
+                    "active": true
+                }
+            ],
+            "translation": [
+                -0.1002006,
+                0.0,
+                -2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "135": {
+            "link": {
+                "name": "l_handMeshNode<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "components": [
+                {
+                    "active": true,
+                    "mesh": {
+                        "skin": "133"
+                    }
+                }
+            ]
+        },
+        "136": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_max<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134"
+        },
+        "137": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_min<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134"
+        },
+        "138": {
+            "link": {
+                "name": "xr_standard_trigger_pressed_value<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134"
+        },
+        "139": {
+            "link": {
+                "name": "pinky-finger-tip<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "140": {
+            "link": {
+                "name": "pinky-finger-phalanx-distal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "141": {
+            "link": {
+                "name": "pinky-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "142": {
+            "link": {
+                "name": "pinky-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "143": {
+            "link": {
+                "name": "pinky-finger-metacarpal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "144": {
+            "link": {
+                "name": "ring-finger-tip<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "145": {
+            "link": {
+                "name": "ring-finger-phalanx-distal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "146": {
+            "link": {
+                "name": "ring-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "147": {
+            "link": {
+                "name": "ring-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "148": {
+            "link": {
+                "name": "ring-finger-metacarpal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "149": {
+            "link": {
+                "name": "middle-finger-tip<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "150": {
+            "link": {
+                "name": "middle-finger-phalanx-distal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "151": {
+            "link": {
+                "name": "middle-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "152": {
+            "link": {
+                "name": "middle-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "153": {
+            "link": {
+                "name": "middle-finger-metacarpal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "154": {
+            "link": {
+                "name": "index-finger-tip<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "components": [
+                {
+                    "type": "finger-cursor"
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.0099999
+                        },
+                        "groups": 2
+                    }
+                }
+            ],
+            "skin": "133"
+        },
+        "155": {
+            "link": {
+                "name": "index-finger-phalanx-distal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "156": {
+            "link": {
+                "name": "index-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "157": {
+            "link": {
+                "name": "index-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "158": {
+            "link": {
+                "name": "index-finger-metacarpal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "159": {
+            "link": {
+                "name": "thumb-tip<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "160": {
+            "link": {
+                "name": "thumb-phalanx-distal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "161": {
+            "link": {
+                "name": "thumb-phalanx-proximal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "162": {
+            "link": {
+                "name": "thumb-metacarpal<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "163": {
+            "link": {
+                "name": "wrist<Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "parent": "134",
+            "skin": "133"
+        },
+        "167": {
+            "link": {
+                "name": "Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "205",
+            "name": "HandRight",
+            "components": [
+                {
+                    "type": "hand-tracking",
+                    "hand-tracking": {
+                        "handedness": "right",
+                        "handSkin": "166",
+                        "controllerToDeactivate": "129"
+                    },
+                    "active": true
+                },
+                {
+                    "type": "vr-mode-active-switch",
+                    "active": true
+                }
+            ],
+            "translation": [
+                0.1003172,
+                0.0,
+                -2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "168": {
+            "link": {
+                "name": "r_handMeshNode<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "components": [
+                {
+                    "mesh": {
+                        "skin": "166"
+                    }
+                }
+            ]
+        },
+        "169": {
+            "link": {
+                "name": "wrist<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "170": {
+            "link": {
+                "name": "thumb-metacarpal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "171": {
+            "link": {
+                "name": "thumb-phalanx-proximal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "172": {
+            "link": {
+                "name": "thumb-phalanx-distal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "173": {
+            "link": {
+                "name": "thumb-tip<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "174": {
+            "link": {
+                "name": "index-finger-metacarpal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "175": {
+            "link": {
+                "name": "index-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "176": {
+            "link": {
+                "name": "index-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "177": {
+            "link": {
+                "name": "index-finger-phalanx-distal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "178": {
+            "link": {
+                "name": "index-finger-tip<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "components": [
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.0099999
+                        },
+                        "groups": 2
+                    }
+                },
+                {
+                    "type": "finger-cursor"
+                }
+            ],
+            "skin": "166"
+        },
+        "179": {
+            "link": {
+                "name": "middle-finger-metacarpal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "180": {
+            "link": {
+                "name": "middle-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "181": {
+            "link": {
+                "name": "middle-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "182": {
+            "link": {
+                "name": "middle-finger-phalanx-distal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "183": {
+            "link": {
+                "name": "middle-finger-tip<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "184": {
+            "link": {
+                "name": "ring-finger-metacarpal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "185": {
+            "link": {
+                "name": "ring-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "186": {
+            "link": {
+                "name": "ring-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "187": {
+            "link": {
+                "name": "ring-finger-phalanx-distal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "188": {
+            "link": {
+                "name": "ring-finger-tip<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "189": {
+            "link": {
+                "name": "pinky-finger-metacarpal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "190": {
+            "link": {
+                "name": "pinky-finger-phalanx-proximal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "191": {
+            "link": {
+                "name": "pinky-finger-phalanx-intermediate<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "192": {
+            "link": {
+                "name": "pinky-finger-phalanx-distal<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "193": {
+            "link": {
+                "name": "pinky-finger-tip<Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "parent": "167",
+            "skin": "166"
+        },
+        "205": {
+            "name": "TrackedSpace",
+            "parent": "14",
+            "components": [
+                {
+                    "type": "player-height"
+                }
+            ],
+            "translation": [
+                2.5052964,
+                3.1964445,
+                0.0000202
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                3.0,
+                3.0,
+                3.0
+            ]
+        },
+        "209": {
+            "name": "CursorRayLeft",
+            "parent": "126",
+            "translation": [
+                0.0,
+                0.0,
+                2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "210": {
+            "name": "CursorRayMeshLeft",
+            "parent": "209",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "10",
+                        "material": "128"
+                    }
+                }
+            ],
+            "translation": [
+                2.3841928964429826e-7,
+                0.0002447,
+                0.0
+            ],
+            "rotation": [
+                0.707,
+                0.0,
+                0.0,
+                0.7072135
+            ],
+            "scaling": [
+                0.0049998,
+                0.3500002,
+                0.0049999
+            ]
+        },
+        "212": {
+            "name": "CursorRight",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "cursor",
+                    "cursor": {
+                        "cursorObject": "377",
+                        "collisionGroup": 0,
+                        "cursorRayObject": "213",
+                        "cursorRayScalingAxis": "y",
+                        "inputObject": null,
+                        "viewObject": null
+                    }
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "ray right"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch"
+                }
+            ],
+            "translation": [
+                0.0,
+                0.0,
+                -2.086162567138672e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "213": {
+            "name": "CursorRayRight",
+            "parent": "212",
+            "translation": [
+                0.0,
+                0.0,
+                2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "214": {
+            "name": "CursorRayMeshRight",
+            "parent": "213",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "10",
+                        "material": "128"
+                    }
+                }
+            ],
+            "translation": [
+                2.384185791015625e-7,
+                0.0002447,
+                0.0
+            ],
+            "rotation": [
+                0.7072796,
+                0.0,
+                0.0,
+                0.7069339
+            ],
+            "scaling": [
+                0.0049998,
+                0.3499999,
+                0.0049999
+            ]
+        },
+        "233": {
+            "name": "Head",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "vr-mode-active-switch",
+                    "active": true
+                },
+                {
+                    "type": "audio-listener",
+                    "active": false
+                },
+                {
+                    "type": "input"
+                }
+            ]
+        },
+        "234": {
+            "name": "Manager",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": null,
+                        "material": null
+                    }
+                },
+                {
+                    "type": "game-selector",
+                    "game-selector": {
+                        "footballField": "315",
+                        "tennisCourt": "240",
+                        "gymFloor": "324",
+                        "targetManager": "234",
+                        "beamWalkManager": "234",
+                        "dataManager": "234",
+                        "uiStatusText": "273",
+                        "ballThrower": 0,
+                        "deflectBall": null,
+                        "strikeBall": null,
+                        "uiCueText": "274",
+                        "uiStatsText": "275",
+                        "deflectManager": "407",
+                        "reactManager": "395",
+                        "uiReportText": "406"
+                    }
+                },
+                {
+                    "type": "data-manager"
+                },
+                {
+                    "type": "beam-walk-manager",
+                    "beam-walk-manager": {
+                        "playerObject": "14",
+                        "startPosition": "349",
+                        "endPosition": "350",
+                        "dataManager": "234",
+                        "statsText": "374",
+                        "headObject": "233",
+                        "leftController": "130",
+                        "rightController": "129"
+                    }
+                },
+                {
+                    "type": "target-manager",
+                    "target-manager": {
+                        "spherePrefab": "352",
+                        "useColorMode": true,
+                        "dataManager": "234",
+                        "uiCueText": 161,
+                        "statsText": 160,
+                        "simultaneousTargets": 4,
+                        "spawnZone": "391",
+                        "gameSelector": "234"
+                    }
+                },
+                {
+                    "type": "vr-motion-tracker",
+                    "vr-motion-tracker": {
+                        "headObject": "233",
+                        "leftController": "130",
+                        "rightController": "129",
+                        "debugMode": true
+                    },
+                    "active": false
+                }
+            ]
+        },
+        "235": {
+            "name": "Environment"
+        },
+        "236": {
+            "name": "Level",
+            "parent": "360",
+            "translation": [
+                0.0,
+                -1.5,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "237": {
+            "name": "WebPlayer",
+            "components": [
+                {
+                    "type": "wasd-controls",
+                    "wasd-controls": {
+                        "headObject": "17",
+                        "lockY": true
+                    }
+                },
+                {
+                    "type": "player-height",
+                    "player-height": {
+                        "height": 1.3999999
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "box",
+                        "box": {
+                            "extents": [
+                                0.2,
+                                1.3999999,
+                                0.2
+                            ]
+                        }
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                1.7405011,
+                1.6482918
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "15": {
+            "name": "PhysicsPlane",
+            "parent": "360",
+            "components": [
+                {
+                    "type": "physx",
+                    "physx": {
+                        "shape": "plane",
+                        "static": true,
+                        "trigger": false
+                    },
+                    "active": true
+                }
+            ],
+            "translation": [
+                0.000109,
+                0.5672428,
+                4.7758529575503423e-8
+            ],
+            "scaling": [
+                0.5863192,
+                0.9999976,
+                1.0000019
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.7072799,
+                0.7069335
+            ]
+        },
+        "240": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "scaling": [
+                50.0,
+                50.0000076,
+                50.0000076
+            ],
+            "name": "TennisCourt",
+            "hiddenForLightBaking": false,
+            "parent": "351",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                -0.7071068,
+                0.0,
+                0.0,
+                0.7071067
+            ]
+        },
+        "315": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            },
+            "name": "FootballField",
+            "scaling": [
+                0.0399998,
+                0.0399999,
+                0.0399999
+            ],
+            "translation": [
+                0.0,
+                -1.7000001,
+                0.0
+            ],
+            "parent": "351",
+            "rotation": [
+                -0.7071068,
+                0.0,
+                0.0,
+                0.7071067
+            ]
+        },
+        "324": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            },
+            "name": "GymFloor",
+            "scaling": [
+                1.0,
+                1.0000001,
+                1.0000001
+            ],
+            "translation": [
+                0.0,
+                -0.3,
+                0.0
+            ],
+            "hiddenForLightBaking": false,
+            "parent": "351",
+            "rotation": [
+                -0.7071068,
+                0.0,
+                0.0,
+                0.7071067
+            ]
+        },
+        "342": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "scaling": [
+                0.0049998,
+                0.0049997,
+                0.0049997
+            ],
+            "translation": [
+                4.3000001,
+                1.5143206,
+                -4.4442167
+            ],
+            "rotation": [
+                -0.7071023,
+                0.0,
+                0.0,
+                0.7071111
+            ],
+            "name": "Beam",
+            "components": [],
+            "parent": "351"
+        },
+        "343": {
+            "link": {
+                "name": "Collada visual scene group<Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "parent": "342"
+        },
+        "344": {
+            "link": {
+                "name": "Cube<Collada visual scene group<Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "parent": "343"
+        },
+        "345": {
+            "link": {
+                "name": "defaultMaterial<Cube<Collada visual scene group<Sketchfab_model",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            },
+            "parent": "344",
+            "translation": [
+                1638.265625,
+                0.0005969,
+                -0.00885
+            ],
+            "rotation": [
+                1.0677015893634237e-7,
+                -0.7071068,
+                -1.0677015893634237e-7,
+                -0.7071068
+            ],
+            "scaling": [
+                0.9999982,
+                1.0,
+                0.9999993
+            ]
+        },
+        "349": {
+            "name": "BeamStart",
+            "parent": "342",
+            "translation": [
+                1645.1994628,
+                454.2001342,
+                109.7897644
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "350": {
+            "name": "BeamEnd",
+            "parent": "342",
+            "translation": [
+                1645.1826171,
+                -443.8601379,
+                125.2633132
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "352": {
+            "name": "TargetSphere",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "22"
+                    },
+                    "active": true
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.2
+                        }
+                    },
+                    "active": true
+                },
+                {
+                    "type": "target-collision",
+                    "target-collision": {
+                        "manager": "234"
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "scaling": [
+                0.2,
+                0.2,
+                0.2
+            ],
+            "translation": [
+                4.642488,
+                3.875,
+                -5.754795
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "hiddenForLightBaking": true,
+            "parent": "361"
+        },
+        "337": {
+            "name": "UIPANEL",
+            "parent": "27",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "128",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -3.4199771,
+                4.2041521,
+                -3.3919343
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "353": {
+            "name": "button-start-target",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Target Drill",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4499999,
+                0.7622138,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "354": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Target"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "353"
+        },
+        "358": {
+            "name": "button-start-beam",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Beam Walk",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false,
+                        "autoStartBeamDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                0.4499999,
+                0.7622138,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "359": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Beam"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "358"
+        },
+        "362": {
+            "name": "button-stop-drills",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "231",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Stop All Drills",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.8999999,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    },
+                    "active": true
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                0.0179921,
+                0.1622138,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.85,
+                0.101,
+                0.3009999
+            ]
+        },
+        "363": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Stop Drills"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.5939999,
+                9.2010002,
+                3.3222591
+            ],
+            "parent": "362"
+        },
+        "364": {
+            "name": "button-show-report",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Show Report",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                0.4499999,
+                -0.7484055,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "365": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Show Report"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "364"
+        },
+        "368": {
+            "name": "button-env-football",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Football Environment",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4499999,
+                -0.1484056,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "369": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Football"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "368"
+        },
+        "370": {
+            "name": "button-env-tennis",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "debugMode": true,
+                        "triggerDistance": 5.0
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4499999,
+                -0.4484056,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "371": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Tennis"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "370"
+        },
+        "372": {
+            "name": "button-env-gym",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Gym Environment",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4499999,
+                -0.7484055,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "373": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Basketball"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "372"
+        },
+        "374": {
+            "name": "beamStatistics",
+            "parent": "27",
+            "components": [
+                {
+                    "type": "text"
+                }
+            ],
+            "translation": [
+                16.2816524,
+                6.2210912,
+                10.3678998
+            ],
+            "rotation": [
+                0.0,
+                0.9989582,
+                0.0,
+                0.0456341
+            ],
+            "scaling": [
+                8.8999996,
+                8.9000291,
+                8.8999996
+            ]
+        },
+        "376": {
+            "name": "3DCursorHitLeft",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "128"
+                    }
+                }
+            ],
+            "scaling": [
+                0.0099999,
+                0.0099999,
+                0.0099999
+            ],
+            "translation": [
+                0.0,
+                0.0388117,
+                1.5585094
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "377": {
+            "name": "3DCursorHitRight",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "128"
+                    }
+                }
+            ],
+            "scaling": [
+                0.0099999,
+                0.0099999,
+                0.0099999
+            ],
+            "translation": [
+                0.0,
+                0.0388117,
+                1.5585094
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "378": {
+            "name": "STATPANEL",
+            "parent": "27",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                -1.464667,
+                4.2732129,
+                -3.387495
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.8,
+                0.8169999,
+                0.2820143
+            ]
+        },
+        "393": {
+            "name": "button-stop-drills",
+            "parent": "27",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Stop All Drills",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                1.5,
+                                0.375,
+                                0.1875
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                17.4678344,
+                5.0731863,
+                9.785057
+            ],
+            "rotation": [
+                0.0,
+                1.0,
+                0.0,
+                1.114800411983197e-7
+            ],
+            "scaling": [
+                1.2009998,
+                0.3024963,
+                0.9014986
+            ]
+        },
+        "394": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Stop"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "393"
+        },
+        "391": {
+            "name": "TargetSpawnBox",
+            "parent": "360",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "8",
+                        "material": null
+                    }
+                }
+            ],
+            "translation": [
+                0.0,
+                3.562,
+                -0.7451276
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                4.3000001,
+                2.5,
+                1.7
+            ]
+        },
+        "395": {
+            "name": "SpawnPlane",
+            "components": [
+                {
+                    "type": "reaction-game",
+                    "reaction-game": {
+                        "spawnArea": "398",
+                        "targetTemplate": "397",
+                        "statusText": 248,
+                        "endPanel": 251,
+                        "resultText": 256,
+                        "panelVisibleLocation": 258,
+                        "gameSelector": "234"
+                    }
+                }
+            ],
+            "translation": [
+                2.4445276,
+                3.1893315,
+                -1.2959239
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "parent": "361"
+        },
+        "397": {
+            "name": "SphereTarget",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "26"
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.2
+                        }
+                    },
+                    "active": true
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "parent": "395",
+            "scaling": [
+                0.2,
+                0.2,
+                0.2
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "398": {
+            "name": "Plane",
+            "parent": "395",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "20"
+                    },
+                    "active": false
+                }
+            ],
+            "scaling": [
+                1.5,
+                0.8,
+                1.0
+            ]
+        },
+        "407": {
+            "name": "SphereDeflect",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "26"
+                    }
+                },
+                {
+                    "type": "physx",
+                    "physx": {
+                        "sphere": {
+                            "radius": 0.2
+                        },
+                        "gravity": true,
+                        "static": false,
+                        "linearDamping": 1.5,
+                        "angularDamping": 1.0,
+                        "mass": 0.5
+                    }
+                },
+                {
+                    "type": "bouncing-ball",
+                    "bouncing-ball": {
+                        "endPanel": 260,
+                        "scoreText": 265,
+                        "panelVisiblePos": 267,
+                        "batObject": "424",
+                        "gameSelector": "234",
+                        "minY": 3.5,
+                        "maxY": 4.0,
+                        "minForceX": 100.0,
+                        "maxForceX": 200.0,
+                        "minForceZ": 300.0,
+                        "maxForceZ": 350.0
+                    }
+                },
+                {
+                    "type": "trail",
+                    "trail": {
+                        "material": "20",
+                        "width": 0.125,
+                        "segments": 50,
+                        "interval": 0.025
+                    }
+                }
+            ],
+            "translation": [
+                3.5309169,
+                4.0574007,
+                -1.25
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.2,
+                0.2,
+                0.2
+            ],
+            "parent": "361"
+        },
+        "417": {
+            "name": "button-start-deflect",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Deflect & Catch",
+                        "debugMode": true
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                -0.4499999,
+                0.4622138,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "418": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Deflect"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "417"
+        },
+        "419": {
+            "name": "button-start-strike",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "202",
+                        "morphTargets": null
+                    }
+                },
+                {
+                    "type": "ui-plane-button",
+                    "ui-plane-button": {
+                        "action": "Start Strike & React",
+                        "debugMode": true,
+                        "autoStartTargetDrill": false,
+                        "autoStartBeamDrill": false
+                    }
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                0.4,
+                                0.1,
+                                0.05
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "cursor-target"
+                }
+            ],
+            "translation": [
+                0.4499999,
+                0.4622138,
+                0.0821392
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.4009999,
+                0.101,
+                0.3009999
+            ]
+        },
+        "420": {
+            "name": "Text",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Start Strike"
+                    }
+                }
+            ],
+            "translation": [
+                0.0436449,
+                -0.123657,
+                0.134531
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4937655,
+                9.9009904,
+                3.3222591
+            ],
+            "parent": "419"
+        },
+        "424": {
+            "link": {
+                "name": "Object_2<BaseballBat.obj.cleaner.materialmerger.gles<Sketchfab_model",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            },
+            "parent": "129",
+            "translation": [
+                0.0035614,
+                -0.0947094,
+                -0.0048104
+            ],
+            "components": [
+                {
+                    "originalIndex": 0,
+                    "active": false
+                },
+                {
+                    "type": "physx",
+                    "physx": {
+                        "shape": "capsule",
+                        "capsule": {
+                            "radius": 0.1,
+                            "halfHeight": 0.9499999
+                        },
+                        "rotationOffset": [
+                            -0.5,
+                            0.4999999,
+                            0.5,
+                            0.4999999
+                        ],
+                        "translationOffset": [
+                            0.0,
+                            0.0,
+                            1.1
+                        ],
+                        "gravity": false,
+                        "kinematic": true,
+                        "static": false
+                    },
+                    "active": false
+                },
+                {
+                    "type": "bat-manager"
+                }
+            ],
+            "scaling": [
+                0.035,
+                0.0349961,
+                0.0349962
+            ],
+            "name": "Baseball Bat",
+            "rotation": [
+                -0.0,
+                1.0,
+                -4.4703490686970326e-8,
+                -0.0002441
+            ]
+        },
+        "425": {
+            "name": "UIPANELWHITE",
+            "parent": "337",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "7",
+                        "material": "128",
+                        "morphTargets": null
+                    }
+                }
+            ],
+            "translation": [
+                1.9504847,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "325": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "324",
+            "translation": [
+                0.0,
+                2.9802322387695313e-8,
+                0.5911177
+            ],
+            "rotation": [
+                -0.7071065,
+                0.0,
+                0.0,
+                0.707107
+            ],
+            "scaling": [
+                1.0,
+                0.999995,
+                0.999995
+            ]
+        },
+        "446": {
+            "link": {
+                "name": "bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "325",
+            "rotation": [
+                -0.7071068,
+                5.338507591545749e-8,
+                0.7071068,
+                5.338507591545749e-8
+            ]
+        },
+        "447": {
+            "link": {
+                "name": "RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "446",
+            "translation": [
+                -107.1999969,
+                0.6999999,
+                60.0
+            ],
+            "scaling": [
+                5.0,
+                5.0,
+                5.0
+            ]
+        },
+        "448": {
+            "link": {
+                "name": "Line002<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "449": {
+            "link": {
+                "name": "Object_4<Line002<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "448"
+        },
+        "450": {
+            "link": {
+                "name": "Line002_20 - Default_0<Object_4<Line002<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "449"
+        },
+        "451": {
+            "link": {
+                "name": "Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "452": {
+            "link": {
+                "name": "Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "451"
+        },
+        "453": {
+            "link": {
+                "name": "Object040_Material #191_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "454": {
+            "link": {
+                "name": "Object040_metall_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "455": {
+            "link": {
+                "name": "Object040_08 - Default_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "456": {
+            "link": {
+                "name": "Object040_svet_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "457": {
+            "link": {
+                "name": "Object040_ch_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "458": {
+            "link": {
+                "name": "Object040_09 - Default_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "459": {
+            "link": {
+                "name": "Object040_19 - Default_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "460": {
+            "link": {
+                "name": "Object040_14 - Default_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "461": {
+            "link": {
+                "name": "Object040_13 - Default_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "462": {
+            "link": {
+                "name": "Object040_15 - Default_0<Object_7<Object040<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "452"
+        },
+        "463": {
+            "link": {
+                "name": "Line003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "464": {
+            "link": {
+                "name": "Object_19<Line003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "463"
+        },
+        "465": {
+            "link": {
+                "name": "Line003_20 - Default_0<Object_19<Line003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "464"
+        },
+        "466": {
+            "link": {
+                "name": "Box001<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "467": {
+            "link": {
+                "name": "Box001_16 - Default_0<Box001<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "466"
+        },
+        "468": {
+            "link": {
+                "name": "Box001_10 - Default_0<Box001<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "466"
+        },
+        "469": {
+            "link": {
+                "name": "Box001_04 - Default_0<Box001<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "466"
+        },
+        "470": {
+            "link": {
+                "name": "Box001_Material #5909_0<Box001<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "466"
+        },
+        "471": {
+            "link": {
+                "name": "Cylinder002<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "472": {
+            "link": {
+                "name": "Cylinder002_04 - Default_0<Cylinder002<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "471"
+        },
+        "473": {
+            "link": {
+                "name": "Tube001<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "474": {
+            "link": {
+                "name": "Tube001_16 - Default_0<Tube001<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "473"
+        },
+        "475": {
+            "link": {
+                "name": "Box003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "476": {
+            "link": {
+                "name": "Box003_22 - Default_0<Box003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "475"
+        },
+        "477": {
+            "link": {
+                "name": "Box003_10 - Default_0<Box003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "475"
+        },
+        "478": {
+            "link": {
+                "name": "Box004<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "479": {
+            "link": {
+                "name": "Box004_16 - Default_0<Box004<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "478"
+        },
+        "480": {
+            "link": {
+                "name": "Box004_10 - Default_0<Box004<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "478"
+        },
+        "481": {
+            "link": {
+                "name": "Box004_04 - Default_0<Box004<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "478"
+        },
+        "482": {
+            "link": {
+                "name": "Box004_Material #5909_0<Box004<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "478"
+        },
+        "483": {
+            "link": {
+                "name": "Cylinder004<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "484": {
+            "link": {
+                "name": "Cylinder004_04 - Default_0<Cylinder004<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "483"
+        },
+        "485": {
+            "link": {
+                "name": "Tube003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "447"
+        },
+        "486": {
+            "link": {
+                "name": "Tube003_16 - Default_0<Tube003<RootNode<bask.fbx<Sketchfab_model",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "parent": "485"
+        },
+        "316": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "315",
+            "rotation": [
+                0.0,
+                -0.0,
+                0.7071068,
+                0.7071067
+            ],
+            "scaling": [
+                29.9992313,
+                29.9992313,
+                30.0
+            ],
+            "translation": [
+                999.9999389,
+                0.0,
+                141.0577697
+            ]
+        },
+        "317": {
+            "link": {
+                "name": "root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "316"
+        },
+        "318": {
+            "link": {
+                "name": "GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "317"
+        },
+        "319": {
+            "link": {
+                "name": "Plane.011_0<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "318"
+        },
+        "320": {
+            "link": {
+                "name": "Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "318"
+        },
+        "321": {
+            "link": {
+                "name": "Object_5<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "322": {
+            "link": {
+                "name": "Object_6<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "323": {
+            "link": {
+                "name": "Object_7<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "495": {
+            "link": {
+                "name": "Object_8<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "496": {
+            "link": {
+                "name": "Object_9<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "497": {
+            "link": {
+                "name": "Object_10<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "498": {
+            "link": {
+                "name": "Object_11<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "499": {
+            "link": {
+                "name": "Object_12<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "500": {
+            "link": {
+                "name": "Object_13<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "501": {
+            "link": {
+                "name": "Object_14<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "502": {
+            "link": {
+                "name": "Object_15<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "503": {
+            "link": {
+                "name": "Object_16<Plane.004_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            },
+            "parent": "320"
+        },
+        "243": {
+            "link": {
+                "name": "Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "240",
+            "scaling": [
+                0.0199999,
+                0.0199999,
+                0.0199999
+            ],
+            "rotation": [
+                -0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "translation": [
+                -0.0324971,
+                -0.0,
+                0.0109046
+            ]
+        },
+        "244": {
+            "link": {
+                "name": "root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "243"
+        },
+        "245": {
+            "link": {
+                "name": "GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "244"
+        },
+        "246": {
+            "link": {
+                "name": "net-poles_0<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "247": {
+            "link": {
+                "name": "Object_4<net-poles_0<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "246"
+        },
+        "248": {
+            "link": {
+                "name": "bottom-net_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "249": {
+            "link": {
+                "name": "Object_6<bottom-net_1<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "248"
+        },
+        "250": {
+            "link": {
+                "name": "net_2<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "251": {
+            "link": {
+                "name": "Object_8<net_2<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "250"
+        },
+        "252": {
+            "link": {
+                "name": "Object_9<net_2<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "250"
+        },
+        "253": {
+            "link": {
+                "name": "Object_10<net_2<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "250"
+        },
+        "254": {
+            "link": {
+                "name": "white-part_3<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "268": {
+            "link": {
+                "name": "Object_12<white-part_3<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "254"
+        },
+        "269": {
+            "link": {
+                "name": "court_4<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "270": {
+            "link": {
+                "name": "Object_14<court_4<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "269"
+        },
+        "271": {
+            "link": {
+                "name": "external-court_5<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "245"
+        },
+        "272": {
+            "link": {
+                "name": "Object_16<external-court_5<GLTF_SceneRootNode<root<Sketchfab_model",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            },
+            "parent": "271"
+        },
+        "351": {
+            "name": "Scenes",
+            "parent": "235"
+        },
+        "27": {
+            "name": "UI",
+            "parent": "235"
+        },
+        "360": {
+            "name": "Functional",
+            "parent": "235"
+        },
+        "361": {
+            "name": "Games"
+        },
+        "273": {
+            "name": "uiStatus",
+            "parent": "378",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Status"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0201437,
+                0.2641272,
+                0.1178236
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.4892086,
+                1.458221,
+                4.2244896
+            ]
+        },
+        "274": {
+            "name": "uiCue",
+            "parent": "378",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Cue"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0201437,
+                0.494656,
+                0.1178236
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.4892086,
+                1.458221,
+                4.2244896
+            ]
+        },
+        "275": {
+            "name": "uiStats",
+            "parent": "378",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "text": "Stats"
+                    }
+                }
+            ],
+            "translation": [
+                -0.0201437,
+                0.8066501,
+                0.0908222
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.7410072,
+                0.7255882,
+                2.1020407
+            ]
+        },
+        "406": {
+            "name": "uiReport",
+            "parent": "378",
+            "components": [
+                {
+                    "type": "text",
+                    "text": {
+                        "effect": "none",
+                        "wrapMode": "none",
+                        "text": "Reports",
+                        "lineSpacing": 1.0,
+                        "characterSpacing": 0.0,
+                        "alignment": "left",
+                        "justified": true,
+                        "verticalAlignment": "middle"
+                    }
+                }
+            ],
+            "translation": [
+                -0.8876503,
+                -0.0584923,
+                0.1178236
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                0.5889999,
+                0.576744,
+                1.6708365
+            ]
+        }
+    },
+    "meshes": {
+        "7": {
+            "link": {
+                "name": "PrimitivePlane",
+                "file": "default"
+            }
+        },
+        "8": {
+            "link": {
+                "name": "PrimitiveCube",
+                "file": "default"
+            }
+        },
+        "9": {
+            "link": {
+                "name": "PrimitiveSphere",
+                "file": "default"
+            }
+        },
+        "10": {
+            "link": {
+                "name": "PrimitiveCone",
+                "file": "default"
+            }
+        },
+        "11": {
+            "link": {
+                "name": "PrimitiveCylinder",
+                "file": "default"
+            }
+        },
+        "12": {
+            "link": {
+                "name": "PrimitiveCircle",
+                "file": "default"
+            }
+        },
+        "47": {
+            "link": {
+                "name": "controller_plyShape",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "48": {
+            "link": {
+                "name": "controller_plyShape.003",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "49": {
+            "link": {
+                "name": "controller_plyShape.005",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "50": {
+            "link": {
+                "name": "controller_plyShape.006",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "51": {
+            "link": {
+                "name": "controller_plyShape.004",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "52": {
+            "link": {
+                "name": "controller_plyShape.002",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "89": {
+            "link": {
+                "name": "controller_plyShape.004",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "90": {
+            "link": {
+                "name": "controller_plyShape.005",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "91": {
+            "link": {
+                "name": "controller_plyShape",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "92": {
+            "link": {
+                "name": "controller_plyShape.002",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "93": {
+            "link": {
+                "name": "controller_plyShape.003",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "94": {
+            "link": {
+                "name": "controller_plyShape.001",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "132": {
+            "link": {
+                "name": "Mesh",
+                "file": "models\\hand-left.glb"
+            },
+            "name": "HandLeft"
+        },
+        "165": {
+            "link": {
+                "name": "Mesh.001",
+                "file": "models\\hand-right.glb"
+            },
+            "name": "HandRight"
+        },
+        "195": {
+            "link": {
+                "name": "Cube.001",
+                "file": "models\\button.glb"
+            },
+            "name": "Button"
+        },
+        "207": {
+            "link": {
+                "name": "TeleportIndicator",
+                "file": "models\\teleport-indicator.glb"
+            }
+        },
+        "208": {
+            "link": {
+                "name": "Cube.1605",
+                "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
+            }
+        },
+        "209": {
+            "link": {
+                "name": "Cube.1605.0",
+                "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
+            }
+        },
+        "210": {
+            "link": {
+                "name": "Mesh1_Material4_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "211": {
+            "link": {
+                "name": "Mesh1_Material4_0-uv1",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "212": {
+            "link": {
+                "name": "Mesh2_Tatami_black_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "213": {
+            "link": {
+                "name": "Mesh2_Tatami_black_0-uv1",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "214": {
+            "link": {
+                "name": "Mesh3_Material4_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "215": {
+            "link": {
+                "name": "Mesh3_Material4_0-uv1",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "216": {
+            "link": {
+                "name": "pPlane1_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "217": {
+            "link": {
+                "name": "pPlane1_green_carpet_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "218": {
+            "link": {
+                "name": "pPlane1_lambert6_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "219": {
+            "link": {
+                "name": "pCylinder1_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "220": {
+            "link": {
+                "name": "pCylinder2_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "221": {
+            "link": {
+                "name": "pCylinder3_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "222": {
+            "link": {
+                "name": "pCylinder4_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "223": {
+            "link": {
+                "name": "pCylinder5_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "224": {
+            "link": {
+                "name": "pCylinder6_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "225": {
+            "link": {
+                "name": "pCylinder7_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "226": {
+            "link": {
+                "name": "pCylinder8_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "227": {
+            "link": {
+                "name": "pCylinder9_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "228": {
+            "link": {
+                "name": "pCylinder10_lambert4_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "229": {
+            "link": {
+                "name": "pPlane2_net_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "230": {
+            "link": {
+                "name": "pPlane3_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "231": {
+            "link": {
+                "name": "pPlane4_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "232": {
+            "link": {
+                "name": "pPlane5_lambert3_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "233": {
+            "link": {
+                "name": "pCube1_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "234": {
+            "link": {
+                "name": "pCube2_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "235": {
+            "link": {
+                "name": "pCube3_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "236": {
+            "link": {
+                "name": "polySurface1_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "237": {
+            "link": {
+                "name": "polySurface2_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "238": {
+            "link": {
+                "name": "polySurface3_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "239": {
+            "link": {
+                "name": "polySurface4_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "240": {
+            "link": {
+                "name": "polySurface5_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "241": {
+            "link": {
+                "name": "polySurface6_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "242": {
+            "link": {
+                "name": "polySurface7_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "243": {
+            "link": {
+                "name": "polySurface8_pole_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "244": {
+            "link": {
+                "name": "pCube5_blinn1_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "245": {
+            "link": {
+                "name": "Cube_grass_dark_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "246": {
+            "link": {
+                "name": "Cube_base_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "247": {
+            "link": {
+                "name": "Cube_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "248": {
+            "link": {
+                "name": "Cube_ground_dark_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "249": {
+            "link": {
+                "name": "Cube_ground_light_football_field_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "250": {
+            "link": {
+                "name": "Main Bar_Aluminum - Satin_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "251": {
+            "link": {
+                "name": "Bottom Bar_Aluminum - Satin_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "252": {
+            "link": {
+                "name": "String_PEEK_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "253": {
+            "link": {
+                "name": "Ring_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "254": {
+            "link": {
+                "name": "End Cap 1_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "255": {
+            "link": {
+                "name": "End Cap 2_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "256": {
+            "link": {
+                "name": "Screen_Rilsan Invent Natural - PA 11_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "257": {
+            "link": {
+                "name": "Hook Hold 1_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "258": {
+            "link": {
+                "name": "Hook Hold 2_Coating - Black Oxide_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "259": {
+            "link": {
+                "name": "Hook 1_Brass - Polished_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "260": {
+            "link": {
+                "name": "Hook 2_Brass - Polished_0",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "261": {
+            "link": {
+                "name": "defaultMaterial",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "262": {
+            "link": {
+                "name": "Object_0",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "263": {
+            "link": {
+                "name": "Line002_20 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "264": {
+            "link": {
+                "name": "Object040_Material #191_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "265": {
+            "link": {
+                "name": "Object040_metall_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "266": {
+            "link": {
+                "name": "Object040_08 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "267": {
+            "link": {
+                "name": "Object040_svet_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "268": {
+            "link": {
+                "name": "Object040_ch_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "269": {
+            "link": {
+                "name": "Object040_09 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "270": {
+            "link": {
+                "name": "Object040_19 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "271": {
+            "link": {
+                "name": "Object040_14 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "272": {
+            "link": {
+                "name": "Object040_13 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "273": {
+            "link": {
+                "name": "Object040_15 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "274": {
+            "link": {
+                "name": "Line003_20 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "275": {
+            "link": {
+                "name": "Box001_16 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "276": {
+            "link": {
+                "name": "Box001_10 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "277": {
+            "link": {
+                "name": "Box001_04 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "278": {
+            "link": {
+                "name": "Box001_Material #5909_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "279": {
+            "link": {
+                "name": "Cylinder002_04 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "280": {
+            "link": {
+                "name": "Tube001_16 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "281": {
+            "link": {
+                "name": "Box003_22 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "282": {
+            "link": {
+                "name": "Box003_10 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "283": {
+            "link": {
+                "name": "Box004_16 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "284": {
+            "link": {
+                "name": "Box004_10 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "285": {
+            "link": {
+                "name": "Box004_04 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "286": {
+            "link": {
+                "name": "Box004_Material #5909_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "287": {
+            "link": {
+                "name": "Cylinder004_04 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "288": {
+            "link": {
+                "name": "Tube003_16 - Default_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "289": {
+            "link": {
+                "name": "Object_0",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "290": {
+            "link": {
+                "name": "Object_1",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "291": {
+            "link": {
+                "name": "Object_2",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "292": {
+            "link": {
+                "name": "Object_3",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "293": {
+            "link": {
+                "name": "Object_4",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "294": {
+            "link": {
+                "name": "Object_5",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "295": {
+            "link": {
+                "name": "Object_6",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "296": {
+            "link": {
+                "name": "Object_7",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "297": {
+            "link": {
+                "name": "Object_8",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "298": {
+            "link": {
+                "name": "Object_9",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "299": {
+            "link": {
+                "name": "Object_10",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "300": {
+            "link": {
+                "name": "Object_11",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "301": {
+            "link": {
+                "name": "Object_0",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "302": {
+            "link": {
+                "name": "Object_1",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "303": {
+            "link": {
+                "name": "Object_2",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "304": {
+            "link": {
+                "name": "Object_3",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "305": {
+            "link": {
+                "name": "Object_4",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "306": {
+            "link": {
+                "name": "Object_5",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "307": {
+            "link": {
+                "name": "Object_6",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "308": {
+            "link": {
+                "name": "Object_7",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        }
+    },
+    "textures": {
+        "44": {
+            "link": {
+                "name": "texture_0",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "45": {
+            "link": {
+                "name": "texture_1",
+                "file": "models\\oculus-touch-v2-left.glb"
+            }
+        },
+        "86": {
+            "link": {
+                "name": "texture_0",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "87": {
+            "link": {
+                "name": "texture_1",
+                "file": "models\\oculus-touch-v2-right.glb"
+            }
+        },
+        "88": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "89": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "90": {
+            "link": {
+                "name": "texture_1",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "91": {
+            "link": {
+                "name": "texture_2",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "92": {
+            "link": {
+                "name": "material_baseColor.png",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\textures\\material_baseColor.png"
+            }
+        },
+        "93": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "94": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "95": {
+            "link": {
+                "name": "texture_1",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "96": {
+            "link": {
+                "name": "texture_0",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "97": {
+            "link": {
+                "name": "texture_1",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "98": {
+            "link": {
+                "name": "texture_2",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "99": {
+            "link": {
+                "name": "wood_planks_diff_2k.jpg",
+                "file": "models\\wood_planks_diff_2k.jpg"
+            }
+        },
+        "100": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "101": {
+            "link": {
+                "name": "texture_1",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "102": {
+            "link": {
+                "name": "texture_2",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "103": {
+            "link": {
+                "name": "texture_3",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "104": {
+            "link": {
+                "name": "texture_4",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "105": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "106": {
+            "link": {
+                "name": "texture_1",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "107": {
+            "link": {
+                "name": "texture_2",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "108": {
+            "link": {
+                "name": "texture_3",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "109": {
+            "link": {
+                "name": "texture_4",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "110": {
+            "link": {
+                "name": "texture_5",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "111": {
+            "link": {
+                "name": "texture_0",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "112": {
+            "link": {
+                "name": "obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg",
+                "file": "models\\baseball\\textures\\obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg"
+            }
+        }
+    },
+    "images": {
+        "42": {
+            "link": {
+                "name": "Image_0",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "maxSize": [
+                1024,
+                1024
+            ]
+        },
+        "43": {
+            "link": {
+                "name": "Image_1",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "maxSize": [
+                256,
+                256
+            ]
+        },
+        "84": {
+            "link": {
+                "name": "Image_0",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "maxSize": [
+                1024,
+                1024
+            ]
+        },
+        "85": {
+            "link": {
+                "name": "Image_1",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "maxSize": [
+                256,
+                256
+            ]
+        },
+        "86": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "87": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "88": {
+            "link": {
+                "name": "image_1",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "89": {
+            "link": {
+                "name": "image_2",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "90": {
+            "link": {
+                "name": "material_baseColor.png",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\textures\\material_baseColor.png"
+            }
+        },
+        "91": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "92": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "93": {
+            "link": {
+                "name": "image_1",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "94": {
+            "link": {
+                "name": "image_0",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "95": {
+            "link": {
+                "name": "image_1",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "96": {
+            "link": {
+                "name": "image_2",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            }
+        },
+        "97": {
+            "link": {
+                "name": "wood_planks_diff_2k.jpg",
+                "file": "models\\wood_planks_diff_2k.jpg"
+            }
+        },
+        "98": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "99": {
+            "link": {
+                "name": "image_1",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "100": {
+            "link": {
+                "name": "image_2",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "101": {
+            "link": {
+                "name": "image_3",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "102": {
+            "link": {
+                "name": "image_4",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "103": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "104": {
+            "link": {
+                "name": "image_1",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "105": {
+            "link": {
+                "name": "image_2",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "106": {
+            "link": {
+                "name": "image_3",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "107": {
+            "link": {
+                "name": "image_4",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "108": {
+            "link": {
+                "name": "image_5",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "109": {
+            "link": {
+                "name": "image_0",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "110": {
+            "link": {
+                "name": "obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg",
+                "file": "models\\baseball\\textures\\obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg"
+            }
+        }
+    },
+    "materials": {
+        "DefaultFontMaterial": {
+            "link": {
+                "name": "DefaultFontMaterial",
+                "file": "default"
+            },
+            "Text": {
+                "effectColor": [
+                    0.8470588,
+                    0.6975778,
+                    0.0,
+                    1.0
+                ],
+                "font": "230",
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        "20": {
+            "name": "White",
+            "shader": "Phong",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1
+            },
+            "pipeline": "37"
+        },
+        "22": {
+            "name": "Pink",
+            "Phong": {
+                "diffuseColor": [
+                    0.9098039,
+                    0.0,
+                    0.5411764,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.999911299019004e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 10,
+                "ambientColor": [
+                    0.317647,
+                    0.0,
+                    0.2165777,
+                    1.0
+                ]
+            },
+            "pipeline": "37"
+        },
+        "25": {
+            "name": "Yellow",
+            "Phong": {
+                "diffuseColor": [
+                    1.0,
+                    0.8039215,
+                    0.0,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999999974752427e-7,
+                    9.999899930335232e-7,
+                    9.999899930335232e-7,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.3843137,
+                    0.3089579,
+                    0.0,
+                    1.0
+                ]
+            },
+            "pipeline": "37"
+        },
+        "26": {
+            "name": "Green",
+            "Phong": {
+                "diffuseColor": [
+                    0.1529411,
+                    0.7882353,
+                    0.5411764,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999999974752427e-7,
+                    9.999899930335232e-7,
+                    9.999899930335232e-7,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.0,
+                    0.2352941,
+                    0.1437908,
+                    1.0
+                ]
+            },
+            "pipeline": "37"
+        },
+        "46": {
+            "link": {
+                "name": "skel_controller_materials_controllerMTL1",
+                "file": "models\\oculus-touch-v2-left.glb"
+            },
+            "name": "ControllerLeft"
+        },
+        "88": {
+            "link": {
+                "name": "skel_controller_materials_controllerMTL",
+                "file": "models\\oculus-touch-v2-right.glb"
+            },
+            "name": "ControllerRight"
+        },
+        "128": {
+            "name": "Cursor",
+            "shader": "Phong",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1
+            },
+            "pipeline": "34"
+        },
+        "131": {
+            "link": {
+                "name": "Default_Material",
+                "file": "models\\hand-left.glb"
+            },
+            "name": "HandLeft"
+        },
+        "164": {
+            "link": {
+                "name": "lambert2",
+                "file": "models\\hand-right.glb"
+            },
+            "name": "HandRight"
+        },
+        "201": {
+            "link": {
+                "name": "DefaultFontMaterial",
+                "file": "default"
+            },
+            "name": "TextAccent",
+            "Text": {
+                "color": [
+                    0.9098039,
+                    0.0,
+                    0.5411764,
+                    1.0
+                ],
+                "font": "230"
+            }
+        },
+        "202": {
+            "name": "Dark",
+            "shader": "Phong",
+            "Phong": {
+                "specularColor": [
+                    9.999899930335232e-7,
+                    9.99993744699168e-7,
+                    9.999999974752427e-7,
+                    1.0
+                ],
+                "shininess": 1,
+                "diffuseColor": [
+                    0.1686274,
+                    0.1686257,
+                    0.1686257,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.0274509,
+                    0.0274507,
+                    0.0274507,
+                    1.0
+                ]
+            },
+            "pipeline": "37"
+        },
+        "203": {
+            "name": "GreenHover",
+            "Phong": {
+                "diffuseColor": [
+                    0.4894117,
+                    0.917647,
+                    0.7511102,
+                    1.0
+                ],
+                "specularColor": [
+                    9.999999974752427e-7,
+                    9.999899930335232e-7,
+                    9.999899930335232e-7,
+                    1.0
+                ],
+                "ambientColor": [
+                    0.0,
+                    0.3294117,
+                    0.2013071,
+                    1.0
+                ]
+            },
+            "pipeline": "37"
+        },
+        "206": {
+            "link": {
+                "name": "TeleportIndicator",
+                "file": "models\\teleport-indicator.glb"
+            },
+            "Phong": {
+                "diffuseColor": [
+                    0.6862745,
+                    0.6862676,
+                    0.6862676,
+                    1.0
+                ]
+            },
+            "pipeline": "34",
+            "Flat": {
+                "color": [
+                    0.8392156,
+                    0.8392072,
+                    0.8392072,
+                    1.0
+                ]
+            }
+        },
+        "207": {
+            "name": "Sky",
+            "pipeline": "229"
+        },
+        "208": {
+            "link": {
+                "name": "Green",
+                "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
+            }
+        },
+        "209": {
+            "link": {
+                "name": "BrownDark",
+                "file": "assets\\models\\gltf\\tileLarge_forest.gltf.glb"
+            }
+        },
+        "210": {
+            "link": {
+                "name": "Material4",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "211": {
+            "link": {
+                "name": "Tatami_black",
+                "file": "assets\\OurModels\\training environment 3 - gym floor\\scene.gltf"
+            }
+        },
+        "212": {
+            "link": {
+                "name": "lambert3",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "213": {
+            "link": {
+                "name": "green_carpet",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "214": {
+            "link": {
+                "name": "lambert6",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "215": {
+            "link": {
+                "name": "lambert4",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "216": {
+            "link": {
+                "name": "material",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "pipeline": "38",
+            "Phong": {
+                "diffuseTexture": "91",
+                "emissiveTexture": null
+            }
+        },
+        "217": {
+            "link": {
+                "name": "pole",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            }
+        },
+        "218": {
+            "link": {
+                "name": "blinn1",
+                "file": "assets\\OurModels\\training environment 2 - tennis court\\scene.gltf"
+            },
+            "pipeline": "38"
+        },
+        "219": {
+            "link": {
+                "name": "grass_dark_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "220": {
+            "link": {
+                "name": "base_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "221": {
+            "link": {
+                "name": "football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "222": {
+            "link": {
+                "name": "ground_dark_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "223": {
+            "link": {
+                "name": "ground_light_football_field",
+                "file": "assets\\OurModels\\training environment 1 - football field\\scene.gltf"
+            }
+        },
+        "224": {
+            "link": {
+                "name": "Aluminum_-_Satin",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "225": {
+            "link": {
+                "name": "PEEK",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "226": {
+            "link": {
+                "name": "Coating_-_Black_Oxide",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "227": {
+            "link": {
+                "name": "Rilsan_Invent_Natural_-_PA_11",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "228": {
+            "link": {
+                "name": "Brass_-_Polished",
+                "file": "assets\\OurModels\\ui panel\\scene.gltf"
+            }
+        },
+        "229": {
+            "link": {
+                "name": "Material",
+                "file": "assets\\OurModels\\balance beam model\\scene.gltf"
+            }
+        },
+        "230": {
+            "link": {
+                "name": "initialShadingGroup",
+                "file": "models\\baseball_bat_gltf\\scene.gltf"
+            },
+            "pipeline": "223",
+            "Physical": {
+                "albedoTexture": "96",
+                "metallicFactor": 0.8999999,
+                "albedoColor": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "roughnessFactor": 0.3
+            }
+        },
+        "231": {
+            "link": {
+                "name": "20_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "232": {
+            "link": {
+                "name": "Material_191",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "233": {
+            "link": {
+                "name": "metall",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "234": {
+            "link": {
+                "name": "08_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "235": {
+            "link": {
+                "name": "svet",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "236": {
+            "link": {
+                "name": "material",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "237": {
+            "link": {
+                "name": "09_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "238": {
+            "link": {
+                "name": "19_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            },
+            "Phong": {
+                "shininess": 112,
+                "diffuseColor": [
+                    0.702,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        "239": {
+            "link": {
+                "name": "14_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "240": {
+            "link": {
+                "name": "13_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "241": {
+            "link": {
+                "name": "15_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "242": {
+            "link": {
+                "name": "16_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "243": {
+            "link": {
+                "name": "10_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "244": {
+            "link": {
+                "name": "04_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "245": {
+            "link": {
+                "name": "Material_5909",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "246": {
+            "link": {
+                "name": "22_-_Default",
+                "file": "assets\\OurModels\\basketball_court\\scene.gltf"
+            }
+        },
+        "247": {
+            "link": {
+                "name": "dirt",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "248": {
+            "link": {
+                "name": "Color.001",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "249": {
+            "link": {
+                "name": "Fence2",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "250": {
+            "link": {
+                "name": "ModularRoads",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "251": {
+            "link": {
+                "name": "ColorPalette",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "252": {
+            "link": {
+                "name": "BusStop",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "253": {
+            "link": {
+                "name": "Glass",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "254": {
+            "link": {
+                "name": "ColorPalette.001",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "255": {
+            "link": {
+                "name": "Color.003",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "256": {
+            "link": {
+                "name": "material",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "257": {
+            "link": {
+                "name": "zemin",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "258": {
+            "link": {
+                "name": "Saha",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        },
+        "259": {
+            "link": {
+                "name": "material_0",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "260": {
+            "link": {
+                "name": "Material.003",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "261": {
+            "link": {
+                "name": "Material.004",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        },
+        "262": {
+            "link": {
+                "name": "texture-campo",
+                "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
+            }
+        }
+    },
+    "shaders": {
+        "2": {
+            "link": {
+                "name": "Flat.frag",
+                "file": "default"
+            }
+        },
+        "4": {
+            "link": {
+                "name": "MeshVisualizer.frag",
+                "file": "default"
+            }
+        },
+        "5": {
+            "link": {
+                "name": "Phong.frag",
+                "file": "default"
+            }
+        },
+        "28": {
+            "link": {
+                "name": "Dynamic.vert",
+                "file": "default"
+            }
+        },
+        "30": {
+            "link": {
+                "name": "Skinning.vert",
+                "file": "default"
+            }
+        },
+        "32": {
+            "link": {
+                "name": "DistanceFieldVector.frag",
+                "file": "default"
+            }
+        },
+        "37": {
+            "link": {
+                "name": "Particle.frag",
+                "file": "default"
+            }
+        },
+        "217": {
+            "link": {
+                "name": "Background.frag",
+                "file": "default"
+            }
+        },
+        "218": {
+            "link": {
+                "name": "Depth.frag",
+                "file": "default"
+            }
+        },
+        "220": {
+            "link": {
+                "name": "FullScreenTriangle.vert",
+                "file": "default"
+            }
+        },
+        "221": {
+            "link": {
+                "name": "Physical.frag",
+                "file": "default"
+            }
+        },
+        "224": {
+            "link": {
+                "name": "Sky.frag",
+                "file": "default"
+            }
+        },
+        "225": {
+            "link": {
+                "name": "Text.frag",
+                "file": "default"
+            }
+        },
+        "227": {
+            "link": {
+                "name": "Text.vert",
+                "file": "default"
+            }
+        },
+        "228": {
+            "link": {
+                "name": "TileFeedback.frag",
+                "file": "default"
+            }
+        },
+        "234": {
+            "link": {
+                "name": "lib\\Color.glsl",
+                "file": "default"
+            }
+        },
+        "235": {
+            "link": {
+                "name": "lib\\Compatibility.glsl",
+                "file": "default"
+            }
+        },
+        "236": {
+            "link": {
+                "name": "lib\\CoordinateSystems.glsl",
+                "file": "default"
+            }
+        },
+        "237": {
+            "link": {
+                "name": "lib\\GI.glsl",
+                "file": "default"
+            }
+        },
+        "238": {
+            "link": {
+                "name": "lib\\Inputs.glsl",
+                "file": "default"
+            }
+        },
+        "239": {
+            "link": {
+                "name": "lib\\Lights.glsl",
+                "file": "default"
+            }
+        },
+        "240": {
+            "link": {
+                "name": "lib\\Materials.glsl",
+                "file": "default"
+            }
+        },
+        "241": {
+            "link": {
+                "name": "lib\\Math.glsl",
+                "file": "default"
+            }
+        },
+        "242": {
+            "link": {
+                "name": "lib\\Packing.glsl",
+                "file": "default"
+            }
+        },
+        "243": {
+            "link": {
+                "name": "lib\\Quaternion.glsl",
+                "file": "default"
+            }
+        },
+        "244": {
+            "link": {
+                "name": "lib\\Slug.frag.glsl",
+                "file": "default"
+            }
+        },
+        "245": {
+            "link": {
+                "name": "lib\\Slug.vert.glsl",
+                "file": "default"
+            }
+        },
+        "246": {
+            "link": {
+                "name": "lib\\Surface.glsl",
+                "file": "default"
+            }
+        },
+        "247": {
+            "link": {
+                "name": "lib\\Textures.glsl",
+                "file": "default"
+            }
+        },
+        "249": {
+            "link": {
+                "name": "lib\\Uniforms.glsl",
+                "file": "default"
+            }
+        },
+        "250": {
+            "link": {
+                "name": "AtmosphericSky.frag",
+                "file": "default"
+            }
+        },
+        "251": {
+            "link": {
+                "name": "lib\\MorphTargets.glsl",
+                "file": "default"
+            }
+        },
+        "252": {
+            "link": {
+                "name": "lib\\PhysicalBSDF.glsl",
+                "file": "default"
+            }
+        },
+        "253": {
+            "link": {
+                "name": "lib\\SkyProcedural.glsl",
+                "file": "default"
+            }
+        }
+    },
+    "settings": {
+        "project": {
+            "name": "project",
+            "version": [
+                1,
+                4,
+                7
+            ]
+        },
+        "xr": {
+            "leftEyeObject": "18",
+            "rightEyeObject": "19",
+            "webxr": {
+                "optionalFeatures": {
+                    "local-floor": true
+                }
+            }
+        },
+        "scripting": {
+            "application": {
+                "output": "project-app.js",
+                "bundling": "esbuild"
+            },
+            "components": {
+                "output": "project-bundle.js"
+            }
+        },
+        "runtime": {
+            "visualizeColliders": false
+        },
+        "rendering": {
+            "hdr": {
+                "exposure": 1.5
+            },
+            "environment": {
+                "bakingMode": "sky",
+                "material": null
+            },
+            "sky": {
+                "enabled": true,
+                "material": "207"
+            }
+        },
+        "physx": {
+            "enable": true
+        }
+    },
+    "animations": {
+        "1": {
+            "link": {
+                "name": "Animation",
+                "file": "assets\\OurModels\\football_field\\scene.gltf"
+            }
+        }
+    },
+    "skins": {
+        "133": {
+            "link": {
+                "name": "Armature",
+                "file": "models\\hand-left.glb"
+            },
+            "name": "HandLeftSkin",
+            "joints": [
+                "139",
+                "140",
+                "141",
+                "142",
+                "143",
+                "144",
+                "145",
+                "146",
+                "147",
+                "148",
+                "149",
+                "150",
+                "151",
+                "152",
+                "153",
+                "154",
+                "155",
+                "156",
+                "157",
+                "158",
+                "159",
+                "160",
+                "161",
+                "162",
+                "163"
+            ]
+        },
+        "166": {
+            "link": {
+                "name": "Armature",
+                "file": "models\\hand-right.glb"
+            },
+            "name": "HandRightSkin",
+            "joints": [
+                "169",
+                "170",
+                "171",
+                "172",
+                "173",
+                "174",
+                "175",
+                "176",
+                "177",
+                "178",
+                "179",
+                "180",
+                "181",
+                "182",
+                "183",
+                "184",
+                "185",
+                "186",
+                "187",
+                "188",
+                "189",
+                "190",
+                "191",
+                "192",
+                "193"
+            ]
+        }
+    },
+    "pipelines": {
+        "33": {
+            "link": {
+                "name": "DistanceFieldVector",
+                "file": "default"
+            }
+        },
+        "34": {
+            "link": {
+                "name": "Flat Opaque",
+                "file": "default"
+            }
+        },
+        "35": {
+            "link": {
+                "name": "Flat Opaque Textured",
+                "file": "default"
+            }
+        },
+        "36": {
+            "link": {
+                "name": "MeshVisualizer",
+                "file": "default"
+            }
+        },
+        "37": {
+            "link": {
+                "name": "Phong Opaque",
+                "file": "default"
+            },
+            "features": {
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "38": {
+            "link": {
+                "name": "Phong Opaque Textured",
+                "file": "default"
+            },
+            "features": {
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "39": {
+            "link": {
+                "name": "Foliage",
+                "file": "default"
+            },
+            "features": {
+                "DEPRECATED_LIGHT_ATTENUATION": true
+            }
+        },
+        "40": {
+            "link": {
+                "name": "Particle",
+                "file": "default"
+            }
+        },
+        "219": {
+            "link": {
+                "name": "Depth",
+                "file": "default"
+            }
+        },
+        "222": {
+            "link": {
+                "name": "Physical Opaque",
+                "file": "default"
+            },
+            "features": {
+                "SEPARATE_OCCLUSION_TEXTURE": true
+            }
+        },
+        "223": {
+            "link": {
+                "name": "Physical Opaque Textured",
+                "file": "default"
+            },
+            "features": {
+                "SEPARATE_OCCLUSION_TEXTURE": true
+            }
+        },
+        "226": {
+            "link": {
+                "name": "Text",
+                "file": "default"
+            }
+        },
+        "229": {
+            "link": {
+                "name": "Sky",
+                "file": "default"
+            },
+            "features": {
+                "GRADIENT": true,
+                "TEXTURED": false
+            }
+        },
+        "231": {
+            "link": {
+                "name": "Phong Normalmapped",
+                "file": "default"
+            },
+            "features": {
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "232": {
+            "link": {
+                "name": "Phong Lightmapped",
+                "file": "default"
+            },
+            "features": {
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "WITH_EMISSIVE": true
+            }
+        },
+        "248": {
+            "link": {
+                "name": "TileFeedback",
+                "file": "default"
+            }
+        },
+        "249": {
+            "link": {
+                "name": "AtmosphericSky",
+                "file": "default"
+            }
+        },
+        "900": {
+            "link": {
+                "name": "Phong (alpha mask)",
+                "file": "default"
+            },
+            "defines": {
+                "WITH_TEXTURE": true,
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "ALPHA_MASK": true
+            }
+        },
+        "901": {
+            "link": {
+                "name": "Phong (transparent)",
+                "file": "default"
+            },
+            "defines": {
+                "WITH_TEXTURE": true,
+                "DEPRECATED_LIGHT_ATTENUATION": true,
+                "ALPHA_BLEND": true
+            },
+            "customStates": {
+                "blend": true,
+                "blendFunc": [
+                    770,
+                    771,
+                    770,
+                    771
+                ],
+                "depthMask": false
+            }
+        }
+    },
+    "files": {
+        "250": {
+            "fileName": "models/oculus-touch-v2-left.glb",
+            "importerName": ""
+        },
+        "251": {
+            "fileName": "models/oculus-touch-v2-right.glb",
+            "importerName": ""
+        },
+        "252": {
+            "fileName": "models/hand-left.glb",
+            "importerName": ""
+        },
+        "253": {
+            "fileName": "models/hand-right.glb",
+            "importerName": ""
+        },
+        "254": {
+            "fileName": "models/button.glb",
+            "importerName": ""
+        },
+        "255": {
+            "fileName": "models/teleport-indicator.glb",
+            "importerName": ""
+        },
+        "256": {
+            "fileName": "assets/models/gltf/tileLarge_forest.gltf.glb",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "257": {
+            "fileName": "assets/OurModels/training environment 3 - gym floor/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "258": {
+            "fileName": "assets/OurModels/training environment 2 - tennis court/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "259": {
+            "fileName": "assets/OurModels/training environment 2 - tennis court/scene.bin",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "260": {
+            "fileName": "assets/OurModels/training environment 2 - tennis court/textures/material_baseColor.png",
+            "importerName": ""
+        },
+        "261": {
+            "fileName": "assets/OurModels/training environment 1 - football field",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "262": {
+            "fileName": "assets/OurModels/training environment 1 - football field/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "263": {
+            "fileName": "assets/OurModels/ui panel/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "264": {
+            "fileName": "assets/OurModels/balance beam model/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "265": {
+            "fileName": "assets/OurModels/balance beam model/scene.bin",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "266": {
+            "fileName": "models/baseball_bat_gltf/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "267": {
+            "fileName": "models/wood_planks_diff_2k.jpg",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "268": {
+            "fileName": "assets/OurModels/basketball_court/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "269": {
+            "fileName": "assets/OurModels/football_field/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "270": {
+            "fileName": "assets/OurModels/red_clay_tennis_court/scene.gltf",
+            "importerName": "",
+            "importPhysicalAsPhongMaterials": true
+        },
+        "271": {
+            "fileName": "models/baseball/textures/obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg",
+            "importerName": ""
+        }
+    },
+    "fonts": {
+        "230": {
+            "link": {
+                "name": "DejaVuSans.ttf",
+                "file": "default"
+            }
+        }
+    },
+    "languages": {},
+    "morphTargets": {},
+    "particleEffects": {}
+}

@@ -1,0 +1,11 @@
+Model Information:
+* title:	Baseball
+* source:	https://sketchfab.com/3d-models/baseball-08771d910f5d4f169f41fcc1dad6671d
+* author:	Virtua Con (https://sketchfab.com/virtuaCon)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Baseball" (https://sketchfab.com/3d-models/baseball-08771d910f5d4f169f41fcc1dad6671d) by Virtua Con (https://sketchfab.com/virtuaCon) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

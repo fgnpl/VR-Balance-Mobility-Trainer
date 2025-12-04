@@ -1,0 +1,11 @@
+Model Information:
+* title:	PaviFLEX | TATAMI JUNIOR Pink
+* source:	https://sketchfab.com/3d-models/paviflex-tatami-junior-pink-a339f019cdb64ec3b6cfac047d908e72
+* author:	PaviFLEX (https://sketchfab.com/PaviFLEX)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "PaviFLEX | TATAMI JUNIOR Pink" (https://sketchfab.com/3d-models/paviflex-tatami-junior-pink-a339f019cdb64ec3b6cfac047d908e72) by PaviFLEX (https://sketchfab.com/PaviFLEX) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
