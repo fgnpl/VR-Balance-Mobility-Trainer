@@ -1,8 +1,10 @@
 import {Component, Property} from '@wonderlandengine/api';
 
 /**
- * UI Cursor Button Component
- * 
+ * UI Cursor Button Compone            case 7: // Stop All Drills
+                if (gs.stopAllDrills) gs.stopAllDrills();
+                break;
+            case 8: // Show Report * 
  * This component handles button clicks via VR controller cursors (raycasting).
  * It replaces the distance-based ui-plane-button approach with proper cursor interaction.
  * 
@@ -21,7 +23,7 @@ export class UiCursorButton extends Component {
     static Properties = {
         action: Property.enum(
             ['Tennis Environment', 'Football Environment', 'Gym Environment', 
-             'Start Target Drill', 'Start Beam Walk', 'Start Ball Catching', 
+             'Start Target Drill', 'Start Beam Walk', 'Start Deflect & Catch', 'Start Strike & React',
              'Stop All Drills', 'Show Report'], 
             'Tennis Environment'
         ),
@@ -92,13 +94,16 @@ export class UiCursorButton extends Component {
             case 4: // Start Beam Walk
                 if (gs.startBeamWalk) gs.startBeamWalk();
                 break;
-            case 5: // Start Ball Catching
-                if (gs.startBallDrill) gs.startBallDrill();
+            case 5: // Start Deflect & Catch (bouncing ball)
+                if (gs.startDeflectDrill) gs.startDeflectDrill();
                 break;
-            case 6: // Stop All Drills
+            case 6: // Start Strike & React (sphere spawner)
+                if (gs.startReactDrill) gs.startReactDrill();
+                break;
+            case 7: // Stop All Drills
                 if (gs.stopAllDrills) gs.stopAllDrills();
                 break;
-            case 7: // Show Report
+            case 8: // Show Report
                 if (gs.showReport) gs.showReport();
                 break;
             default:

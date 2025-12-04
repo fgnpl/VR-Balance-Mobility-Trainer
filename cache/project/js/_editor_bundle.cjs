@@ -12090,159 +12090,6 @@
     // Enable debug logging
   });
 
-  // js/ball-thrower.js
-  var ball_thrower_exports = {};
-  __export(ball_thrower_exports, {
-    BallThrower: () => BallThrower
-  });
-  var BallThrower = class extends Component3 {
-    start() {
-      this.running = false;
-      this.ballsThrown = 0;
-      this.ballsCaught = 0;
-      this.ballsDeflected = 0;
-      this.ballsMissed = 0;
-      this.activeBalls = [];
-      this.nextSpawnTime = 0;
-      if (this.ballPrefab) {
-        this.ballPrefab.active = false;
-      }
-    }
-    startDrill() {
-      console.log("[BallThrower] Starting drill");
-      this.running = true;
-      this.ballsThrown = 0;
-      this.ballsCaught = 0;
-      this.ballsDeflected = 0;
-      this.ballsMissed = 0;
-      this.nextSpawnTime = 0;
-      this.activeBalls.forEach((ball) => ball.destroy());
-      this.activeBalls = [];
-    }
-    endDrill() {
-      console.log("[BallThrower] Ending drill");
-      this.running = false;
-      this.activeBalls.forEach((ball) => ball.destroy());
-      this.activeBalls = [];
-      const total = this.ballsCaught + this.ballsDeflected + this.ballsMissed;
-      const accuracy = total > 0 ? (this.ballsCaught + this.ballsDeflected) / total * 100 : 0;
-      console.log(`[BallThrower] Results - Caught: ${this.ballsCaught}, Deflected: ${this.ballsDeflected}, Missed: ${this.ballsMissed}, Accuracy: ${accuracy.toFixed(1)}%`);
-      return {
-        ballsThrown: this.ballsThrown,
-        ballsCaught: this.ballsCaught,
-        ballsDeflected: this.ballsDeflected,
-        ballsMissed: this.ballsMissed,
-        accuracy
-      };
-    }
-    update(dt) {
-      if (!this.running || !this.playerObject)
-        return;
-      this.nextSpawnTime -= dt;
-      const canSpawn = this.ballsThrown < this.maxBalls && (this.waitForHit ? this.activeBalls.length === 0 : true);
-      if (this.nextSpawnTime <= 0 && canSpawn) {
-        this.spawnBall();
-        this.nextSpawnTime = this.spawnInterval;
-      }
-      this.activeBalls = this.activeBalls.filter((ball) => {
-        if (!ball || !ball.active)
-          return false;
-        if (!this.waitForHit) {
-          const ballPos = ball.getPositionWorld();
-          const playerPos = this.playerObject.getPositionWorld();
-          const behindDist = playerPos[2] - ballPos[2];
-          if (behindDist > 3 || ballPos[1] < -1) {
-            this.onBallMissed(ball);
-            ball.destroy();
-            return false;
-          }
-        }
-        return true;
-      });
-      if (this.ballsThrown >= this.maxBalls && this.activeBalls.length === 0) {
-        this.endDrill();
-      }
-    }
-    spawnBall() {
-      if (!this.ballPrefab || !this.playerObject)
-        return;
-      const ball = this.ballPrefab.clone(this.object);
-      ball.active = true;
-      const playerPos = this.playerObject.getPositionWorld();
-      const angle2 = Math.random() * Math.PI * 2;
-      const heightVariation = this.spawnHeightMin + Math.random() * (this.spawnHeightMax - this.spawnHeightMin);
-      const spawnX = playerPos[0] + Math.cos(angle2) * this.spawnRadius;
-      const spawnY = heightVariation;
-      const spawnZ = playerPos[2] + Math.sin(angle2) * this.spawnRadius;
-      ball.setPositionWorld([spawnX, spawnY, spawnZ]);
-      ball.spawnTime = performance.now();
-      const direction2 = vec3_exports.sub(vec3_exports.create(), playerPos, [spawnX, spawnY, spawnZ]);
-      vec3_exports.normalize(direction2, direction2);
-      vec3_exports.scale(direction2, direction2, this.ballSpeed);
-      ball.velocity = direction2;
-      ball.isCaught = false;
-      ball.isDeflected = false;
-      let collision = ball.getComponent("ball-collision");
-      if (!collision) {
-        collision = ball.addComponent("ball-collision");
-      }
-      collision.thrower = this;
-      this.activeBalls.push(ball);
-      this.ballsThrown++;
-      console.log(`[BallThrower] Ball ${this.ballsThrown} spawned at ${spawnX.toFixed(1)}, ${spawnY.toFixed(1)}, ${spawnZ.toFixed(1)}`);
-    }
-    onBallCaught(ball) {
-      if (ball.isCaught || ball.isDeflected)
-        return;
-      ball.isCaught = true;
-      this.ballsCaught++;
-      const index = this.activeBalls.indexOf(ball);
-      if (index !== -1)
-        this.activeBalls.splice(index, 1);
-      const dm = this.dataManager?.getComponent("data-manager");
-      dm?.addBallResult("caught");
-      console.log("[BallThrower] Ball caught! Total caught:", this.ballsCaught);
-    }
-    onBallDeflected(ball) {
-      if (ball.isCaught || ball.isDeflected)
-        return;
-      ball.isDeflected = true;
-      this.ballsDeflected++;
-      const index = this.activeBalls.indexOf(ball);
-      if (index !== -1)
-        this.activeBalls.splice(index, 1);
-      const dm = this.dataManager?.getComponent("data-manager");
-      dm?.addBallResult("deflected");
-      console.log("[BallThrower] Ball deflected! Total deflected:", this.ballsDeflected);
-    }
-    onBallMissed(ball) {
-      if (ball.isCaught || ball.isDeflected) {
-        return;
-      }
-      this.ballsMissed++;
-      const dm = this.dataManager?.getComponent("data-manager");
-      dm?.addBallResult("missed");
-      console.log("[BallThrower] Ball missed!");
-    }
-  };
-  __publicField(BallThrower, "TypeName", "ball-thrower");
-  __publicField(BallThrower, "Properties", {
-    ballPrefab: Property.object(),
-    playerObject: Property.object(),
-    maxBalls: Property.int(15),
-    spawnInterval: Property.float(2),
-    // seconds between spawns
-    ballSpeed: Property.float(3),
-    // meters per second
-    spawnRadius: Property.float(3),
-    // distance from player to spawn
-    spawnHeightMin: Property.float(1),
-    spawnHeightMax: Property.float(2.5),
-    dataManager: Property.object(),
-    waitForHit: Property.bool(true)
-    // Wait for ball to be hit before spawning next
-  });
-
   // js/bat-manager.js
   var bat_manager_exports = {};
   __export(bat_manager_exports, {
@@ -12531,21 +12378,14 @@ Avg Dev: ${avgDev}m`;
       this.isSpawning = false;
       this.canRegisterHit = false;
       this.gameRunning = false;
-      this.hiddenPosition = [0, -50, 0];
     }
     start() {
       this.rigidBody = this.object.getComponent("physx");
       this.setGameComponentsActive(false);
-      if (this.endPanel) {
-        this.endPanel.active = true;
-        if (this.panelVisiblePos) {
-          this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
-        }
-      }
-      if (this.scoreText) {
-        const textComp = this.scoreText.getComponent("text");
-        if (textComp) {
-          textComp.text = "Ready?";
+      if (!this.gameSelector) {
+        const manager = this.engine.scene.findByName("Manager")[0];
+        if (manager) {
+          this.gameSelector = manager.getComponent("game-selector");
         }
       }
       this.object.getComponent("physx").onCollision((type, other) => {
@@ -12554,16 +12394,23 @@ Avg Dev: ${avgDev}m`;
         }
       });
     }
+    updateUI() {
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs) {
+        gs.updateCue?.(`Ball ${this.nSpawned + 1} / ${this.maxSpawn}`);
+        gs.updateStats?.(`Hits: ${this.hitCount} / ${this.nSpawned}`);
+      }
+    }
     /**
      * Dedicated function to start the game.
-     * Called by resetGame() when the button is clicked.
+     * Called by game-selector when the button is clicked.
      */
     startGame() {
       this.nSpawned = 0;
       this.hitCount = 0;
       this.isSpawning = false;
       this.gameRunning = true;
-      this.hideGameOverPanel();
+      this.updateUI();
       this.respawn();
       this.setGameComponentsActive(true);
     }
@@ -12595,6 +12442,7 @@ Avg Dev: ${avgDev}m`;
           console.log("Bat hit");
           this.hitCount++;
           this.canRegisterHit = false;
+          this.updateUI();
         }
       }
     }
@@ -12640,30 +12488,30 @@ Avg Dev: ${avgDev}m`;
         }
       }, 100);
       this.nSpawned++;
+      this.updateUI();
     }
     applyRandomForce() {
       const randomForceX = (Math.random() * (this.maxForceX - this.minForceX) + this.minForceX) * (Math.random() < 0.5 ? -1 : 1);
       const randomForceZ = Math.random() * (this.maxForceZ - this.minForceZ) + this.minForceZ;
       this.rigidBody.addForce([randomForceX, 0, randomForceZ]);
     }
-    // Logic for panel teleporting
     showGameOver() {
       console.log("Game over. Hits: " + this.hitCount);
       this.gameRunning = false;
       this.setGameComponentsActive(false);
-      if (this.scoreText) {
-        const textComp = this.scoreText.getComponent("text");
-        if (textComp) {
-          textComp.text = `Hits: ${this.hitCount} / ${this.maxSpawn}`;
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (manager) {
+        const dm = manager.getComponent("data-manager");
+        if (dm) {
+          dm.addDeflectGame(this.maxSpawn, this.hitCount);
         }
       }
-      if (this.endPanel && this.panelVisiblePos) {
-        this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
-      }
-    }
-    hideGameOverPanel() {
-      if (this.endPanel) {
-        this.endPanel.setPositionWorld(this.hiddenPosition);
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs) {
+        const accuracy = this.maxSpawn > 0 ? (this.hitCount / this.maxSpawn * 100).toFixed(0) : 0;
+        gs.updateStatus?.("Deflect & Catch: COMPLETE");
+        gs.updateCue?.("Game Over!");
+        gs.updateStats?.(`Final: ${this.hitCount} / ${this.maxSpawn} hits (${accuracy}%)`);
       }
     }
     resetGame() {
@@ -12689,16 +12537,11 @@ Avg Dev: ${avgDev}m`;
     maxForceX: Property.float(100),
     minForceZ: Property.float(250),
     maxForceZ: Property.float(300),
-    // UI properties
-    endPanel: Property.object(),
-    // Parent object (the panel)
-    scoreText: Property.object(),
-    // Text object (child of the panel)
-    panelVisiblePos: Property.object(),
-    // Location object where panel should appear
     // Game Objects
-    batObject: Property.object()
+    batObject: Property.object(),
     // Reference to the Bat
+    // Game selector for unified UI
+    gameSelector: Property.object()
   });
 
   // js/button-3d.js
@@ -12817,118 +12660,6 @@ Avg Dev: ${avgDev}m`;
     debugMode: Property.bool(true),
     usePlayerForDesktop: Property.bool(true)
   });
-
-  // js/button-env-football.js
-  var button_env_football_exports = {};
-  __export(button_env_football_exports, {
-    ButtonEnvFootball: () => ButtonEnvFootball
-  });
-  var ButtonEnvFootball = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.showFootball();
-    }
-  };
-  __publicField(ButtonEnvFootball, "TypeName", "button-env-football");
-
-  // js/button-env-gym.js
-  var button_env_gym_exports = {};
-  __export(button_env_gym_exports, {
-    ButtonEnvGym: () => ButtonEnvGym
-  });
-  var ButtonEnvGym = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.showGym();
-    }
-  };
-  __publicField(ButtonEnvGym, "TypeName", "button-env-gym");
-
-  // js/button-env-tennis.js
-  var button_env_tennis_exports = {};
-  __export(button_env_tennis_exports, {
-    ButtonEnvTennis: () => ButtonEnvTennis
-  });
-  var ButtonEnvTennis = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.showTennis();
-    }
-  };
-  __publicField(ButtonEnvTennis, "TypeName", "button-env-tennis");
-
-  // js/button-show-report.js
-  var button_show_report_exports = {};
-  __export(button_show_report_exports, {
-    ButtonShowReport: () => ButtonShowReport
-  });
-  var ButtonShowReport = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.showReport();
-    }
-  };
-  __publicField(ButtonShowReport, "TypeName", "button-show-report");
-
-  // js/button-start-ball.js
-  var button_start_ball_exports = {};
-  __export(button_start_ball_exports, {
-    ButtonStartBall: () => ButtonStartBall
-  });
-  var ButtonStartBall = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.startBallDrill();
-    }
-  };
-  __publicField(ButtonStartBall, "TypeName", "button-start-ball");
-
-  // js/button-start-beam.js
-  var button_start_beam_exports = {};
-  __export(button_start_beam_exports, {
-    ButtonStartBeam: () => ButtonStartBeam
-  });
-  var ButtonStartBeam = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.startBeamWalk();
-    }
-  };
-  __publicField(ButtonStartBeam, "TypeName", "button-start-beam");
-
-  // js/button-start-target.js
-  var button_start_target_exports = {};
-  __export(button_start_target_exports, {
-    ButtonStartTarget: () => ButtonStartTarget
-  });
-  var ButtonStartTarget = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.startTargetDrill();
-    }
-  };
-  __publicField(ButtonStartTarget, "TypeName", "button-start-target");
-
-  // js/button-stop-drills.js
-  var button_stop_drills_exports = {};
-  __export(button_stop_drills_exports, {
-    ButtonStopDrills: () => ButtonStopDrills
-  });
-  var ButtonStopDrills = class extends Button3D {
-    onPress() {
-      super.onPress();
-      const gs = this.engine.scene.findByName("Manager")[0]?.getComponent("game-selector");
-      gs?.stopDrills();
-    }
-  };
-  __publicField(ButtonStopDrills, "TypeName", "button-stop-drills");
 
   // js/button.js
   var button_exports = {};
@@ -13063,39 +12794,6 @@ Avg Dev: ${avgDev}m`;
     showExit: Property.bool(false)
   });
 
-  // js/controller-hit.js
-  var controller_hit_exports = {};
-  __export(controller_hit_exports, {
-    ControllerHit: () => ControllerHit
-  });
-  var ControllerHit = class extends Component3 {
-    start() {
-      console.log(`[ControllerHit] ${this.hand} controller initialized`);
-      const collision = this.object.getComponent("collision");
-      if (!collision) {
-        console.error(`[ControllerHit] \u274C ${this.hand} controller has NO collision component!`);
-        console.error(`[ControllerHit] Add 'collision' component in editor for hits to work!`);
-      } else {
-        console.log(`[ControllerHit] \u2705 ${this.hand} controller has collision component`);
-      }
-    }
-    onCollisionEnter(other) {
-      console.log(`[ControllerHit] \u{1F535} ${this.hand} collision DETECTED with:`, other.object?.name);
-      console.log(`[ControllerHit] Other object has target-collision?`, other.object?.hasComponent("target-collision"));
-      if (other.object && other.object.hasComponent("target-collision")) {
-        console.log(`[ControllerHit] \u{1F3AF} ${this.hand} hand hit a target!`);
-        other.object.getComponent("target-collision").onHit(this.object);
-      } else {
-        console.log(`[ControllerHit] ${this.hand} hit non-target object`);
-      }
-    }
-  };
-  __publicField(ControllerHit, "TypeName", "controller-hit");
-  /* Properties that are configurable in the editor */
-  __publicField(ControllerHit, "Properties", {
-    hand: Property.string("right")
-  });
-
   // js/cursor-debug.js
   var cursor_debug_exports = {};
   __export(cursor_debug_exports, {
@@ -13213,7 +12911,10 @@ Checking ray mesh hierarchy:`);
       this.session = {
         target: { reactionTimes: [], accuracy: { correct: 0, total: 0 } },
         beam: { runs: [], bestDuration: 0 },
-        ball: { caught: 0, deflected: 0, missed: 0, total: 0 }
+        deflect: { totalBalls: 0, hits: 0, games: [] },
+        // Bouncing ball game
+        react: { reactionTimes: [], totalTargets: 0 }
+        // Sphere spawner game
       };
     }
     // Target drill
@@ -13231,16 +12932,22 @@ Checking ray mesh hierarchy:`);
       if (durationSec > this.session.beam.bestDuration)
         this.session.beam.bestDuration = durationSec;
     }
-    // Ball catching drill
-    addBallResult(result) {
-      this.session.ball.total += 1;
-      if (result === "caught") {
-        this.session.ball.caught += 1;
-      } else if (result === "deflected") {
-        this.session.ball.deflected += 1;
-      } else if (result === "missed") {
-        this.session.ball.missed += 1;
-      }
+    // Deflect & Catch drill (bouncing ball)
+    addDeflectGame(totalBalls, hits) {
+      this.session.deflect.totalBalls += totalBalls;
+      this.session.deflect.hits += hits;
+      this.session.deflect.games.push({ totalBalls, hits, accuracy: totalBalls > 0 ? hits / totalBalls * 100 : 0 });
+    }
+    // Strike & React drill (sphere spawner)
+    addReactTime(reactionTime) {
+      this.session.react.reactionTimes.push(reactionTime);
+      this.session.react.totalTargets += 1;
+    }
+    addReactSession(reactionTimes) {
+      reactionTimes.forEach((rt) => {
+        this.session.react.reactionTimes.push(rt);
+        this.session.react.totalTargets += 1;
+      });
     }
     // Aggregates
     getReport() {
@@ -13250,18 +12957,29 @@ Checking ray mesh hierarchy:`);
       const slowest = rts.length ? Math.max(...rts) : 0;
       const acc = this.session.target.accuracy;
       const accPct = acc.total ? acc.correct / acc.total * 100 : 0;
-      const ball = this.session.ball;
-      const ballSuccessRate = ball.total ? (ball.caught + ball.deflected) / ball.total * 100 : 0;
+      const deflect = this.session.deflect;
+      const deflectAccuracy = deflect.totalBalls > 0 ? deflect.hits / deflect.totalBalls * 100 : 0;
+      const reactTimes = this.session.react.reactionTimes;
+      const reactAvg = reactTimes.length ? reactTimes.reduce((a, b) => a + b, 0) / reactTimes.length : 0;
+      const reactFastest = reactTimes.length ? Math.min(...reactTimes) : 0;
+      const reactSlowest = reactTimes.length ? Math.max(...reactTimes) : 0;
       return {
         reaction: { average: avg, fastest, slowest, total: rts.length },
         accuracy: { correct: acc.correct, total: acc.total, percent: accPct },
         beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() },
-        ball: {
-          caught: ball.caught,
-          deflected: ball.deflected,
-          missed: ball.missed,
-          total: ball.total,
-          successRate: ballSuccessRate
+        deflect: {
+          totalBalls: deflect.totalBalls,
+          hits: deflect.hits,
+          accuracy: deflectAccuracy,
+          gamesPlayed: deflect.games.length,
+          games: deflect.games.slice()
+        },
+        react: {
+          average: reactAvg,
+          fastest: reactFastest,
+          slowest: reactSlowest,
+          total: reactTimes.length,
+          times: reactTimes.slice()
         }
       };
     }
@@ -13396,7 +13114,13 @@ Checking ray mesh hierarchy:`);
     start() {
       this.currentDrill = null;
       this._lastStatus = "";
+      this._lastCue = "";
+      this._lastStats = "";
+      this._lastReport = "";
       this.updateStatus("Select a drill");
+      this.updateCue("");
+      this.updateStats("");
+      this.updateReport("");
       this._storeOriginalScales();
       this._applyDefaultEnvironment();
       this._validateSetup();
@@ -13411,8 +13135,11 @@ Checking ray mesh hierarchy:`);
       if (!this.beamWalkManager) {
         console.warn("[GameSelector] Beam Walk Manager not linked!");
       }
-      if (!this.ballThrower) {
-        console.warn("[GameSelector] Ball Thrower not linked!");
+      if (!this.deflectManager) {
+        console.warn("[GameSelector] Deflect Manager (bouncing ball) not linked!");
+      }
+      if (!this.reactManager) {
+        console.warn("[GameSelector] React Manager (sphere spawner) not linked!");
       }
       if (!this.dataManager) {
         console.warn("[GameSelector] Data Manager not linked!");
@@ -13431,6 +13158,39 @@ Checking ray mesh hierarchy:`);
         }
       } else {
         console.log("[GameSelector] status:", text);
+      }
+    }
+    updateCue(text) {
+      if (this._lastCue === text)
+        return;
+      this._lastCue = text;
+      if (this.uiCueText) {
+        const textComp = this.uiCueText.getComponent("text");
+        if (textComp) {
+          textComp.text = text;
+        }
+      }
+    }
+    updateStats(text) {
+      if (this._lastStats === text)
+        return;
+      this._lastStats = text;
+      if (this.uiStatsText) {
+        const textComp = this.uiStatsText.getComponent("text");
+        if (textComp) {
+          textComp.text = text;
+        }
+      }
+    }
+    updateReport(text) {
+      if (this._lastReport === text)
+        return;
+      this._lastReport = text;
+      if (this.uiReportText) {
+        const textComp = this.uiReportText.getComponent("text");
+        if (textComp) {
+          textComp.text = text;
+        }
       }
     }
     // ----- Environment Switching Logic -----
@@ -13506,15 +13266,30 @@ Checking ray mesh hierarchy:`);
         this.updateStatus("Error: Beam Manager not found");
       }
     }
-    startBallDrill() {
+    startDeflectDrill() {
       this.stopDrills();
-      this.currentDrill = "ball";
-      const mgr = this.ballThrower?.getComponent("ball-thrower");
+      this.currentDrill = "deflect";
+      const mgr = this.deflectManager?.getComponent("bouncing-ball");
       if (mgr) {
-        mgr.startDrill?.();
-        this.updateStatus("Ball Catching: ON");
+        mgr.startGame?.();
+        this.updateStatus("Deflect & Catch: ON");
+        this.updateCue("Ready?");
+        this.updateStats("");
       } else {
-        this.updateStatus("Error: Ball Thrower not found");
+        this.updateStatus("Error: Deflect Manager not found");
+      }
+    }
+    startReactDrill() {
+      this.stopDrills();
+      this.currentDrill = "react";
+      const mgr = this.reactManager?.getComponent("reaction-game");
+      if (mgr) {
+        mgr.startGame?.();
+        this.updateStatus("Strike & React: ON");
+        this.updateCue("Click the targets!");
+        this.updateStats("");
+      } else {
+        this.updateStatus("Error: React Manager not found");
       }
     }
     stopDrills() {
@@ -13524,42 +13299,104 @@ Checking ray mesh hierarchy:`);
       } else if (this.currentDrill === "beam") {
         const bm = this.beamWalkManager?.getComponent("beam-walk-manager");
         bm?.endDrill?.();
-      } else if (this.currentDrill === "ball") {
-        const bt = this.ballThrower?.getComponent("ball-thrower");
-        bt?.endDrill?.();
+      } else if (this.currentDrill === "deflect") {
+        const dm = this.deflectManager?.getComponent("bouncing-ball");
+        if (dm) {
+          dm.gameRunning = false;
+          dm.setGameComponentsActive?.(false);
+        }
+      } else if (this.currentDrill === "react") {
+        const rm = this.reactManager?.getComponent("reaction-game");
+        if (rm) {
+          rm.isGameActive = false;
+          rm.currentTargetActive = false;
+          if (rm.targetTemplate) {
+            rm.targetTemplate.active = false;
+          }
+        }
       }
       this.currentDrill = null;
       this.updateStatus("Drills stopped");
+      this.updateCue("");
+      this.updateStats("");
     }
     // Report
     showReport() {
       const dm = this.dataManager?.getComponent("data-manager");
       if (!dm) {
-        this.updateStatus("Error: No data available");
+        this.updateReport("Error: No data available");
         return;
       }
       const r = dm.getReport();
-      let report = "=== SESSION REPORT ===\n";
-      if (r.reaction.total > 0) {
-        report += `TARGET: Hits:${r.reaction.total} AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s `;
+      console.log("[GameSelector] Report data:", r);
+      let report = "=== SESSION REPORT ===\n\n";
+      let hasData = false;
+      if (r.reaction.total > 0 || r.accuracy.total > 0) {
+        hasData = true;
+        report += `TARGET DRILL
+`;
+        if (r.reaction.total > 0) {
+          report += `  Targets Hit: ${r.reaction.total}
+`;
+          report += `  Avg Reaction Time: ${r.reaction.average.toFixed(3)}s
+`;
+          report += `  Fastest: ${r.reaction.fastest.toFixed(3)}s
+`;
+          report += `  Slowest: ${r.reaction.slowest.toFixed(3)}s
+`;
+        }
         if (r.accuracy.total > 0) {
-          report += `Acc:${r.accuracy.percent.toFixed(0)}% `;
+          report += `  Accuracy: ${r.accuracy.percent.toFixed(1)}% (${r.accuracy.correct}/${r.accuracy.total})
+`;
         }
         report += "\n";
       }
       if (r.beam.runs.length > 0) {
-        report += `BEAM: Runs:${r.beam.runs.length} Best:${r.beam.best.toFixed(2)}s Avg:${(r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length).toFixed(2)}s
+        hasData = true;
+        const avgBeam = r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length;
+        report += `BEAM WALK
 `;
-      }
-      if (r.ball.total > 0) {
-        report += `BALL: Caught:${r.ball.caught} Deflected:${r.ball.deflected} Missed:${r.ball.missed} Success:${r.ball.successRate.toFixed(0)}%
+        report += `  Total Runs: ${r.beam.runs.length}
 `;
+        report += `  Best Time: ${r.beam.best.toFixed(2)}s
+`;
+        report += `  Average Time: ${avgBeam.toFixed(2)}s
+`;
+        report += "\n";
       }
-      if (r.reaction.total === 0 && r.beam.runs.length === 0 && r.ball.total === 0) {
+      if (r.deflect.gamesPlayed > 0) {
+        hasData = true;
+        report += `DEFLECT & CATCH
+`;
+        report += `  Games Played: ${r.deflect.gamesPlayed}
+`;
+        report += `  Total Balls: ${r.deflect.totalBalls}
+`;
+        report += `  Total Hits: ${r.deflect.hits}
+`;
+        report += `  Accuracy: ${r.deflect.accuracy.toFixed(1)}%
+`;
+        report += "\n";
+      }
+      if (r.react.total > 0) {
+        hasData = true;
+        report += `STRIKE & REACT
+`;
+        report += `  Targets Hit: ${r.react.total}
+`;
+        report += `  Avg Reaction Time: ${r.react.average.toFixed(3)}s
+`;
+        report += `  Fastest: ${r.react.fastest.toFixed(3)}s
+`;
+        report += `  Slowest: ${r.react.slowest.toFixed(3)}s
+`;
+        report += "\n";
+      }
+      if (!hasData) {
         report = "No data yet - complete some drills first!";
       }
       console.log(report);
-      this.updateStatus(report.replace(/\n/g, " | "));
+      this.updateReport(report);
     }
   };
   __publicField(GameSelector, "TypeName", "game-selector");
@@ -13572,10 +13409,16 @@ Checking ray mesh hierarchy:`);
     // Drill managers
     targetManager: Property.object(),
     beamWalkManager: Property.object(),
-    ballThrower: Property.object(),
+    deflectManager: Property.object(),
+    // Bouncing ball game (catch/deflect)
+    reactManager: Property.object(),
+    // Reaction game (strike/click)
     dataManager: Property.object(),
     // UI elements
-    uiStatusText: Property.object()
+    uiStatusText: Property.object(),
+    uiCueText: Property.object(),
+    uiStatsText: Property.object(),
+    uiReportText: Property.object()
   });
 
   // js/head-bob.js
@@ -13722,34 +13565,38 @@ Checking ray mesh hierarchy:`);
   });
   var ReactionGame = class extends Component3 {
     init() {
-      this.hiddenPosition = [0, -50, 0];
       this.isGameActive = false;
     }
     start() {
-      this.textComponent = this.statusText.getComponent("text");
-      this.resultTextComponent = this.resultText.getComponent("text");
       this.score = 0;
       this.targetsSpawned = 0;
       this.reactionTimes = [];
       this.isGameActive = false;
       this.currentTimer = 0;
       this.currentTargetActive = false;
+      if (!this.gameSelector) {
+        const manager = this.engine.scene.findByName("Manager")[0];
+        if (manager) {
+          this.gameSelector = manager.getComponent("game-selector");
+        }
+      }
       this.cursorTargetComp = this.targetTemplate.getComponent(CursorTarget);
       if (!this.cursorTargetComp) {
         this.cursorTargetComp = this.targetTemplate.addComponent(CursorTarget);
       }
-      if (this.endPanel) {
-        this.endPanel.active = true;
-        if (this.panelVisibleLocation) {
-          const pos = this.panelVisibleLocation.getTranslationWorld([]);
-          this.endPanel.setTranslationWorld(pos);
-        }
-      }
-      if (this.resultTextComponent) {
-        this.resultTextComponent.text = "Ready?";
-      }
       if (this.targetTemplate) {
         this.targetTemplate.active = false;
+      }
+    }
+    updateUI() {
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs) {
+        gs.updateCue?.(`Target ${this.targetsSpawned} / ${this.maxTargets}`);
+        if (this.reactionTimes.length > 0) {
+          const total = this.reactionTimes.reduce((a, b) => a + b, 0);
+          const avg = total / this.reactionTimes.length;
+          gs.updateStats?.(`Avg Time: ${avg.toFixed(3)}s | Completed: ${this.reactionTimes.length}`);
+        }
       }
     }
     onActivate() {
@@ -13787,14 +13634,14 @@ Checking ray mesh hierarchy:`);
      * Dedicated function to start the game
      */
     startGame() {
-      console.log("Starting game...");
-      this.hideGameOverPanel();
+      console.log("[ReactionGame] Starting game...");
       this.score = 0;
       this.targetsSpawned = 0;
       this.reactionTimes = [];
       this.isGameActive = true;
       this.currentTimer = 0;
       this.currentTargetActive = false;
+      this.updateUI();
       this.spawnNextTarget();
     }
     spawnNextTarget() {
@@ -13803,7 +13650,7 @@ Checking ray mesh hierarchy:`);
         return;
       }
       this.targetsSpawned++;
-      this.updateText(`Target: ${this.targetsSpawned}/${this.maxTargets}`);
+      this.updateUI();
       const rangeX = this.spawnArea.scalingWorld[0];
       const rangeY = this.spawnArea.scalingWorld[1];
       const randX = (Math.random() - 0.5) * 2 * rangeX;
@@ -13821,6 +13668,7 @@ Checking ray mesh hierarchy:`);
       this.reactionTimes.push(reactionTime);
       this.targetTemplate.active = false;
       this.currentTargetActive = false;
+      this.updateUI();
       this.spawnNextTarget();
     }
     handleTimeout() {
@@ -13830,45 +13678,41 @@ Checking ray mesh hierarchy:`);
       this.spawnNextTarget();
     }
     endGame() {
+      console.log("[ReactionGame] Game complete!");
       this.isGameActive = false;
       this.currentTargetActive = false;
       this.targetTemplate.active = false;
       const total = this.reactionTimes.reduce((a, b) => a + b, 0);
       const avg = total / (this.reactionTimes.length || 1);
-      if (this.resultTextComponent) {
-        this.resultTextComponent.text = `Avg. Time: ${avg.toFixed(3)}s`;
+      const fastest = this.reactionTimes.length ? Math.min(...this.reactionTimes) : 0;
+      const slowest = this.reactionTimes.length ? Math.max(...this.reactionTimes) : 0;
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (manager) {
+        const dm = manager.getComponent("data-manager");
+        if (dm && this.reactionTimes.length > 0) {
+          dm.addReactSession(this.reactionTimes);
+        }
       }
-      if (this.endPanel && this.panelVisibleLocation) {
-        const pos = this.panelVisibleLocation.getTranslationWorld([]);
-        this.endPanel.setTranslationWorld(pos);
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs) {
+        gs.updateStatus?.("Strike & React: COMPLETE");
+        gs.updateCue?.("Game Over!");
+        gs.updateStats?.(`Avg: ${avg.toFixed(3)}s | Fast: ${fastest.toFixed(3)}s | Slow: ${slowest.toFixed(3)}s | Total: ${this.reactionTimes.length}`);
       }
     }
-    hideGameOverPanel() {
-      if (this.endPanel) {
-        this.endPanel.setPositionWorld(this.hiddenPosition);
-      }
-    }
-    // Called by the button
+    // Called by the button (for backward compatibility)
     resetGame() {
       this.startGame();
-    }
-    updateText(msg) {
-      if (this.textComponent)
-        this.textComponent.text = msg;
     }
   };
   __publicField(ReactionGame, "TypeName", "reaction-game");
   __publicField(ReactionGame, "Properties", {
     spawnArea: Property.object(),
     targetTemplate: Property.object(),
-    statusText: Property.object(),
     maxTargets: Property.int(20),
     timeoutDuration: Property.float(10),
-    // UI references
-    endPanel: Property.object(),
-    resultText: Property.object(),
-    // Where should the panel appear when the game ends/starts?
-    panelVisibleLocation: Property.object()
+    // Game selector for unified UI
+    gameSelector: Property.object()
   });
 
   // js/replay-button-react.js
@@ -13953,46 +13797,34 @@ Checking ray mesh hierarchy:`);
   var TargetCollision = class extends Component3 {
     start() {
       this.hit = false;
-      if (!this.object.startTime)
-        this.object.startTime = performance.now();
-      console.log("[TargetCollision] Initialized on:", this.object.name);
-      const collision = this.object.getComponent("collision");
-      if (!collision) {
-        console.error("[TargetCollision] \u274C Target has NO collision component!");
+      console.log("[TargetCollision] Starting on object:", this.object.name);
+      let cursorTarget = this.object.getComponent(CursorTarget);
+      if (!cursorTarget) {
+        console.log("[TargetCollision] No cursor-target found, adding one");
+        cursorTarget = this.object.addComponent(CursorTarget);
       } else {
-        console.log("[TargetCollision] \u2705 Target has collision component");
+        console.log("[TargetCollision] cursor-target already exists");
       }
+      cursorTarget.onDown.add(this.onDown.bind(this));
+      console.log("[TargetCollision] Registered onDown callback");
     }
-    // Called by ControllerHit OR direct collision events if enabled
-    onHit(controllerObject) {
-      console.log("[TargetCollision] onHit called! hit:", this.hit);
-      if (this.hit) {
-        console.log("[TargetCollision] Already hit, ignoring");
+    onDown(_, cursor) {
+      console.log("[TargetCollision] onDown called! Hit status:", this.hit);
+      if (this.hit)
         return;
-      }
+      this.onHit();
+    }
+    onHit() {
+      console.log("[TargetCollision] onHit called! Manager:", this.manager);
+      if (this.hit)
+        return;
       this.hit = true;
       const reactionTime = (performance.now() - this.object.startTime) / 1e3;
-      console.log("[TargetCollision] Registering hit with manager, RT:", reactionTime);
-      if (!this.manager) {
-        console.error("[TargetCollision] \u274C No manager set!");
-        return;
-      }
-      this.manager.onTargetHit(this.object, reactionTime);
-    }
-    // Optional direct collision handling (if controller objects collide with sphere)
-    onCollisionEnter(other) {
-      console.log("[TargetCollision] onCollisionEnter with:", other.object?.name);
-      if (this.hit) {
-        console.log("[TargetCollision] Already hit");
-        return;
-      }
-      const name = other.object?.name || "";
-      console.log("[TargetCollision] Checking if controller:", name);
-      if (name.includes("Controller") || name.includes("controller")) {
-        console.log("[TargetCollision] \u{1F3AF} Controller collision detected!");
-        this.onHit(other.object);
+      console.log("[TargetCollision] Reaction time:", reactionTime, "Manager:", this.manager);
+      if (this.manager) {
+        this.manager.onTargetHit(this.object, reactionTime);
       } else {
-        console.log("[TargetCollision] Not a controller");
+        console.error("[TargetCollision] No manager set!");
       }
     }
   };
@@ -14006,14 +13838,15 @@ Checking ray mesh hierarchy:`);
   __export(target_manager_exports, {
     TargetManager: () => TargetManager
   });
-  console.log("target-manager.js loaded");
   var TargetManager = class extends Component3 {
     start() {
       this.hitCount = 0;
       this.missCount = 0;
+      this.cycleCount = 0;
       this.reactionTimes = [];
       this.activeTargets = [];
       this.spherePrefab.active = false;
+      this.roundActive = false;
       this.colors = [
         { name: "yellow", materialId: this.yellowMaterialId },
         { name: "pink", materialId: this.pinkMaterialId },
@@ -14028,21 +13861,18 @@ Checking ray mesh hierarchy:`);
         "Green:",
         this.greenMaterialId
       );
-      console.log("[TargetManager] simultaneousTargets:", this.simultaneousTargets);
-      if (this.spawnZone) {
-        this._calculateSpawnZone();
-      } else {
-        console.warn("[TargetManager] No spawn zone set - using default curved area");
+      if (!this.gameSelector) {
+        const manager = this.engine.scene.findByName("Manager")[0];
+        if (manager) {
+          this.gameSelector = manager.getComponent("game-selector");
+        }
       }
+      this.calculateSpawnZone();
       this.updateStats();
-      console.log("[TargetManager] Initialized - waiting for startGame()");
+      console.log("[TargetManager] Initialized, waiting for startGame()");
     }
-    _calculateSpawnZone() {
+    calculateSpawnZone() {
       const mesh = this.spawnZone.getComponent("mesh");
-      if (!mesh) {
-        console.error("[TargetManager] Spawn zone has no mesh component!");
-        return;
-      }
       const pos = this.spawnZone.getPositionWorld();
       const scale6 = this.spawnZone.getScalingWorld();
       this.spawnBounds = {
@@ -14053,169 +13883,141 @@ Checking ray mesh hierarchy:`);
         minZ: pos[2] - scale6[2] / 2,
         maxZ: pos[2] + scale6[2] / 2
       };
-      console.log("[TargetManager] Spawn zone calculated:", this.spawnBounds);
     }
     updateStats() {
-      if (!this.statsText)
-        return;
-      const textComp = this.statsText.getComponent("text");
-      if (!textComp)
-        return;
       const avgReactionTime = this.reactionTimes.length > 0 ? (this.reactionTimes.reduce((a, b) => a + b, 0) / this.reactionTimes.length).toFixed(3) : "0.000";
       const accuracy = this.hitCount + this.missCount > 0 ? (this.hitCount / (this.hitCount + this.missCount) * 100).toFixed(1) : "0.0";
-      const stats = `STATS
-Hits: ${this.hitCount} / ${this.maxTargets}
-Misses: ${this.missCount}
-Accuracy: ${accuracy}%
-Avg RT: ${avgReactionTime}s
-Active: ${this.activeTargets.length}`;
-      textComp.text = stats;
+      const stats = `Round: ${this.cycleCount}/${this.maxTargets} | Hits: ${this.hitCount} | Misses: ${this.missCount} | Accuracy: ${accuracy}% | Avg RT: ${avgReactionTime}s`;
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs) {
+        gs.updateStats?.(stats);
+      }
     }
-    spawnTarget() {
-      if (this.hitCount >= this.maxTargets) {
+    updateCue(text) {
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs) {
+        gs.updateCue?.(text);
+      }
+    }
+    startGame() {
+      this.clearRound();
+      this.hitCount = 0;
+      this.missCount = 0;
+      this.cycleCount = 0;
+      this.reactionTimes = [];
+      this.updateStats();
+      this.startRound();
+    }
+    startRound() {
+      if (this.cycleCount >= this.maxTargets) {
         this.endGame();
         return;
       }
+      this.cycleCount++;
+      this.updateStats();
+      this.roundActive = true;
+      this.activeTargets = [];
+      const targetColorObj = this.colors[Math.floor(Math.random() * this.colors.length)];
+      this.currentCue = targetColorObj.name;
+      this.updateCue(`Hit ${this.currentCue.toUpperCase()}`);
+      let batchColors = [];
+      batchColors.push(this.currentCue);
+      const distractors = this.colors.filter((c) => c.name !== this.currentCue);
+      for (let i = 1; i < this.simultaneousTargets; i++) {
+        const distColor = distractors[Math.floor(Math.random() * distractors.length)].name;
+        batchColors.push(distColor);
+      }
+      batchColors.sort(() => Math.random() - 0.5);
+      for (let i = 0; i < this.simultaneousTargets; i++) {
+        this.spawnSphere(batchColors[i]);
+      }
+      console.log(`[TargetManager] Round ${this.cycleCount} Started. Target: ${this.currentCue}`);
+    }
+    spawnSphere(colorName) {
       const sphere = this.spherePrefab.clone(this.object);
       sphere.active = true;
       this.activeTargets.push(sphere);
-      let x, y, z;
-      if (this.spawnBounds) {
-        x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
-        y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
-        z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
-        console.log("[TargetManager] Spawning in zone:", x, y, z);
-      } else {
-        x = (Math.random() - 0.5) * 7.5;
-        y = 1.5 + Math.random() * 2.5;
-        z = 2 + Math.pow(x, 2) / 2;
-        console.log("[TargetManager] Spawning (no zone):", x, y, z);
-      }
+      const x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
+      const y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
+      const z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
       sphere.setPositionWorld([x, y, z]);
       sphere.startTime = performance.now();
-      if (this.useColorMode) {
-        const colorObj = this.colors[Math.floor(Math.random() * this.colors.length)];
-        sphere.colorTag = colorObj.name;
-        this.currentCue = this.colors[Math.floor(Math.random() * this.colors.length)].name;
-        const textComp = this.uiCueText?.getComponent("text");
-        if (textComp)
-          textComp.text = `Hit ${this.currentCue.toUpperCase()}`;
-        const meshComp = sphere.getComponent("mesh");
-        if (meshComp && meshComp.material) {
-          try {
-            const colorMap = {
-              "yellow": [1, 1, 0, 1],
-              // Yellow
-              "pink": [1, 0.41, 0.71, 1],
-              // Hot Pink
-              "green": [0, 1, 0, 1]
-              // Green
-            };
-            const colorRGBA = colorMap[colorObj.name];
-            if (colorRGBA) {
-              meshComp.material.diffuseColor = colorRGBA;
-              console.log(`[TargetManager] Set color to ${colorObj.name}:`, colorRGBA);
-            }
-          } catch (e) {
-            console.error(`[TargetManager] Error setting color:`, e);
-          }
+      sphere.colorTag = colorName;
+      const meshComp = sphere.getComponent("mesh");
+      if (meshComp && meshComp.material) {
+        const colorMap = {
+          "yellow": [1, 1, 0, 1],
+          "pink": [1, 0.41, 0.71, 1],
+          "green": [0, 1, 0, 1]
+        };
+        const colorRGBA = colorMap[colorName];
+        if (colorRGBA) {
+          meshComp.material = meshComp.material.clone();
+          meshComp.material.diffuseColor = colorRGBA;
         }
-      }
-      const ballCollision = sphere.getComponent("ball-collision");
-      if (ballCollision) {
-        console.log("[TargetManager] Removing ball-collision from target sphere (not needed for target drill)");
-        ballCollision.destroy();
-      }
-      let collision = sphere.getComponent("collision");
-      if (!collision) {
-        console.warn("[TargetManager] \u26A0\uFE0F Target has no collision component! Adding one...");
-        collision = sphere.addComponent("collision", {
-          collider: 2,
-          // Sphere collider
-          extents: [0.15, 0.15, 0.15],
-          group: 2
-        });
-      } else {
-        console.log("[TargetManager] \u2705 Target has collision component");
-        console.log("[TargetManager] Collision settings:", {
-          group: collision.group,
-          collider: collision.collider,
-          extents: collision.extents
-        });
       }
       let tc = sphere.getComponent("target-collision");
       if (!tc) {
-        console.log("[TargetManager] Adding target-collision component");
+        console.log("[TargetManager] No target-collision found, adding one");
         tc = sphere.addComponent("target-collision");
+      } else {
+        console.log("[TargetManager] target-collision already exists on sphere");
       }
       tc.manager = this;
-      console.log("[TargetManager] Target spawned at:", sphere.getPositionWorld());
-      console.log("[TargetManager] Active targets:", this.activeTargets.length, "/", this.simultaneousTargets);
+      console.log("[TargetManager] Set manager on target-collision, manager is:", this);
       sphere.timeoutId = setTimeout(() => {
         this.onTargetTimeout(sphere);
       }, this.targetLifetime * 1e3);
     }
     onTargetTimeout(sphere) {
-      const index = this.activeTargets.indexOf(sphere);
-      if (index === -1)
+      if (!this.roundActive)
         return;
-      console.log("[TargetManager] Target timeout - respawning");
-      this.activeTargets.splice(index, 1);
+      console.log("[TargetManager] Time run out - Resetting cycle");
+      this.roundActive = false;
       this.missCount++;
-      sphere.destroy();
       this.updateStats();
-      this.spawnTarget();
+      this.clearRound();
+      this.startRound();
     }
     onTargetHit(sphere, reactionTime) {
-      if (sphere.timeoutId) {
-        clearTimeout(sphere.timeoutId);
-        sphere.timeoutId = null;
-      }
-      const index = this.activeTargets.indexOf(sphere);
-      if (index !== -1) {
-        this.activeTargets.splice(index, 1);
-      }
-      this.hitCount++;
-      this.reactionTimes.push(reactionTime);
+      if (!this.roundActive)
+        return;
+      this.roundActive = false;
+      const isCorrectColor = sphere.colorTag === this.currentCue;
       const dm = this.dataManager?.getComponent("data-manager");
       dm?.addReactionTime(reactionTime);
-      if (this.useColorMode) {
-        const correct = sphere.colorTag === this.currentCue;
-        dm?.addAccuracySample(!!correct);
+      dm?.addAccuracySample(isCorrectColor);
+      if (isCorrectColor) {
+        console.log("[TargetManager] Correct Hit!");
+        this.hitCount++;
+        this.reactionTimes.push(reactionTime);
+      } else {
+        console.log("[TargetManager] Wrong Color Hit!");
+        this.missCount++;
       }
-      sphere.destroy();
       this.updateStats();
-      setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
+      setTimeout(() => {
+        this.clearRound();
+      }, 0);
+      setTimeout(() => {
+        this.startRound();
+      }, this.spawnInterval * 1e3);
     }
-    endGame() {
-      console.log("Game over! Reaction times: ", this.reactionTimes);
+    clearRound() {
       for (const target of this.activeTargets) {
-        if (target.timeoutId) {
+        if (target.timeoutId)
           clearTimeout(target.timeoutId);
-        }
         target.destroy();
       }
       this.activeTargets = [];
+    }
+    endGame() {
+      console.log("Game over! Finished cycles: ", this.cycleCount);
+      this.clearRound();
       const dm = this.dataManager?.getComponent("data-manager");
       const report = dm?.getReport();
       if (report)
         console.log("[TargetManager] Report summary:", report);
-    }
-    startGame() {
-      for (const target of this.activeTargets) {
-        if (target.timeoutId) {
-          clearTimeout(target.timeoutId);
-        }
-        target.destroy();
-      }
-      this.activeTargets = [];
-      this.hitCount = 0;
-      this.missCount = 0;
-      this.reactionTimes = [];
-      this.updateStats();
-      for (let i = 0; i < this.simultaneousTargets; i++) {
-        this.spawnTarget();
-      }
     }
   };
   __publicField(TargetManager, "TypeName", "target-manager");
@@ -14223,23 +14025,21 @@ Active: ${this.activeTargets.length}`;
   __publicField(TargetManager, "Properties", {
     spherePrefab: Property.object(),
     spawnZone: Property.object(),
-    // Optional: Cube mesh object to define spawn boundaries
-    maxTargets: Property.int(20),
+    // cube mesh object to define spawn boundaries
+    maxTargets: Property.int(5),
     spawnInterval: Property.float(1),
-    // seconds
-    useColorMode: Property.bool(false),
-    uiCueText: Property.object(),
+    // seconds delay before respawning
     dataManager: Property.object(),
-    targetLifetime: Property.float(1),
+    targetLifetime: Property.float(1.5),
     // seconds - auto-respawn if not hit
-    simultaneousTargets: Property.int(1),
+    simultaneousTargets: Property.int(5),
     // number of targets to spawn at once
-    statsText: Property.object(),
-    // Text component to display stats
-    // Material IDs - set these in the editor to match your scene materials
+    // material IDs 
     yellowMaterialId: Property.int(25),
     pinkMaterialId: Property.int(22),
-    greenMaterialId: Property.int(26)
+    greenMaterialId: Property.int(26),
+    // Game selector for unified UI
+    gameSelector: Property.object()
   });
 
   // js/ui-cursor-button.js
@@ -14305,14 +14105,18 @@ Active: ${this.activeTargets.length}`;
             gs.startBeamWalk();
           break;
         case 5:
-          if (gs.startBallDrill)
-            gs.startBallDrill();
+          if (gs.startDeflectDrill)
+            gs.startDeflectDrill();
           break;
         case 6:
+          if (gs.startReactDrill)
+            gs.startReactDrill();
+          break;
+        case 7:
           if (gs.stopAllDrills)
             gs.stopAllDrills();
           break;
-        case 7:
+        case 8:
           if (gs.showReport)
             gs.showReport();
           break;
@@ -14330,7 +14134,8 @@ Active: ${this.activeTargets.length}`;
         "Gym Environment",
         "Start Target Drill",
         "Start Beam Walk",
-        "Start Ball Catching",
+        "Start Deflect & Catch",
+        "Start Strike & React",
         "Stop All Drills",
         "Show Report"
       ],
@@ -14440,20 +14245,27 @@ Active: ${this.activeTargets.length}`;
           }
           break;
         case 5:
-          if (gs.startBallDrill) {
-            gs.startBallDrill();
+          if (gs.startDeflectDrill) {
+            gs.startDeflectDrill();
           } else {
-            console.warn("[UiPlaneButton] startBallDrill method not found");
+            console.warn("[UiPlaneButton] startDeflectDrill method not found");
           }
           break;
         case 6:
+          if (gs.startReactDrill) {
+            gs.startReactDrill();
+          } else {
+            console.warn("[UiPlaneButton] startReactDrill method not found");
+          }
+          break;
+        case 7:
           if (gs.stopDrills) {
             gs.stopDrills();
           } else {
             console.warn("[UiPlaneButton] stopDrills method not found");
           }
           break;
-        case 7:
+        case 8:
           if (gs.showReport) {
             gs.showReport();
           } else {
@@ -14474,7 +14286,8 @@ Active: ${this.activeTargets.length}`;
         "Gym Environment",
         "Start Target Drill",
         "Start Beam Walk",
-        "Start Ball Catching",
+        "Start Deflect & Catch",
+        "Start Strike & React",
         "Stop All Drills",
         "Show Report"
       ],
@@ -14856,22 +14669,12 @@ Active: ${this.activeTargets.length}`;
   _registerEditor(dist_exports);
   _registerEditor(app_exports);
   _registerEditor(ball_collision_exports);
-  _registerEditor(ball_thrower_exports);
   _registerEditor(bat_manager_exports);
   _registerEditor(beam_walk_manager_exports);
   _registerEditor(bouncing_ball_exports);
   _registerEditor(button_3d_exports);
-  _registerEditor(button_env_football_exports);
-  _registerEditor(button_env_gym_exports);
-  _registerEditor(button_env_tennis_exports);
-  _registerEditor(button_show_report_exports);
-  _registerEditor(button_start_ball_exports);
-  _registerEditor(button_start_beam_exports);
-  _registerEditor(button_start_target_exports);
-  _registerEditor(button_stop_drills_exports);
   _registerEditor(button_exports);
   _registerEditor(collision_debug_exports);
-  _registerEditor(controller_hit_exports);
   _registerEditor(cursor_debug_exports);
   _registerEditor(data_manager_exports);
   _registerEditor(environment_switcher_exports);

@@ -16,13 +16,11 @@ export class BouncingBall extends Component {
         minForceZ: Property.float(250.0),
         maxForceZ: Property.float(300.0),
 
-        // UI properties
-        endPanel: Property.object(),        // Parent object (the panel)
-        scoreText: Property.object(),       // Text object (child of the panel)
-        panelVisiblePos: Property.object(), // Location object where panel should appear
-        
         // Game Objects
         batObject: Property.object(),       // Reference to the Bat
+        
+        // Game selector for unified UI
+        gameSelector: Property.object(),
     };
 
     init() {
@@ -37,36 +35,21 @@ export class BouncingBall extends Component {
         
         // State tracking
         this.gameRunning = false;
-
-        // Coordinates for panel when hidden (Teleportation logic)
-        this.hiddenPosition = [0, -50, 0];
     }
 
     start() {
         this.rigidBody = this.object.getComponent('physx');
 
-        // 1. Initialize Game State: Disable Bat/Ball physics/mesh so they aren't active in the menu
+        // Initialize Game State: Disable Bat/Ball physics/mesh so they aren't active in the menu
         this.setGameComponentsActive(false);
         
-        // 2. SHOW the panel at the start (Start Menu)
-        if (this.endPanel) {
-            this.endPanel.active = true;
-            
-            // Move panel to the visible position immediately
-            if (this.panelVisiblePos) {
-                this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
+        // Get game selector reference
+        if (!this.gameSelector) {
+            const manager = this.engine.scene.findByName('Manager')[0];
+            if (manager) {
+                this.gameSelector = manager.getComponent('game-selector');
             }
         }
-
-        // Optional: Set the text to something inviting for the start
-        if (this.scoreText) {
-            const textComp = this.scoreText.getComponent('text');
-            if (textComp) {
-                textComp.text = "Ready?";
-            }
-        }
-
-        // NOTE: We do NOT call this.startGame() here. We wait for the button click.
 
         this.object.getComponent('physx').onCollision((type, other) => {
            if (type === CollisionEventType.Touch) { 
@@ -74,10 +57,18 @@ export class BouncingBall extends Component {
            }
         })
     }
+    
+    updateUI() {
+        const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
+        if (gs) {
+            gs.updateCue?.(`Ball ${this.nSpawned + 1} / ${this.maxSpawn}`);
+            gs.updateStats?.(`Hits: ${this.hitCount} / ${this.nSpawned}`);
+        }
+    }
 
     /**
      * Dedicated function to start the game.
-     * Called by resetGame() when the button is clicked.
+     * Called by game-selector when the button is clicked.
      */
     startGame() {
         this.nSpawned = 0;
@@ -85,8 +76,8 @@ export class BouncingBall extends Component {
         this.isSpawning = false;
         this.gameRunning = true;
 
-        // Teleport Panel away
-        this.hideGameOverPanel();
+        // Update UI
+        this.updateUI();
 
         // Start the loop
         this.respawn();
@@ -124,6 +115,7 @@ export class BouncingBall extends Component {
                 console.log("Bat hit");
                 this.hitCount++;
                 this.canRegisterHit = false;
+                this.updateUI();
             }
         }
     }
@@ -177,6 +169,7 @@ export class BouncingBall extends Component {
         }, 100);
 
         this.nSpawned++;
+        this.updateUI();
     }
 
     applyRandomForce() {
@@ -186,7 +179,6 @@ export class BouncingBall extends Component {
         this.rigidBody.addForce([randomForceX, 0, randomForceZ]);
     }
 
-    // Logic for panel teleporting
     showGameOver() {
         console.log("Game over. Hits: " + this.hitCount);
         this.gameRunning = false;
@@ -194,23 +186,22 @@ export class BouncingBall extends Component {
         // Disable Bat and Ball physics/mesh so they don't interfere with UI
         this.setGameComponentsActive(false);
         
-        if (this.scoreText) {
-            const textComp = this.scoreText.getComponent('text');
-            if (textComp) {
-                textComp.text = `Hits: ${this.hitCount} / ${this.maxSpawn}`;
+        // Save data to data manager
+        const manager = this.engine.scene.findByName('Manager')[0];
+        if (manager) {
+            const dm = manager.getComponent('data-manager');
+            if (dm) {
+                dm.addDeflectGame(this.maxSpawn, this.hitCount);
             }
         }
-
-        // Teleport the panel from under the map to the visible position
-        if (this.endPanel && this.panelVisiblePos) {
-            this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
-        }
-    }
-
-    hideGameOverPanel() {
-        // Teleport the panel deep under the map
-        if (this.endPanel) {
-            this.endPanel.setPositionWorld(this.hiddenPosition);
+        
+        // Update UI with final results
+        const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
+        if (gs) {
+            const accuracy = this.maxSpawn > 0 ? ((this.hitCount / this.maxSpawn) * 100).toFixed(0) : 0;
+            gs.updateStatus?.('Deflect & Catch: COMPLETE');
+            gs.updateCue?.('Game Over!');
+            gs.updateStats?.(`Final: ${this.hitCount} / ${this.maxSpawn} hits (${accuracy}%)`);
         }
     }
 

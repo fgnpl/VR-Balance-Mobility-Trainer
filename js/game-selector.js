@@ -16,16 +16,26 @@ export class GameSelector extends Component {
         // Drill managers
         targetManager: Property.object(),
         beamWalkManager: Property.object(),
-        ballThrower: Property.object(),
+        deflectManager: Property.object(), // Bouncing ball game (catch/deflect)
+        reactManager: Property.object(), // Reaction game (strike/click)
         dataManager: Property.object(),
         // UI elements
         uiStatusText: Property.object(),
+        uiCueText: Property.object(),
+        uiStatsText: Property.object(),
+        uiReportText: Property.object(),
     };
 
     start() {
-        this.currentDrill = null; // 'target' | 'beam' | 'ball' | null
+        this.currentDrill = null; // 'target' | 'beam' | 'deflect' | 'react' | null
         this._lastStatus = '';
+        this._lastCue = '';
+        this._lastStats = '';
+        this._lastReport = '';
         this.updateStatus('Select a drill');
+        this.updateCue('');
+        this.updateStats('');
+        this.updateReport('');
         this._storeOriginalScales();
         this._applyDefaultEnvironment();
         this._validateSetup();
@@ -42,8 +52,11 @@ export class GameSelector extends Component {
         if (!this.beamWalkManager) {
             console.warn('[GameSelector] Beam Walk Manager not linked!');
         }
-        if (!this.ballThrower) {
-            console.warn('[GameSelector] Ball Thrower not linked!');
+        if (!this.deflectManager) {
+            console.warn('[GameSelector] Deflect Manager (bouncing ball) not linked!');
+        }
+        if (!this.reactManager) {
+            console.warn('[GameSelector] React Manager (sphere spawner) not linked!');
         }
         if (!this.dataManager) {
             console.warn('[GameSelector] Data Manager not linked!');
@@ -63,6 +76,42 @@ export class GameSelector extends Component {
             }
         } else {
             console.log('[GameSelector] status:', text);
+        }
+    }
+
+    updateCue(text) {
+        if (this._lastCue === text) return;
+        this._lastCue = text;
+        
+        if (this.uiCueText) {
+            const textComp = this.uiCueText.getComponent('text');
+            if (textComp) {
+                textComp.text = text;
+            }
+        }
+    }
+
+    updateStats(text) {
+        if (this._lastStats === text) return;
+        this._lastStats = text;
+        
+        if (this.uiStatsText) {
+            const textComp = this.uiStatsText.getComponent('text');
+            if (textComp) {
+                textComp.text = text;
+            }
+        }
+    }
+
+    updateReport(text) {
+        if (this._lastReport === text) return;
+        this._lastReport = text;
+        
+        if (this.uiReportText) {
+            const textComp = this.uiReportText.getComponent('text');
+            if (textComp) {
+                textComp.text = text;
+            }
         }
     }
 
@@ -126,15 +175,31 @@ export class GameSelector extends Component {
         }
     }
 
-    startBallDrill() {
+    startDeflectDrill() {
         this.stopDrills();
-        this.currentDrill = 'ball';
-        const mgr = this.ballThrower?.getComponent('ball-thrower');
+        this.currentDrill = 'deflect';
+        const mgr = this.deflectManager?.getComponent('bouncing-ball');
         if (mgr) {
-            mgr.startDrill?.();
-            this.updateStatus('Ball Catching: ON');
+            mgr.startGame?.();
+            this.updateStatus('Deflect & Catch: ON');
+            this.updateCue('Ready?');
+            this.updateStats('');
         } else {
-            this.updateStatus('Error: Ball Thrower not found');
+            this.updateStatus('Error: Deflect Manager not found');
+        }
+    }
+
+    startReactDrill() {
+        this.stopDrills();
+        this.currentDrill = 'react';
+        const mgr = this.reactManager?.getComponent('reaction-game');
+        if (mgr) {
+            mgr.startGame?.();
+            this.updateStatus('Strike & React: ON');
+            this.updateCue('Click the targets!');
+            this.updateStats('');
+        } else {
+            this.updateStatus('Error: React Manager not found');
         }
     }
 
@@ -145,51 +210,99 @@ export class GameSelector extends Component {
         } else if (this.currentDrill === 'beam') {
             const bm = this.beamWalkManager?.getComponent('beam-walk-manager');
             bm?.endDrill?.();
-        } else if (this.currentDrill === 'ball') {
-            const bt = this.ballThrower?.getComponent('ball-thrower');
-            bt?.endDrill?.();
+        } else if (this.currentDrill === 'deflect') {
+            const dm = this.deflectManager?.getComponent('bouncing-ball');
+            if (dm) {
+                dm.gameRunning = false;
+                dm.setGameComponentsActive?.(false);
+            }
+        } else if (this.currentDrill === 'react') {
+            const rm = this.reactManager?.getComponent('reaction-game');
+            if (rm) {
+                rm.isGameActive = false;
+                rm.currentTargetActive = false;
+                if (rm.targetTemplate) {
+                    rm.targetTemplate.active = false;
+                }
+            }
         }
         this.currentDrill = null;
         this.updateStatus('Drills stopped');
+        this.updateCue('');
+        this.updateStats('');
     }
 
     // Report
     showReport() {
         const dm = this.dataManager?.getComponent('data-manager');
         if (!dm) {
-            this.updateStatus('Error: No data available');
+            this.updateReport('Error: No data available');
             return;
         }
         
         const r = dm.getReport();
+        console.log('[GameSelector] Report data:', r); // Debug log
         
         // Build comprehensive report string
-        let report = '=== SESSION REPORT ===\n';
+        let report = '=== SESSION REPORT ===\n\n';
+        let hasData = false;
         
-        // Target Striking results
-        if (r.reaction.total > 0) {
-            report += `TARGET: Hits:${r.reaction.total} AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s `;
+        // Target Striking results - check for either reaction times or accuracy data
+        if (r.reaction.total > 0 || r.accuracy.total > 0) {
+            hasData = true;
+            report += `TARGET DRILL\n`;
+            
+            if (r.reaction.total > 0) {
+                report += `  Targets Hit: ${r.reaction.total}\n`;
+                report += `  Avg Reaction Time: ${r.reaction.average.toFixed(3)}s\n`;
+                report += `  Fastest: ${r.reaction.fastest.toFixed(3)}s\n`;
+                report += `  Slowest: ${r.reaction.slowest.toFixed(3)}s\n`;
+            }
+            
             if (r.accuracy.total > 0) {
-                report += `Acc:${r.accuracy.percent.toFixed(0)}% `;
+                report += `  Accuracy: ${r.accuracy.percent.toFixed(1)}% (${r.accuracy.correct}/${r.accuracy.total})\n`;
             }
             report += '\n';
         }
         
         // Beam Walk results
         if (r.beam.runs.length > 0) {
-            report += `BEAM: Runs:${r.beam.runs.length} Best:${r.beam.best.toFixed(2)}s Avg:${(r.beam.runs.reduce((a,b)=>a+b,0)/r.beam.runs.length).toFixed(2)}s\n`;
+            hasData = true;
+            const avgBeam = r.beam.runs.reduce((a,b)=>a+b,0)/r.beam.runs.length;
+            report += `BEAM WALK\n`;
+            report += `  Total Runs: ${r.beam.runs.length}\n`;
+            report += `  Best Time: ${r.beam.best.toFixed(2)}s\n`;
+            report += `  Average Time: ${avgBeam.toFixed(2)}s\n`;
+            report += '\n';
         }
         
-        // Ball Catching results
-        if (r.ball.total > 0) {
-            report += `BALL: Caught:${r.ball.caught} Deflected:${r.ball.deflected} Missed:${r.ball.missed} Success:${r.ball.successRate.toFixed(0)}%\n`;
+        // Deflect & Catch results
+        if (r.deflect.gamesPlayed > 0) {
+            hasData = true;
+            report += `DEFLECT & CATCH\n`;
+            report += `  Games Played: ${r.deflect.gamesPlayed}\n`;
+            report += `  Total Balls: ${r.deflect.totalBalls}\n`;
+            report += `  Total Hits: ${r.deflect.hits}\n`;
+            report += `  Accuracy: ${r.deflect.accuracy.toFixed(1)}%\n`;
+            report += '\n';
         }
         
-        if (r.reaction.total === 0 && r.beam.runs.length === 0 && r.ball.total === 0) {
+        // Strike & React results
+        if (r.react.total > 0) {
+            hasData = true;
+            report += `STRIKE & REACT\n`;
+            report += `  Targets Hit: ${r.react.total}\n`;
+            report += `  Avg Reaction Time: ${r.react.average.toFixed(3)}s\n`;
+            report += `  Fastest: ${r.react.fastest.toFixed(3)}s\n`;
+            report += `  Slowest: ${r.react.slowest.toFixed(3)}s\n`;
+            report += '\n';
+        }
+        
+        if (!hasData) {
             report = 'No data yet - complete some drills first!';
         }
         
         console.log(report);
-        this.updateStatus(report.replace(/\n/g, ' | '));
+        this.updateReport(report);
     }
 }

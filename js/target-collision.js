@@ -1,9 +1,10 @@
 import {Component, Property} from '@wonderlandengine/api';
+import {CursorTarget} from '@wonderlandengine/components';
 
 /**
  * target-collision
- * Simplified: rely on engine collision callbacks instead of manual per-frame distance checks.
  */
+
 export class TargetCollision extends Component {
     static TypeName = 'target-collision';
     static Properties = {
@@ -12,55 +13,49 @@ export class TargetCollision extends Component {
 
     start() {
         this.hit = false;
-        // Cache start time if prefab didn't get it yet; TargetManager sets it on spawn.
-        if (!this.object.startTime) this.object.startTime = performance.now();
         
-        console.log('[TargetCollision] Initialized on:', this.object.name);
+        console.log('[TargetCollision] Starting on object:', this.object.name);
         
-        // Check for collision component
-        const collision = this.object.getComponent('collision');
-        if (!collision) {
-            console.error('[TargetCollision] ❌ Target has NO collision component!');
+        // Skip audio component - it doesn't exist in this Wonderland Engine version
+        // this.soundSource = this.object.addComponent('audio-source', {
+        //     src: 'sfx/click.wav', 
+        //     spatial: true
+        // });
+
+        let cursorTarget = this.object.getComponent(CursorTarget);
+        if (!cursorTarget) {
+            console.log('[TargetCollision] No cursor-target found, adding one');
+            cursorTarget = this.object.addComponent(CursorTarget);
         } else {
-            console.log('[TargetCollision] ✅ Target has collision component');
+            console.log('[TargetCollision] cursor-target already exists');
         }
+
+        cursorTarget.onDown.add(this.onDown.bind(this));
+        console.log('[TargetCollision] Registered onDown callback');
     }
 
-    // Called by ControllerHit OR direct collision events if enabled
-    onHit(controllerObject) {
-        console.log('[TargetCollision] onHit called! hit:', this.hit);
-        if (this.hit) {
-            console.log('[TargetCollision] Already hit, ignoring');
-            return;
-        }
+    onDown(_, cursor) {
+        console.log('[TargetCollision] onDown called! Hit status:', this.hit);
+        if (this.hit) return;
+        
+        // Skip audio playback - component doesn't exist
+        // if (this.soundSource) this.soundSource.play();
+
+        this.onHit();
+    }
+
+    onHit() {
+        console.log('[TargetCollision] onHit called! Manager:', this.manager);
+        if (this.hit) return;
         this.hit = true;
+        
         const reactionTime = (performance.now() - this.object.startTime) / 1000;
-        console.log('[TargetCollision] Registering hit with manager, RT:', reactionTime);
+        console.log('[TargetCollision] Reaction time:', reactionTime, 'Manager:', this.manager);
         
-        if (!this.manager) {
-            console.error('[TargetCollision] ❌ No manager set!');
-            return;
-        }
-        
-        this.manager.onTargetHit(this.object, reactionTime);
-    }
-
-    // Optional direct collision handling (if controller objects collide with sphere)
-    onCollisionEnter(other) {
-        console.log('[TargetCollision] onCollisionEnter with:', other.object?.name);
-        if (this.hit) {
-            console.log('[TargetCollision] Already hit');
-            return;
-        }
-        // Accept collisions from controllers only
-        const name = other.object?.name || '';
-        console.log('[TargetCollision] Checking if controller:', name);
-        if (name.includes('Controller') || name.includes('controller')) {
-            console.log('[TargetCollision] 🎯 Controller collision detected!');
-            this.onHit(other.object);
+        if (this.manager) {
+            this.manager.onTargetHit(this.object, reactionTime);
         } else {
-            console.log('[TargetCollision] Not a controller');
+            console.error('[TargetCollision] No manager set!');
         }
     }
 }
-

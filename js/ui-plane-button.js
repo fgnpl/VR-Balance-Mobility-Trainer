@@ -2,7 +2,15 @@ import {Component, Property} from '@wonderlandengine/api';
 
 /**
  * Universal UI Plane Button Component
- * Attach this to any 2D plane button and select the action from the dropdown.
+ * Attach this to any 2D plane butt            case 7: // Stop All Drills
+                if (gs.stopDrills) {
+                    gs.stopDrills();
+                } else {
+                    console.warn('[UiPlaneButton] stopDrills method not found');
+                }
+                break;
+            
+            case 8: // Show Reportlect the action from the dropdown.
  * Uses cursor-target for proper click detection.
  * 
  * REQUIRED SETUP:
@@ -17,7 +25,7 @@ export class UiPlaneButton extends Component {
     static Properties = {
         action: Property.enum(
             ['Tennis Environment', 'Football Environment', 'Gym Environment', 
-             'Start Target Drill', 'Start Beam Walk', 'Start Ball Catching', 
+             'Start Target Drill', 'Start Beam Walk', 'Start Deflect & Catch', 'Start Strike & React',
              'Stop All Drills', 'Show Report'], 
             'Tennis Environment'
         ),
@@ -140,15 +148,23 @@ export class UiPlaneButton extends Component {
                 }
                 break;
             
-            case 5: // Start Ball Catching
-                if (gs.startBallDrill) {
-                    gs.startBallDrill();
+            case 5: // Start Deflect & Catch (bouncing ball)
+                if (gs.startDeflectDrill) {
+                    gs.startDeflectDrill();
                 } else {
-                    console.warn('[UiPlaneButton] startBallDrill method not found');
+                    console.warn('[UiPlaneButton] startDeflectDrill method not found');
+                }
+                break;
+            
+            case 6: // Start Strike & React (sphere spawner)
+                if (gs.startReactDrill) {
+                    gs.startReactDrill();
+                } else {
+                    console.warn('[UiPlaneButton] startReactDrill method not found');
                 }
                 break;
 
-            case 6: // Stop All Drills
+            case 7: // Stop All Drills
                 if (gs.stopDrills) {
                     gs.stopDrills();
                 } else {
@@ -156,7 +172,7 @@ export class UiPlaneButton extends Component {
                 }
                 break;
             
-            case 7: // Show Report
+            case 8: // Show Report
                 if (gs.showReport) {
                     gs.showReport();
                 } else {

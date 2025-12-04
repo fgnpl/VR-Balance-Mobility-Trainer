@@ -7,28 +7,18 @@ export class ReactionGame extends Component {
     static Properties = {
         spawnArea: Property.object(),
         targetTemplate: Property.object(),
-        statusText: Property.object(), 
         maxTargets: Property.int(20),
         timeoutDuration: Property.float(10.0),
-
-        // UI references
-        endPanel: Property.object(),       
-        resultText: Property.object(),
         
-        // Where should the panel appear when the game ends/starts?
-        panelVisibleLocation: Property.object() 
+        // Game selector for unified UI
+        gameSelector: Property.object(),
     };
 
     init() {
-        // Coordinates for panel when hidden
-        this.hiddenPosition = [0, -50, 0];
         this.isGameActive = false;
     }
 
     start() {
-        this.textComponent = this.statusText.getComponent('text');
-        this.resultTextComponent = this.resultText.getComponent('text');
-
         this.score = 0;
         this.targetsSpawned = 0;
         this.reactionTimes = [];
@@ -36,33 +26,37 @@ export class ReactionGame extends Component {
         this.currentTimer = 0;
         this.currentTargetActive = false;
 
+        // Get game selector reference
+        if (!this.gameSelector) {
+            const manager = this.engine.scene.findByName('Manager')[0];
+            if (manager) {
+                this.gameSelector = manager.getComponent('game-selector');
+            }
+        }
+
         // Setup game target
         this.cursorTargetComp = this.targetTemplate.getComponent(CursorTarget);
         if(!this.cursorTargetComp) {
             this.cursorTargetComp = this.targetTemplate.addComponent(CursorTarget);
         }
 
-        // --- CHANGE: SHOW PANEL AT START ---
-        if (this.endPanel) {
-            this.endPanel.active = true;
-            // Move the panel to the visible location immediately
-            if (this.panelVisibleLocation) {
-                const pos = this.panelVisibleLocation.getTranslationWorld([]);
-                this.endPanel.setTranslationWorld(pos);
-            }
-        }
-
-        // Set initial text
-        if (this.resultTextComponent) {
-            this.resultTextComponent.text = "Ready?";
-        }
-
         // Ensure target is hidden initially
         if (this.targetTemplate) {
             this.targetTemplate.active = false;
         }
+    }
 
-        // Note: We do NOT call spawnNextTarget() here. We wait for button click.
+    updateUI() {
+        const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
+        if (gs) {
+            gs.updateCue?.(`Target ${this.targetsSpawned} / ${this.maxTargets}`);
+            
+            if (this.reactionTimes.length > 0) {
+                const total = this.reactionTimes.reduce((a, b) => a + b, 0);
+                const avg = total / this.reactionTimes.length;
+                gs.updateStats?.(`Avg Time: ${avg.toFixed(3)}s | Completed: ${this.reactionTimes.length}`);
+            }
+        }
     }
 
     onActivate() {
@@ -103,10 +97,7 @@ export class ReactionGame extends Component {
      * Dedicated function to start the game
      */
     startGame() {
-        console.log("Starting game...");
-
-        // Hide the panel
-        this.hideGameOverPanel();
+        console.log("[ReactionGame] Starting game...");
 
         // Reset variables
         this.score = 0;
@@ -115,6 +106,9 @@ export class ReactionGame extends Component {
         this.isGameActive = true;
         this.currentTimer = 0;
         this.currentTargetActive = false;
+
+        // Update UI
+        this.updateUI();
 
         // Start spawning
         this.spawnNextTarget();
@@ -127,7 +121,7 @@ export class ReactionGame extends Component {
         }
 
         this.targetsSpawned++;
-        this.updateText(`Target: ${this.targetsSpawned}/${this.maxTargets}`);
+        this.updateUI();
 
         const rangeX = this.spawnArea.scalingWorld[0]; 
         const rangeY = this.spawnArea.scalingWorld[1];
@@ -150,6 +144,7 @@ export class ReactionGame extends Component {
         this.reactionTimes.push(reactionTime);
         this.targetTemplate.active = false;
         this.currentTargetActive = false;
+        this.updateUI();
         this.spawnNextTarget();
     }
 
@@ -161,38 +156,36 @@ export class ReactionGame extends Component {
     }
 
     endGame() {
+        console.log("[ReactionGame] Game complete!");
         this.isGameActive = false;
         this.currentTargetActive = false;
         this.targetTemplate.active = false;
 
         const total = this.reactionTimes.reduce((a, b) => a + b, 0);
         const avg = total / (this.reactionTimes.length || 1);
+        const fastest = this.reactionTimes.length ? Math.min(...this.reactionTimes) : 0;
+        const slowest = this.reactionTimes.length ? Math.max(...this.reactionTimes) : 0;
 
-        // Update the text before moving it 
-        if (this.resultTextComponent) {
-            this.resultTextComponent.text = `Avg. Time: ${avg.toFixed(3)}s`;
+        // Save data to data manager
+        const manager = this.engine.scene.findByName('Manager')[0];
+        if (manager) {
+            const dm = manager.getComponent('data-manager');
+            if (dm && this.reactionTimes.length > 0) {
+                dm.addReactSession(this.reactionTimes);
+            }
         }
-            
-        // Move the panel to the desired location
-        if (this.endPanel && this.panelVisibleLocation) {
-            const pos = this.panelVisibleLocation.getTranslationWorld([]);
-            this.endPanel.setTranslationWorld(pos);
+
+        // Update UI with final results
+        const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
+        if (gs) {
+            gs.updateStatus?.('Strike & React: COMPLETE');
+            gs.updateCue?.('Game Over!');
+            gs.updateStats?.(`Avg: ${avg.toFixed(3)}s | Fast: ${fastest.toFixed(3)}s | Slow: ${slowest.toFixed(3)}s | Total: ${this.reactionTimes.length}`);
         }
     }
 
-    hideGameOverPanel() {
-        // Teleport the panel deep under the map
-        if (this.endPanel) {
-            this.endPanel.setPositionWorld(this.hiddenPosition);
-        }
-    }
-
-    // Called by the button
+    // Called by the button (for backward compatibility)
     resetGame() {
         this.startGame();
-    }
-
-    updateText(msg) {
-        if (this.textComponent) this.textComponent.text = msg;
     }
 }

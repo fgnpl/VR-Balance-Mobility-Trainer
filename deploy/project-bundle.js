@@ -7593,8 +7593,8 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
-// js/ball-collision.js
-import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
+// js/bat-manager.js
+import { CollisionEventType, Component as Component29, Property as Property2 } from "@wonderlandengine/api";
 
 // js/haptic-feedback.js
 var HapticPatterns = {
@@ -7711,313 +7711,8 @@ function findInputComponent(obj) {
   return null;
 }
 
-// js/ball-collision.js
-var BallCollision = class extends Component29 {
-  start() {
-    this.handled = false;
-    this.lastControllerPositions = {
-      left: vec3_exports.create(),
-      right: vec3_exports.create()
-    };
-    this.leftController = this.engine.scene.findByName("HandLeft")[0] || this.engine.scene.findByName("ControllerLeft")[0];
-    this.rightController = this.engine.scene.findByName("HandRight")[0] || this.engine.scene.findByName("ControllerRight")[0];
-    console.log("[BallCollision] Left controller:", this.leftController?.name);
-    console.log("[BallCollision] Right controller:", this.rightController?.name);
-    if (!this.leftController || !this.rightController) {
-      console.warn("[BallCollision] Controllers not found! Ball catching will not work.");
-    }
-    if (this.leftController)
-      this.leftController.getPositionWorld(this.lastControllerPositions.left);
-    if (this.rightController)
-      this.rightController.getPositionWorld(this.lastControllerPositions.right);
-  }
-  update(dt) {
-    if (this.handled)
-      return;
-    if (this.object.velocity) {
-      const currentPos = this.object.getPositionWorld();
-      const newPos = vec3_exports.scaleAndAdd(
-        vec3_exports.create(),
-        currentPos,
-        this.object.velocity,
-        dt
-      );
-      this.object.setPositionWorld(newPos);
-    }
-    const ballPos = this.object.getPositionWorld();
-    if (this.debugMode) {
-      if (!this.frameCount)
-        this.frameCount = 0;
-      this.frameCount++;
-      if (this.frameCount % 30 === 0) {
-        console.log(`[BallCollision] Ball pos: [${ballPos[0].toFixed(2)}, ${ballPos[1].toFixed(2)}, ${ballPos[2].toFixed(2)}]`);
-      }
-    }
-    let minDist = 999;
-    let closestController = "none";
-    if (this.leftController) {
-      const ctrlPos = this.leftController.getPositionWorld();
-      const distance2 = vec3_exports.distance(ballPos, ctrlPos);
-      if (distance2 < minDist) {
-        minDist = distance2;
-        closestController = "left";
-      }
-      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.left) / dt;
-      vec3_exports.copy(this.lastControllerPositions.left, ctrlPos);
-      if (this.debugMode && distance2 < 1) {
-        console.log(`[BallCollision] LEFT - dist: ${distance2.toFixed(3)}m, vel: ${velocity.toFixed(3)}m/s, catch<${this.catchRadius}, deflect<${this.deflectRadius}`);
-      }
-      if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
-        console.log(`[BallCollision] CATCH triggered! Left controller`);
-        this.onCatch(this.leftController);
-        return;
-      } else if (distance2 < this.deflectRadius) {
-        console.log(`[BallCollision] DEFLECT triggered! Left controller`);
-        this.onDeflect(this.leftController, velocity);
-        return;
-      }
-    } else if (this.debugMode && this.frameCount % 60 === 0) {
-      console.warn("[BallCollision] No left controller found!");
-    }
-    if (this.rightController) {
-      const ctrlPos = this.rightController.getPositionWorld();
-      const distance2 = vec3_exports.distance(ballPos, ctrlPos);
-      if (distance2 < minDist) {
-        minDist = distance2;
-        closestController = "right";
-      }
-      const velocity = vec3_exports.distance(ctrlPos, this.lastControllerPositions.right) / dt;
-      vec3_exports.copy(this.lastControllerPositions.right, ctrlPos);
-      if (this.debugMode && distance2 < 1) {
-        console.log(`[BallCollision] RIGHT - dist: ${distance2.toFixed(3)}m, vel: ${velocity.toFixed(3)}m/s, catch<${this.catchRadius}, deflect<${this.deflectRadius}`);
-      }
-      if (distance2 < this.catchRadius && velocity < this.catchVelocityThreshold) {
-        console.log(`[BallCollision] CATCH triggered! Right controller`);
-        this.onCatch(this.rightController);
-        return;
-      } else if (distance2 < this.deflectRadius) {
-        console.log(`[BallCollision] DEFLECT triggered! Right controller`);
-        this.onDeflect(this.rightController, velocity);
-        return;
-      }
-    } else if (this.debugMode && this.frameCount % 60 === 0) {
-      console.warn("[BallCollision] No right controller found!");
-    }
-    if (this.debugMode && this.frameCount % 30 === 0) {
-      console.log(`[BallCollision] Closest: ${closestController} at ${minDist.toFixed(3)}m`);
-    }
-  }
-  onCatch(controller) {
-    if (this.handled)
-      return;
-    this.handled = true;
-    console.log(`[BallCollision] Caught by ${controller.name}!`);
-    triggerHaptic(controller, HapticPatterns.BALL_CATCH, null, this.debugMode);
-    const throwerComp = this.thrower?.getComponent("ball-thrower");
-    throwerComp?.onBallCaught(this.object);
-    this.object.velocity = [0, 0, 0];
-    setTimeout(() => {
-      if (this.object && this.object.active) {
-        this.object.destroy();
-      }
-    }, 200);
-  }
-  onDeflect(controller, velocity) {
-    if (this.handled)
-      return;
-    this.handled = true;
-    console.log(`[BallCollision] Deflected by ${controller.name} (vel: ${velocity.toFixed(2)})!`);
-    triggerHaptic(controller, HapticPatterns.BALL_DEFLECT, null, this.debugMode);
-    const throwerComp = this.thrower?.getComponent("ball-thrower");
-    throwerComp?.onBallDeflected(this.object);
-    const ctrlPos = controller.getPositionWorld();
-    const ballPos = this.object.getPositionWorld();
-    const bounceDir = vec3_exports.sub(vec3_exports.create(), ballPos, ctrlPos);
-    vec3_exports.normalize(bounceDir, bounceDir);
-    vec3_exports.scale(bounceDir, bounceDir, 2);
-    this.object.velocity = bounceDir;
-    setTimeout(() => {
-      if (this.object && this.object.active) {
-        this.object.destroy();
-      }
-    }, 500);
-  }
-  // Also handle physics collisions if enabled
-  onCollisionEnter(other) {
-    if (this.handled)
-      return;
-    const name = other.object?.name || "";
-    if (name.startsWith("Controller")) {
-      this.onDeflect(other.object, 1);
-    }
-  }
-};
-__publicField(BallCollision, "TypeName", "ball-collision");
-__publicField(BallCollision, "Properties", {
-  thrower: Property2.object(),
-  catchRadius: Property2.float(0.25),
-  // How close controller must be to catch (increased for VR)
-  deflectRadius: Property2.float(0.35),
-  // Slightly larger for deflection (increased for VR)
-  catchVelocityThreshold: Property2.float(0.8),
-  // Max controller velocity for catch
-  debugMode: Property2.bool(false)
-  // Enable debug logging
-});
-
-// js/ball-thrower.js
-import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
-var BallThrower = class extends Component30 {
-  start() {
-    this.running = false;
-    this.ballsThrown = 0;
-    this.ballsCaught = 0;
-    this.ballsDeflected = 0;
-    this.ballsMissed = 0;
-    this.activeBalls = [];
-    this.nextSpawnTime = 0;
-    if (this.ballPrefab) {
-      this.ballPrefab.active = false;
-    }
-  }
-  startDrill() {
-    console.log("[BallThrower] Starting drill");
-    this.running = true;
-    this.ballsThrown = 0;
-    this.ballsCaught = 0;
-    this.ballsDeflected = 0;
-    this.ballsMissed = 0;
-    this.nextSpawnTime = 0;
-    this.activeBalls.forEach((ball) => ball.destroy());
-    this.activeBalls = [];
-  }
-  endDrill() {
-    console.log("[BallThrower] Ending drill");
-    this.running = false;
-    this.activeBalls.forEach((ball) => ball.destroy());
-    this.activeBalls = [];
-    const total = this.ballsCaught + this.ballsDeflected + this.ballsMissed;
-    const accuracy = total > 0 ? (this.ballsCaught + this.ballsDeflected) / total * 100 : 0;
-    console.log(`[BallThrower] Results - Caught: ${this.ballsCaught}, Deflected: ${this.ballsDeflected}, Missed: ${this.ballsMissed}, Accuracy: ${accuracy.toFixed(1)}%`);
-    return {
-      ballsThrown: this.ballsThrown,
-      ballsCaught: this.ballsCaught,
-      ballsDeflected: this.ballsDeflected,
-      ballsMissed: this.ballsMissed,
-      accuracy
-    };
-  }
-  update(dt) {
-    if (!this.running || !this.playerObject)
-      return;
-    this.nextSpawnTime -= dt;
-    const canSpawn = this.ballsThrown < this.maxBalls && (this.waitForHit ? this.activeBalls.length === 0 : true);
-    if (this.nextSpawnTime <= 0 && canSpawn) {
-      this.spawnBall();
-      this.nextSpawnTime = this.spawnInterval;
-    }
-    this.activeBalls = this.activeBalls.filter((ball) => {
-      if (!ball || !ball.active)
-        return false;
-      if (!this.waitForHit) {
-        const ballPos = ball.getPositionWorld();
-        const playerPos = this.playerObject.getPositionWorld();
-        const behindDist = playerPos[2] - ballPos[2];
-        if (behindDist > 3 || ballPos[1] < -1) {
-          this.onBallMissed(ball);
-          ball.destroy();
-          return false;
-        }
-      }
-      return true;
-    });
-    if (this.ballsThrown >= this.maxBalls && this.activeBalls.length === 0) {
-      this.endDrill();
-    }
-  }
-  spawnBall() {
-    if (!this.ballPrefab || !this.playerObject)
-      return;
-    const ball = this.ballPrefab.clone(this.object);
-    ball.active = true;
-    const playerPos = this.playerObject.getPositionWorld();
-    const angle2 = Math.random() * Math.PI * 2;
-    const heightVariation = this.spawnHeightMin + Math.random() * (this.spawnHeightMax - this.spawnHeightMin);
-    const spawnX = playerPos[0] + Math.cos(angle2) * this.spawnRadius;
-    const spawnY = heightVariation;
-    const spawnZ = playerPos[2] + Math.sin(angle2) * this.spawnRadius;
-    ball.setPositionWorld([spawnX, spawnY, spawnZ]);
-    ball.spawnTime = performance.now();
-    const direction2 = vec3_exports.sub(vec3_exports.create(), playerPos, [spawnX, spawnY, spawnZ]);
-    vec3_exports.normalize(direction2, direction2);
-    vec3_exports.scale(direction2, direction2, this.ballSpeed);
-    ball.velocity = direction2;
-    ball.isCaught = false;
-    ball.isDeflected = false;
-    let collision = ball.getComponent("ball-collision");
-    if (!collision) {
-      collision = ball.addComponent("ball-collision");
-    }
-    collision.thrower = this;
-    this.activeBalls.push(ball);
-    this.ballsThrown++;
-    console.log(`[BallThrower] Ball ${this.ballsThrown} spawned at ${spawnX.toFixed(1)}, ${spawnY.toFixed(1)}, ${spawnZ.toFixed(1)}`);
-  }
-  onBallCaught(ball) {
-    if (ball.isCaught || ball.isDeflected)
-      return;
-    ball.isCaught = true;
-    this.ballsCaught++;
-    const index = this.activeBalls.indexOf(ball);
-    if (index !== -1)
-      this.activeBalls.splice(index, 1);
-    const dm = this.dataManager?.getComponent("data-manager");
-    dm?.addBallResult("caught");
-    console.log("[BallThrower] Ball caught! Total caught:", this.ballsCaught);
-  }
-  onBallDeflected(ball) {
-    if (ball.isCaught || ball.isDeflected)
-      return;
-    ball.isDeflected = true;
-    this.ballsDeflected++;
-    const index = this.activeBalls.indexOf(ball);
-    if (index !== -1)
-      this.activeBalls.splice(index, 1);
-    const dm = this.dataManager?.getComponent("data-manager");
-    dm?.addBallResult("deflected");
-    console.log("[BallThrower] Ball deflected! Total deflected:", this.ballsDeflected);
-  }
-  onBallMissed(ball) {
-    if (ball.isCaught || ball.isDeflected) {
-      return;
-    }
-    this.ballsMissed++;
-    const dm = this.dataManager?.getComponent("data-manager");
-    dm?.addBallResult("missed");
-    console.log("[BallThrower] Ball missed!");
-  }
-};
-__publicField(BallThrower, "TypeName", "ball-thrower");
-__publicField(BallThrower, "Properties", {
-  ballPrefab: Property3.object(),
-  playerObject: Property3.object(),
-  maxBalls: Property3.int(15),
-  spawnInterval: Property3.float(2),
-  // seconds between spawns
-  ballSpeed: Property3.float(3),
-  // meters per second
-  spawnRadius: Property3.float(3),
-  // distance from player to spawn
-  spawnHeightMin: Property3.float(1),
-  spawnHeightMax: Property3.float(2.5),
-  dataManager: Property3.object(),
-  waitForHit: Property3.bool(true)
-  // Wait for ball to be hit before spawning next
-});
-
 // js/bat-manager.js
-import { CollisionEventType, Component as Component31, Property as Property4 } from "@wonderlandengine/api";
-var BatManager = class extends Component31 {
+var BatManager = class extends Component29 {
   start() {
     this.soundSource = this.object.addComponent("audio-source", { src: "sfx/click.wav", spatial: true });
     this.object.getComponent("physx").onCollision((type, other) => {
@@ -8035,13 +7730,13 @@ var BatManager = class extends Component31 {
 };
 __publicField(BatManager, "TypeName", "bat-manager");
 __publicField(BatManager, "Properties", {
-  debugMode: Property4.bool(false)
+  debugMode: Property2.bool(false)
   // Enable console logging
 });
 
 // js/beam-walk-manager.js
-import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
-var BeamWalkManager = class extends Component32 {
+import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
+var BeamWalkManager = class extends Component30 {
   start() {
     this.running = false;
     this.totalBalanceDuration = 0;
@@ -8265,28 +7960,28 @@ Avg Dev: ${avgDev}m`;
 };
 __publicField(BeamWalkManager, "TypeName", "beam-walk-manager");
 __publicField(BeamWalkManager, "Properties", {
-  playerObject: Property5.object(),
-  headObject: Property5.object(),
+  playerObject: Property3.object(),
+  headObject: Property3.object(),
   // VR camera/head for Y position checking
-  beamWidth: Property5.float(0.3),
-  startPosition: Property5.object(),
-  endPosition: Property5.object(),
-  maxDistanceFromCenter: Property5.float(1),
+  beamWidth: Property3.float(0.3),
+  startPosition: Property3.object(),
+  endPosition: Property3.object(),
+  maxDistanceFromCenter: Property3.float(1),
   // Increased to 1.0m (100cm tolerance)
-  resetHeight: Property5.float(-2),
-  dataManager: Property5.object(),
-  statsText: Property5.object(),
+  resetHeight: Property3.float(-2),
+  dataManager: Property3.object(),
+  statsText: Property3.object(),
   // Text component to display live stats
-  successRadius: Property5.float(1),
+  successRadius: Property3.float(1),
   // Radius around end point to count as success
   // Controller references for haptic feedback
-  leftController: Property5.object(),
-  rightController: Property5.object()
+  leftController: Property3.object(),
+  rightController: Property3.object()
 });
 
 // js/bouncing-ball.js
-import { CollisionEventType as CollisionEventType2, Component as Component33, Property as Property6 } from "@wonderlandengine/api";
-var BouncingBall = class extends Component33 {
+import { CollisionEventType as CollisionEventType2, Component as Component31, Property as Property4 } from "@wonderlandengine/api";
+var BouncingBall = class extends Component31 {
   init() {
     this.groundTimer = 0;
     this.nSpawned = 0;
@@ -8294,21 +7989,14 @@ var BouncingBall = class extends Component33 {
     this.isSpawning = false;
     this.canRegisterHit = false;
     this.gameRunning = false;
-    this.hiddenPosition = [0, -50, 0];
   }
   start() {
     this.rigidBody = this.object.getComponent("physx");
     this.setGameComponentsActive(false);
-    if (this.endPanel) {
-      this.endPanel.active = true;
-      if (this.panelVisiblePos) {
-        this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
-      }
-    }
-    if (this.scoreText) {
-      const textComp = this.scoreText.getComponent("text");
-      if (textComp) {
-        textComp.text = "Ready?";
+    if (!this.gameSelector) {
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (manager) {
+        this.gameSelector = manager.getComponent("game-selector");
       }
     }
     this.object.getComponent("physx").onCollision((type, other) => {
@@ -8317,16 +8005,23 @@ var BouncingBall = class extends Component33 {
       }
     });
   }
+  updateUI() {
+    const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+    if (gs) {
+      gs.updateCue?.(`Ball ${this.nSpawned + 1} / ${this.maxSpawn}`);
+      gs.updateStats?.(`Hits: ${this.hitCount} / ${this.nSpawned}`);
+    }
+  }
   /**
    * Dedicated function to start the game.
-   * Called by resetGame() when the button is clicked.
+   * Called by game-selector when the button is clicked.
    */
   startGame() {
     this.nSpawned = 0;
     this.hitCount = 0;
     this.isSpawning = false;
     this.gameRunning = true;
-    this.hideGameOverPanel();
+    this.updateUI();
     this.respawn();
     this.setGameComponentsActive(true);
   }
@@ -8358,6 +8053,7 @@ var BouncingBall = class extends Component33 {
         console.log("Bat hit");
         this.hitCount++;
         this.canRegisterHit = false;
+        this.updateUI();
       }
     }
   }
@@ -8403,30 +8099,30 @@ var BouncingBall = class extends Component33 {
       }
     }, 100);
     this.nSpawned++;
+    this.updateUI();
   }
   applyRandomForce() {
     const randomForceX = (Math.random() * (this.maxForceX - this.minForceX) + this.minForceX) * (Math.random() < 0.5 ? -1 : 1);
     const randomForceZ = Math.random() * (this.maxForceZ - this.minForceZ) + this.minForceZ;
     this.rigidBody.addForce([randomForceX, 0, randomForceZ]);
   }
-  // Logic for panel teleporting
   showGameOver() {
     console.log("Game over. Hits: " + this.hitCount);
     this.gameRunning = false;
     this.setGameComponentsActive(false);
-    if (this.scoreText) {
-      const textComp = this.scoreText.getComponent("text");
-      if (textComp) {
-        textComp.text = `Hits: ${this.hitCount} / ${this.maxSpawn}`;
+    const manager = this.engine.scene.findByName("Manager")[0];
+    if (manager) {
+      const dm = manager.getComponent("data-manager");
+      if (dm) {
+        dm.addDeflectGame(this.maxSpawn, this.hitCount);
       }
     }
-    if (this.endPanel && this.panelVisiblePos) {
-      this.endPanel.setPositionWorld(this.panelVisiblePos.getPositionWorld());
-    }
-  }
-  hideGameOverPanel() {
-    if (this.endPanel) {
-      this.endPanel.setPositionWorld(this.hiddenPosition);
+    const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+    if (gs) {
+      const accuracy = this.maxSpawn > 0 ? (this.hitCount / this.maxSpawn * 100).toFixed(0) : 0;
+      gs.updateStatus?.("Deflect & Catch: COMPLETE");
+      gs.updateCue?.("Game Over!");
+      gs.updateStats?.(`Final: ${this.hitCount} / ${this.maxSpawn} hits (${accuracy}%)`);
     }
   }
   resetGame() {
@@ -8442,31 +8138,26 @@ var BouncingBall = class extends Component33 {
 __publicField(BouncingBall, "TypeName", "bouncing-ball");
 // Configuration for where the ball can spawn and forces
 __publicField(BouncingBall, "Properties", {
-  maxSpawn: Property6.int(2),
-  minX: Property6.float(-0.5),
-  maxX: Property6.float(0.5),
-  minY: Property6.float(1.5),
-  maxY: Property6.float(2.5),
-  spawnZ: Property6.float(-3),
-  minForceX: Property6.float(50),
-  maxForceX: Property6.float(100),
-  minForceZ: Property6.float(250),
-  maxForceZ: Property6.float(300),
-  // UI properties
-  endPanel: Property6.object(),
-  // Parent object (the panel)
-  scoreText: Property6.object(),
-  // Text object (child of the panel)
-  panelVisiblePos: Property6.object(),
-  // Location object where panel should appear
+  maxSpawn: Property4.int(2),
+  minX: Property4.float(-0.5),
+  maxX: Property4.float(0.5),
+  minY: Property4.float(1.5),
+  maxY: Property4.float(2.5),
+  spawnZ: Property4.float(-3),
+  minForceX: Property4.float(50),
+  maxForceX: Property4.float(100),
+  minForceZ: Property4.float(250),
+  maxForceZ: Property4.float(300),
   // Game Objects
-  batObject: Property6.object()
+  batObject: Property4.object(),
   // Reference to the Bat
+  // Game selector for unified UI
+  gameSelector: Property4.object()
 });
 
 // js/collision-debug.js
-import { Component as Component34, Property as Property7 } from "@wonderlandengine/api";
-var CollisionDebug = class extends Component34 {
+import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
+var CollisionDebug = class extends Component32 {
   start() {
     console.log(`[${this.logName}] Collision debug active on:`, this.object.name);
     const collision = this.object.getComponent("collision");
@@ -8505,44 +8196,14 @@ var CollisionDebug = class extends Component34 {
 };
 __publicField(CollisionDebug, "TypeName", "collision-debug");
 __publicField(CollisionDebug, "Properties", {
-  logName: Property7.string("CollisionDebug"),
-  showEnter: Property7.bool(true),
-  showExit: Property7.bool(false)
-});
-
-// js/controller-hit.js
-import { Component as Component35, Property as Property8 } from "@wonderlandengine/api";
-var ControllerHit = class extends Component35 {
-  start() {
-    console.log(`[ControllerHit] ${this.hand} controller initialized`);
-    const collision = this.object.getComponent("collision");
-    if (!collision) {
-      console.error(`[ControllerHit] \u274C ${this.hand} controller has NO collision component!`);
-      console.error(`[ControllerHit] Add 'collision' component in editor for hits to work!`);
-    } else {
-      console.log(`[ControllerHit] \u2705 ${this.hand} controller has collision component`);
-    }
-  }
-  onCollisionEnter(other) {
-    console.log(`[ControllerHit] \u{1F535} ${this.hand} collision DETECTED with:`, other.object?.name);
-    console.log(`[ControllerHit] Other object has target-collision?`, other.object?.hasComponent("target-collision"));
-    if (other.object && other.object.hasComponent("target-collision")) {
-      console.log(`[ControllerHit] \u{1F3AF} ${this.hand} hand hit a target!`);
-      other.object.getComponent("target-collision").onHit(this.object);
-    } else {
-      console.log(`[ControllerHit] ${this.hand} hit non-target object`);
-    }
-  }
-};
-__publicField(ControllerHit, "TypeName", "controller-hit");
-/* Properties that are configurable in the editor */
-__publicField(ControllerHit, "Properties", {
-  hand: Property8.string("right")
+  logName: Property5.string("CollisionDebug"),
+  showEnter: Property5.bool(true),
+  showExit: Property5.bool(false)
 });
 
 // js/data-manager.js
-import { Component as Component36 } from "@wonderlandengine/api";
-var DataManager = class extends Component36 {
+import { Component as Component33 } from "@wonderlandengine/api";
+var DataManager = class extends Component33 {
   start() {
     this.resetSession();
   }
@@ -8550,7 +8211,10 @@ var DataManager = class extends Component36 {
     this.session = {
       target: { reactionTimes: [], accuracy: { correct: 0, total: 0 } },
       beam: { runs: [], bestDuration: 0 },
-      ball: { caught: 0, deflected: 0, missed: 0, total: 0 }
+      deflect: { totalBalls: 0, hits: 0, games: [] },
+      // Bouncing ball game
+      react: { reactionTimes: [], totalTargets: 0 }
+      // Sphere spawner game
     };
   }
   // Target drill
@@ -8568,16 +8232,22 @@ var DataManager = class extends Component36 {
     if (durationSec > this.session.beam.bestDuration)
       this.session.beam.bestDuration = durationSec;
   }
-  // Ball catching drill
-  addBallResult(result) {
-    this.session.ball.total += 1;
-    if (result === "caught") {
-      this.session.ball.caught += 1;
-    } else if (result === "deflected") {
-      this.session.ball.deflected += 1;
-    } else if (result === "missed") {
-      this.session.ball.missed += 1;
-    }
+  // Deflect & Catch drill (bouncing ball)
+  addDeflectGame(totalBalls, hits) {
+    this.session.deflect.totalBalls += totalBalls;
+    this.session.deflect.hits += hits;
+    this.session.deflect.games.push({ totalBalls, hits, accuracy: totalBalls > 0 ? hits / totalBalls * 100 : 0 });
+  }
+  // Strike & React drill (sphere spawner)
+  addReactTime(reactionTime) {
+    this.session.react.reactionTimes.push(reactionTime);
+    this.session.react.totalTargets += 1;
+  }
+  addReactSession(reactionTimes) {
+    reactionTimes.forEach((rt) => {
+      this.session.react.reactionTimes.push(rt);
+      this.session.react.totalTargets += 1;
+    });
   }
   // Aggregates
   getReport() {
@@ -8587,18 +8257,29 @@ var DataManager = class extends Component36 {
     const slowest = rts.length ? Math.max(...rts) : 0;
     const acc = this.session.target.accuracy;
     const accPct = acc.total ? acc.correct / acc.total * 100 : 0;
-    const ball = this.session.ball;
-    const ballSuccessRate = ball.total ? (ball.caught + ball.deflected) / ball.total * 100 : 0;
+    const deflect = this.session.deflect;
+    const deflectAccuracy = deflect.totalBalls > 0 ? deflect.hits / deflect.totalBalls * 100 : 0;
+    const reactTimes = this.session.react.reactionTimes;
+    const reactAvg = reactTimes.length ? reactTimes.reduce((a, b) => a + b, 0) / reactTimes.length : 0;
+    const reactFastest = reactTimes.length ? Math.min(...reactTimes) : 0;
+    const reactSlowest = reactTimes.length ? Math.max(...reactTimes) : 0;
     return {
       reaction: { average: avg, fastest, slowest, total: rts.length },
       accuracy: { correct: acc.correct, total: acc.total, percent: accPct },
       beam: { best: this.session.beam.bestDuration, runs: this.session.beam.runs.slice() },
-      ball: {
-        caught: ball.caught,
-        deflected: ball.deflected,
-        missed: ball.missed,
-        total: ball.total,
-        successRate: ballSuccessRate
+      deflect: {
+        totalBalls: deflect.totalBalls,
+        hits: deflect.hits,
+        accuracy: deflectAccuracy,
+        gamesPlayed: deflect.games.length,
+        games: deflect.games.slice()
+      },
+      react: {
+        average: reactAvg,
+        fastest: reactFastest,
+        slowest: reactSlowest,
+        total: reactTimes.length,
+        times: reactTimes.slice()
       }
     };
   }
@@ -8606,12 +8287,18 @@ var DataManager = class extends Component36 {
 __publicField(DataManager, "TypeName", "data-manager");
 
 // js/game-selector.js
-import { Component as Component37, Property as Property9 } from "@wonderlandengine/api";
-var GameSelector = class extends Component37 {
+import { Component as Component34, Property as Property6 } from "@wonderlandengine/api";
+var GameSelector = class extends Component34 {
   start() {
     this.currentDrill = null;
     this._lastStatus = "";
+    this._lastCue = "";
+    this._lastStats = "";
+    this._lastReport = "";
     this.updateStatus("Select a drill");
+    this.updateCue("");
+    this.updateStats("");
+    this.updateReport("");
     this._storeOriginalScales();
     this._applyDefaultEnvironment();
     this._validateSetup();
@@ -8626,8 +8313,11 @@ var GameSelector = class extends Component37 {
     if (!this.beamWalkManager) {
       console.warn("[GameSelector] Beam Walk Manager not linked!");
     }
-    if (!this.ballThrower) {
-      console.warn("[GameSelector] Ball Thrower not linked!");
+    if (!this.deflectManager) {
+      console.warn("[GameSelector] Deflect Manager (bouncing ball) not linked!");
+    }
+    if (!this.reactManager) {
+      console.warn("[GameSelector] React Manager (sphere spawner) not linked!");
     }
     if (!this.dataManager) {
       console.warn("[GameSelector] Data Manager not linked!");
@@ -8646,6 +8336,39 @@ var GameSelector = class extends Component37 {
       }
     } else {
       console.log("[GameSelector] status:", text);
+    }
+  }
+  updateCue(text) {
+    if (this._lastCue === text)
+      return;
+    this._lastCue = text;
+    if (this.uiCueText) {
+      const textComp = this.uiCueText.getComponent("text");
+      if (textComp) {
+        textComp.text = text;
+      }
+    }
+  }
+  updateStats(text) {
+    if (this._lastStats === text)
+      return;
+    this._lastStats = text;
+    if (this.uiStatsText) {
+      const textComp = this.uiStatsText.getComponent("text");
+      if (textComp) {
+        textComp.text = text;
+      }
+    }
+  }
+  updateReport(text) {
+    if (this._lastReport === text)
+      return;
+    this._lastReport = text;
+    if (this.uiReportText) {
+      const textComp = this.uiReportText.getComponent("text");
+      if (textComp) {
+        textComp.text = text;
+      }
     }
   }
   // ----- Environment Switching Logic -----
@@ -8721,15 +8444,30 @@ var GameSelector = class extends Component37 {
       this.updateStatus("Error: Beam Manager not found");
     }
   }
-  startBallDrill() {
+  startDeflectDrill() {
     this.stopDrills();
-    this.currentDrill = "ball";
-    const mgr = this.ballThrower?.getComponent("ball-thrower");
+    this.currentDrill = "deflect";
+    const mgr = this.deflectManager?.getComponent("bouncing-ball");
     if (mgr) {
-      mgr.startDrill?.();
-      this.updateStatus("Ball Catching: ON");
+      mgr.startGame?.();
+      this.updateStatus("Deflect & Catch: ON");
+      this.updateCue("Ready?");
+      this.updateStats("");
     } else {
-      this.updateStatus("Error: Ball Thrower not found");
+      this.updateStatus("Error: Deflect Manager not found");
+    }
+  }
+  startReactDrill() {
+    this.stopDrills();
+    this.currentDrill = "react";
+    const mgr = this.reactManager?.getComponent("reaction-game");
+    if (mgr) {
+      mgr.startGame?.();
+      this.updateStatus("Strike & React: ON");
+      this.updateCue("Click the targets!");
+      this.updateStats("");
+    } else {
+      this.updateStatus("Error: React Manager not found");
     }
   }
   stopDrills() {
@@ -8739,63 +8477,131 @@ var GameSelector = class extends Component37 {
     } else if (this.currentDrill === "beam") {
       const bm = this.beamWalkManager?.getComponent("beam-walk-manager");
       bm?.endDrill?.();
-    } else if (this.currentDrill === "ball") {
-      const bt = this.ballThrower?.getComponent("ball-thrower");
-      bt?.endDrill?.();
+    } else if (this.currentDrill === "deflect") {
+      const dm = this.deflectManager?.getComponent("bouncing-ball");
+      if (dm) {
+        dm.gameRunning = false;
+        dm.setGameComponentsActive?.(false);
+      }
+    } else if (this.currentDrill === "react") {
+      const rm = this.reactManager?.getComponent("reaction-game");
+      if (rm) {
+        rm.isGameActive = false;
+        rm.currentTargetActive = false;
+        if (rm.targetTemplate) {
+          rm.targetTemplate.active = false;
+        }
+      }
     }
     this.currentDrill = null;
     this.updateStatus("Drills stopped");
+    this.updateCue("");
+    this.updateStats("");
   }
   // Report
   showReport() {
     const dm = this.dataManager?.getComponent("data-manager");
     if (!dm) {
-      this.updateStatus("Error: No data available");
+      this.updateReport("Error: No data available");
       return;
     }
     const r = dm.getReport();
-    let report = "=== SESSION REPORT ===\n";
-    if (r.reaction.total > 0) {
-      report += `TARGET: Hits:${r.reaction.total} AvgRT:${r.reaction.average.toFixed(2)}s Fast:${r.reaction.fastest.toFixed(2)}s Slow:${r.reaction.slowest.toFixed(2)}s `;
+    console.log("[GameSelector] Report data:", r);
+    let report = "=== SESSION REPORT ===\n\n";
+    let hasData = false;
+    if (r.reaction.total > 0 || r.accuracy.total > 0) {
+      hasData = true;
+      report += `TARGET DRILL
+`;
+      if (r.reaction.total > 0) {
+        report += `  Targets Hit: ${r.reaction.total}
+`;
+        report += `  Avg Reaction Time: ${r.reaction.average.toFixed(3)}s
+`;
+        report += `  Fastest: ${r.reaction.fastest.toFixed(3)}s
+`;
+        report += `  Slowest: ${r.reaction.slowest.toFixed(3)}s
+`;
+      }
       if (r.accuracy.total > 0) {
-        report += `Acc:${r.accuracy.percent.toFixed(0)}% `;
+        report += `  Accuracy: ${r.accuracy.percent.toFixed(1)}% (${r.accuracy.correct}/${r.accuracy.total})
+`;
       }
       report += "\n";
     }
     if (r.beam.runs.length > 0) {
-      report += `BEAM: Runs:${r.beam.runs.length} Best:${r.beam.best.toFixed(2)}s Avg:${(r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length).toFixed(2)}s
+      hasData = true;
+      const avgBeam = r.beam.runs.reduce((a, b) => a + b, 0) / r.beam.runs.length;
+      report += `BEAM WALK
 `;
-    }
-    if (r.ball.total > 0) {
-      report += `BALL: Caught:${r.ball.caught} Deflected:${r.ball.deflected} Missed:${r.ball.missed} Success:${r.ball.successRate.toFixed(0)}%
+      report += `  Total Runs: ${r.beam.runs.length}
 `;
+      report += `  Best Time: ${r.beam.best.toFixed(2)}s
+`;
+      report += `  Average Time: ${avgBeam.toFixed(2)}s
+`;
+      report += "\n";
     }
-    if (r.reaction.total === 0 && r.beam.runs.length === 0 && r.ball.total === 0) {
+    if (r.deflect.gamesPlayed > 0) {
+      hasData = true;
+      report += `DEFLECT & CATCH
+`;
+      report += `  Games Played: ${r.deflect.gamesPlayed}
+`;
+      report += `  Total Balls: ${r.deflect.totalBalls}
+`;
+      report += `  Total Hits: ${r.deflect.hits}
+`;
+      report += `  Accuracy: ${r.deflect.accuracy.toFixed(1)}%
+`;
+      report += "\n";
+    }
+    if (r.react.total > 0) {
+      hasData = true;
+      report += `STRIKE & REACT
+`;
+      report += `  Targets Hit: ${r.react.total}
+`;
+      report += `  Avg Reaction Time: ${r.react.average.toFixed(3)}s
+`;
+      report += `  Fastest: ${r.react.fastest.toFixed(3)}s
+`;
+      report += `  Slowest: ${r.react.slowest.toFixed(3)}s
+`;
+      report += "\n";
+    }
+    if (!hasData) {
       report = "No data yet - complete some drills first!";
     }
     console.log(report);
-    this.updateStatus(report.replace(/\n/g, " | "));
+    this.updateReport(report);
   }
 };
 __publicField(GameSelector, "TypeName", "game-selector");
 __publicField(GameSelector, "Properties", {
   // Environment parents
-  footballField: Property9.object(),
-  tennisCourt: Property9.object(),
-  gymFloor: Property9.object(),
-  defaultEnvironment: Property9.enum(["football", "tennis", "gym"], "football"),
+  footballField: Property6.object(),
+  tennisCourt: Property6.object(),
+  gymFloor: Property6.object(),
+  defaultEnvironment: Property6.enum(["football", "tennis", "gym"], "football"),
   // Drill managers
-  targetManager: Property9.object(),
-  beamWalkManager: Property9.object(),
-  ballThrower: Property9.object(),
-  dataManager: Property9.object(),
+  targetManager: Property6.object(),
+  beamWalkManager: Property6.object(),
+  deflectManager: Property6.object(),
+  // Bouncing ball game (catch/deflect)
+  reactManager: Property6.object(),
+  // Reaction game (strike/click)
+  dataManager: Property6.object(),
   // UI elements
-  uiStatusText: Property9.object()
+  uiStatusText: Property6.object(),
+  uiCueText: Property6.object(),
+  uiStatsText: Property6.object(),
+  uiReportText: Property6.object()
 });
 
 // js/head-bob.js
-import { Component as Component38, Object as Object2, Property as Property10 } from "@wonderlandengine/api";
-var HeadBob = class extends Component38 {
+import { Component as Component35, Object as Object2, Property as Property7 } from "@wonderlandengine/api";
+var HeadBob = class extends Component35 {
   start() {
     this.initialLocalPosition = vec3_exports.create();
     this.object.getTranslationLocal(this.initialLocalPosition);
@@ -8834,125 +8640,51 @@ var HeadBob = class extends Component38 {
 __publicField(HeadBob, "TypeName", "head-bob");
 __publicField(HeadBob, "Properties", {
   /** The Player object that has the wasd-controls component */
-  playerObject: Property10.object(),
+  playerObject: Property7.object(),
   /** How fast the bobbing effect is (e.g., 10.0) */
-  bobFrequency: Property10.float(10),
+  bobFrequency: Property7.float(10),
   /** How much the camera bobs up and down (e.g., 0.03) */
-  bobAmount: Property10.float(0.03),
+  bobAmount: Property7.float(0.03),
   /** A small value to ignore tiny movements and stop bobbing */
-  epsilon: Property10.float(1e-3)
+  epsilon: Property7.float(1e-3)
 });
-
-// js/replay-button-catch.js
-import { Component as Component39, InputComponent as InputComponent2, MeshComponent as MeshComponent3, Property as Property11 } from "@wonderlandengine/api";
-var ReplayButtonCatch = class extends Component39 {
-  static onRegister(engine) {
-    engine.registerComponent(AudioSource);
-    engine.registerComponent(CursorTarget);
-  }
-  init() {
-    this.returnPos = new Float32Array(3);
-  }
-  start() {
-    this.mesh = this.object.getComponent(MeshComponent3);
-    this.defaultMaterial = this.mesh ? this.mesh.material : null;
-    this.object.getPositionLocal(this.returnPos);
-    this.target = this.object.getComponent(CursorTarget) || this.object.addComponent(CursorTarget);
-    this.soundClick = this.object.addComponent(AudioSource, { src: "sfx/click.wav", spatial: true });
-    this.soundUnClick = this.object.addComponent(AudioSource, { src: "sfx/unclick.wav", spatial: true });
-  }
-  onActivate() {
-    this.target.onHover.add(this.onHover);
-    this.target.onUnhover.add(this.onUnhover);
-    this.target.onDown.add(this.onDown);
-    this.target.onUp.add(this.onUp);
-  }
-  onDeactivate() {
-    this.target.onHover.remove(this.onHover);
-    this.target.onUnhover.remove(this.onUnhover);
-    this.target.onDown.remove(this.onDown);
-    this.target.onUp.remove(this.onUp);
-  }
-  onHover = (_, cursor) => {
-    if (this.mesh && this.hoverMaterial) {
-      this.mesh.material = this.hoverMaterial;
-    }
-    if (cursor.type === "finger-cursor") {
-      this.onDown(_, cursor);
-    }
-    triggerHaptic(cursor.object, HapticPatterns.HOVER);
-  };
-  onDown = (_, cursor) => {
-    this.soundClick.play();
-    this.object.setPositionLocal([0, -0.1, 0]);
-    triggerHaptic(cursor.object, HapticPatterns.BUTTON_DOWN);
-    if (this.gameController) {
-      const ballLogic = this.gameController.getComponent(BouncingBall);
-      if (ballLogic) {
-        ballLogic.resetGame();
-      } else {
-        console.warn("ReplayButton: No BouncingBall component found on gameController object");
-      }
-    }
-  };
-  onUp = (_, cursor) => {
-    this.soundUnClick.play();
-    this.object.setPositionLocal(this.returnPos);
-    triggerHaptic(cursor.object, HapticPatterns.BUTTON_UP);
-  };
-  onUnhover = (_, cursor) => {
-    if (this.mesh && this.defaultMaterial) {
-      this.mesh.material = this.defaultMaterial;
-    }
-    if (cursor.type === "finger-cursor") {
-      this.onUp(_, cursor);
-    }
-    triggerHaptic(cursor.object, HapticPatterns.HOVER);
-  };
-};
-__publicField(ReplayButtonCatch, "TypeName", "replay-button-catch");
-__publicField(ReplayButtonCatch, "Properties", {
-  // Object that has the BouncingBall component
-  gameController: Property11.object(),
-  // Material to apply when hover 
-  hoverMaterial: Property11.material()
-});
-
-// js/replay-button-react.js
-import { Component as Component41, InputComponent as InputComponent4, MeshComponent as MeshComponent4, Property as Property13 } from "@wonderlandengine/api";
 
 // js/sphere-spawner.js
-import { Component as Component40, Property as Property12, InputComponent as InputComponent3 } from "@wonderlandengine/api";
-var ReactionGame = class extends Component40 {
+import { Component as Component36, Property as Property8, InputComponent as InputComponent2 } from "@wonderlandengine/api";
+var ReactionGame = class extends Component36 {
   init() {
-    this.hiddenPosition = [0, -50, 0];
     this.isGameActive = false;
   }
   start() {
-    this.textComponent = this.statusText.getComponent("text");
-    this.resultTextComponent = this.resultText.getComponent("text");
     this.score = 0;
     this.targetsSpawned = 0;
     this.reactionTimes = [];
     this.isGameActive = false;
     this.currentTimer = 0;
     this.currentTargetActive = false;
+    if (!this.gameSelector) {
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (manager) {
+        this.gameSelector = manager.getComponent("game-selector");
+      }
+    }
     this.cursorTargetComp = this.targetTemplate.getComponent(CursorTarget);
     if (!this.cursorTargetComp) {
       this.cursorTargetComp = this.targetTemplate.addComponent(CursorTarget);
     }
-    if (this.endPanel) {
-      this.endPanel.active = true;
-      if (this.panelVisibleLocation) {
-        const pos = this.panelVisibleLocation.getTranslationWorld([]);
-        this.endPanel.setTranslationWorld(pos);
-      }
-    }
-    if (this.resultTextComponent) {
-      this.resultTextComponent.text = "Ready?";
-    }
     if (this.targetTemplate) {
       this.targetTemplate.active = false;
+    }
+  }
+  updateUI() {
+    const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+    if (gs) {
+      gs.updateCue?.(`Target ${this.targetsSpawned} / ${this.maxTargets}`);
+      if (this.reactionTimes.length > 0) {
+        const total = this.reactionTimes.reduce((a, b) => a + b, 0);
+        const avg = total / this.reactionTimes.length;
+        gs.updateStats?.(`Avg Time: ${avg.toFixed(3)}s | Completed: ${this.reactionTimes.length}`);
+      }
     }
   }
   onActivate() {
@@ -8990,14 +8722,14 @@ var ReactionGame = class extends Component40 {
    * Dedicated function to start the game
    */
   startGame() {
-    console.log("Starting game...");
-    this.hideGameOverPanel();
+    console.log("[ReactionGame] Starting game...");
     this.score = 0;
     this.targetsSpawned = 0;
     this.reactionTimes = [];
     this.isGameActive = true;
     this.currentTimer = 0;
     this.currentTargetActive = false;
+    this.updateUI();
     this.spawnNextTarget();
   }
   spawnNextTarget() {
@@ -9006,7 +8738,7 @@ var ReactionGame = class extends Component40 {
       return;
     }
     this.targetsSpawned++;
-    this.updateText(`Target: ${this.targetsSpawned}/${this.maxTargets}`);
+    this.updateUI();
     const rangeX = this.spawnArea.scalingWorld[0];
     const rangeY = this.spawnArea.scalingWorld[1];
     const randX = (Math.random() - 0.5) * 2 * rangeX;
@@ -9024,6 +8756,7 @@ var ReactionGame = class extends Component40 {
     this.reactionTimes.push(reactionTime);
     this.targetTemplate.active = false;
     this.currentTargetActive = false;
+    this.updateUI();
     this.spawnNextTarget();
   }
   handleTimeout() {
@@ -9033,184 +8766,95 @@ var ReactionGame = class extends Component40 {
     this.spawnNextTarget();
   }
   endGame() {
+    console.log("[ReactionGame] Game complete!");
     this.isGameActive = false;
     this.currentTargetActive = false;
     this.targetTemplate.active = false;
     const total = this.reactionTimes.reduce((a, b) => a + b, 0);
     const avg = total / (this.reactionTimes.length || 1);
-    if (this.resultTextComponent) {
-      this.resultTextComponent.text = `Avg. Time: ${avg.toFixed(3)}s`;
+    const fastest = this.reactionTimes.length ? Math.min(...this.reactionTimes) : 0;
+    const slowest = this.reactionTimes.length ? Math.max(...this.reactionTimes) : 0;
+    const manager = this.engine.scene.findByName("Manager")[0];
+    if (manager) {
+      const dm = manager.getComponent("data-manager");
+      if (dm && this.reactionTimes.length > 0) {
+        dm.addReactSession(this.reactionTimes);
+      }
     }
-    if (this.endPanel && this.panelVisibleLocation) {
-      const pos = this.panelVisibleLocation.getTranslationWorld([]);
-      this.endPanel.setTranslationWorld(pos);
+    const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+    if (gs) {
+      gs.updateStatus?.("Strike & React: COMPLETE");
+      gs.updateCue?.("Game Over!");
+      gs.updateStats?.(`Avg: ${avg.toFixed(3)}s | Fast: ${fastest.toFixed(3)}s | Slow: ${slowest.toFixed(3)}s | Total: ${this.reactionTimes.length}`);
     }
   }
-  hideGameOverPanel() {
-    if (this.endPanel) {
-      this.endPanel.setPositionWorld(this.hiddenPosition);
-    }
-  }
-  // Called by the button
+  // Called by the button (for backward compatibility)
   resetGame() {
     this.startGame();
-  }
-  updateText(msg) {
-    if (this.textComponent)
-      this.textComponent.text = msg;
   }
 };
 __publicField(ReactionGame, "TypeName", "reaction-game");
 __publicField(ReactionGame, "Properties", {
-  spawnArea: Property12.object(),
-  targetTemplate: Property12.object(),
-  statusText: Property12.object(),
-  maxTargets: Property12.int(20),
-  timeoutDuration: Property12.float(10),
-  // UI references
-  endPanel: Property12.object(),
-  resultText: Property12.object(),
-  // Where should the panel appear when the game ends/starts?
-  panelVisibleLocation: Property12.object()
-});
-
-// js/replay-button-react.js
-var ReplayButtonReact = class extends Component41 {
-  static onRegister(engine) {
-    engine.registerComponent(AudioSource);
-    engine.registerComponent(CursorTarget);
-  }
-  init() {
-    this.returnPos = new Float32Array(3);
-  }
-  start() {
-    this.mesh = this.object.getComponent(MeshComponent4);
-    this.defaultMaterial = this.mesh ? this.mesh.material : null;
-    this.object.getPositionLocal(this.returnPos);
-    this.target = this.object.getComponent(CursorTarget) || this.object.addComponent(CursorTarget);
-    this.soundClick = this.object.addComponent(AudioSource, { src: "sfx/click.wav", spatial: true });
-    this.soundUnClick = this.object.addComponent(AudioSource, { src: "sfx/unclick.wav", spatial: true });
-  }
-  onActivate() {
-    this.target.onHover.add(this.onHover);
-    this.target.onUnhover.add(this.onUnhover);
-    this.target.onDown.add(this.onDown);
-    this.target.onUp.add(this.onUp);
-  }
-  onDeactivate() {
-    this.target.onHover.remove(this.onHover);
-    this.target.onUnhover.remove(this.onUnhover);
-    this.target.onDown.remove(this.onDown);
-    this.target.onUp.remove(this.onUp);
-  }
-  onHover = (_, cursor) => {
-    if (this.mesh && this.hoverMaterial) {
-      this.mesh.material = this.hoverMaterial;
-    }
-    if (cursor.type === "finger-cursor") {
-      this.onDown(_, cursor);
-    }
-    triggerHaptic(cursor.object, HapticPatterns.HOVER);
-  };
-  onDown = (_, cursor) => {
-    this.soundClick.play();
-    this.object.setPositionLocal([0, -0.1, 0]);
-    triggerHaptic(cursor.object, HapticPatterns.BUTTON_DOWN);
-    if (this.gameController) {
-      const game = this.gameController.getComponent(ReactionGame);
-      if (game) {
-        game.resetGame();
-      } else {
-        console.error("ReplayButton: No 'reaction-game' component found on the referenced Game Container object.");
-      }
-    }
-  };
-  onUp = (_, cursor) => {
-    this.soundUnClick.play();
-    this.object.setPositionLocal(this.returnPos);
-    triggerHaptic(cursor.object, HapticPatterns.BUTTON_UP);
-  };
-  onUnhover = (_, cursor) => {
-    if (this.mesh && this.defaultMaterial) {
-      this.mesh.material = this.defaultMaterial;
-    }
-    if (cursor.type === "finger-cursor") {
-      this.onUp(_, cursor);
-    }
-    triggerHaptic(cursor.object, HapticPatterns.HOVER);
-  };
-};
-__publicField(ReplayButtonReact, "TypeName", "replay-button-react");
-__publicField(ReplayButtonReact, "Properties", {
-  // Object that has the ReactionGame component
-  gameController: Property13.object(),
-  // Material to apply when hover 
-  hoverMaterial: Property13.material()
+  spawnArea: Property8.object(),
+  targetTemplate: Property8.object(),
+  maxTargets: Property8.int(20),
+  timeoutDuration: Property8.float(10),
+  // Game selector for unified UI
+  gameSelector: Property8.object()
 });
 
 // js/target-collision.js
-import { Component as Component42, Property as Property14 } from "@wonderlandengine/api";
-var TargetCollision = class extends Component42 {
+import { Component as Component37, Property as Property9 } from "@wonderlandengine/api";
+var TargetCollision = class extends Component37 {
   start() {
     this.hit = false;
-    if (!this.object.startTime)
-      this.object.startTime = performance.now();
-    console.log("[TargetCollision] Initialized on:", this.object.name);
-    const collision = this.object.getComponent("collision");
-    if (!collision) {
-      console.error("[TargetCollision] \u274C Target has NO collision component!");
+    console.log("[TargetCollision] Starting on object:", this.object.name);
+    let cursorTarget = this.object.getComponent(CursorTarget);
+    if (!cursorTarget) {
+      console.log("[TargetCollision] No cursor-target found, adding one");
+      cursorTarget = this.object.addComponent(CursorTarget);
     } else {
-      console.log("[TargetCollision] \u2705 Target has collision component");
+      console.log("[TargetCollision] cursor-target already exists");
     }
+    cursorTarget.onDown.add(this.onDown.bind(this));
+    console.log("[TargetCollision] Registered onDown callback");
   }
-  // Called by ControllerHit OR direct collision events if enabled
-  onHit(controllerObject) {
-    console.log("[TargetCollision] onHit called! hit:", this.hit);
-    if (this.hit) {
-      console.log("[TargetCollision] Already hit, ignoring");
+  onDown(_, cursor) {
+    console.log("[TargetCollision] onDown called! Hit status:", this.hit);
+    if (this.hit)
       return;
-    }
+    this.onHit();
+  }
+  onHit() {
+    console.log("[TargetCollision] onHit called! Manager:", this.manager);
+    if (this.hit)
+      return;
     this.hit = true;
     const reactionTime = (performance.now() - this.object.startTime) / 1e3;
-    console.log("[TargetCollision] Registering hit with manager, RT:", reactionTime);
-    if (!this.manager) {
-      console.error("[TargetCollision] \u274C No manager set!");
-      return;
-    }
-    this.manager.onTargetHit(this.object, reactionTime);
-  }
-  // Optional direct collision handling (if controller objects collide with sphere)
-  onCollisionEnter(other) {
-    console.log("[TargetCollision] onCollisionEnter with:", other.object?.name);
-    if (this.hit) {
-      console.log("[TargetCollision] Already hit");
-      return;
-    }
-    const name = other.object?.name || "";
-    console.log("[TargetCollision] Checking if controller:", name);
-    if (name.includes("Controller") || name.includes("controller")) {
-      console.log("[TargetCollision] \u{1F3AF} Controller collision detected!");
-      this.onHit(other.object);
+    console.log("[TargetCollision] Reaction time:", reactionTime, "Manager:", this.manager);
+    if (this.manager) {
+      this.manager.onTargetHit(this.object, reactionTime);
     } else {
-      console.log("[TargetCollision] Not a controller");
+      console.error("[TargetCollision] No manager set!");
     }
   }
 };
 __publicField(TargetCollision, "TypeName", "target-collision");
 __publicField(TargetCollision, "Properties", {
-  manager: Property14.object()
+  manager: Property9.object()
 });
 
 // js/target-manager.js
-import { Component as Component43, Property as Property15 } from "@wonderlandengine/api";
-console.log("target-manager.js loaded");
-var TargetManager = class extends Component43 {
+import { Component as Component38, Property as Property10 } from "@wonderlandengine/api";
+var TargetManager = class extends Component38 {
   start() {
     this.hitCount = 0;
     this.missCount = 0;
+    this.cycleCount = 0;
     this.reactionTimes = [];
     this.activeTargets = [];
     this.spherePrefab.active = false;
+    this.roundActive = false;
     this.colors = [
       { name: "yellow", materialId: this.yellowMaterialId },
       { name: "pink", materialId: this.pinkMaterialId },
@@ -9225,21 +8869,18 @@ var TargetManager = class extends Component43 {
       "Green:",
       this.greenMaterialId
     );
-    console.log("[TargetManager] simultaneousTargets:", this.simultaneousTargets);
-    if (this.spawnZone) {
-      this._calculateSpawnZone();
-    } else {
-      console.warn("[TargetManager] No spawn zone set - using default curved area");
+    if (!this.gameSelector) {
+      const manager = this.engine.scene.findByName("Manager")[0];
+      if (manager) {
+        this.gameSelector = manager.getComponent("game-selector");
+      }
     }
+    this.calculateSpawnZone();
     this.updateStats();
-    console.log("[TargetManager] Initialized - waiting for startGame()");
+    console.log("[TargetManager] Initialized, waiting for startGame()");
   }
-  _calculateSpawnZone() {
+  calculateSpawnZone() {
     const mesh = this.spawnZone.getComponent("mesh");
-    if (!mesh) {
-      console.error("[TargetManager] Spawn zone has no mesh component!");
-      return;
-    }
     const pos = this.spawnZone.getPositionWorld();
     const scale6 = this.spawnZone.getScalingWorld();
     this.spawnBounds = {
@@ -9250,198 +8891,168 @@ var TargetManager = class extends Component43 {
       minZ: pos[2] - scale6[2] / 2,
       maxZ: pos[2] + scale6[2] / 2
     };
-    console.log("[TargetManager] Spawn zone calculated:", this.spawnBounds);
   }
   updateStats() {
-    if (!this.statsText)
-      return;
-    const textComp = this.statsText.getComponent("text");
-    if (!textComp)
-      return;
     const avgReactionTime = this.reactionTimes.length > 0 ? (this.reactionTimes.reduce((a, b) => a + b, 0) / this.reactionTimes.length).toFixed(3) : "0.000";
     const accuracy = this.hitCount + this.missCount > 0 ? (this.hitCount / (this.hitCount + this.missCount) * 100).toFixed(1) : "0.0";
-    const stats = `STATS
-Hits: ${this.hitCount} / ${this.maxTargets}
-Misses: ${this.missCount}
-Accuracy: ${accuracy}%
-Avg RT: ${avgReactionTime}s
-Active: ${this.activeTargets.length}`;
-    textComp.text = stats;
+    const stats = `Round: ${this.cycleCount}/${this.maxTargets} | Hits: ${this.hitCount} | Misses: ${this.missCount} | Accuracy: ${accuracy}% | Avg RT: ${avgReactionTime}s`;
+    const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+    if (gs) {
+      gs.updateStats?.(stats);
+    }
   }
-  spawnTarget() {
-    if (this.hitCount >= this.maxTargets) {
+  updateCue(text) {
+    const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+    if (gs) {
+      gs.updateCue?.(text);
+    }
+  }
+  startGame() {
+    this.clearRound();
+    this.hitCount = 0;
+    this.missCount = 0;
+    this.cycleCount = 0;
+    this.reactionTimes = [];
+    this.updateStats();
+    this.startRound();
+  }
+  startRound() {
+    if (this.cycleCount >= this.maxTargets) {
       this.endGame();
       return;
     }
+    this.cycleCount++;
+    this.updateStats();
+    this.roundActive = true;
+    this.activeTargets = [];
+    const targetColorObj = this.colors[Math.floor(Math.random() * this.colors.length)];
+    this.currentCue = targetColorObj.name;
+    this.updateCue(`Hit ${this.currentCue.toUpperCase()}`);
+    let batchColors = [];
+    batchColors.push(this.currentCue);
+    const distractors = this.colors.filter((c) => c.name !== this.currentCue);
+    for (let i = 1; i < this.simultaneousTargets; i++) {
+      const distColor = distractors[Math.floor(Math.random() * distractors.length)].name;
+      batchColors.push(distColor);
+    }
+    batchColors.sort(() => Math.random() - 0.5);
+    for (let i = 0; i < this.simultaneousTargets; i++) {
+      this.spawnSphere(batchColors[i]);
+    }
+    console.log(`[TargetManager] Round ${this.cycleCount} Started. Target: ${this.currentCue}`);
+  }
+  spawnSphere(colorName) {
     const sphere = this.spherePrefab.clone(this.object);
     sphere.active = true;
     this.activeTargets.push(sphere);
-    let x, y, z;
-    if (this.spawnBounds) {
-      x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
-      y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
-      z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
-      console.log("[TargetManager] Spawning in zone:", x, y, z);
-    } else {
-      x = (Math.random() - 0.5) * 7.5;
-      y = 1.5 + Math.random() * 2.5;
-      z = 2 + Math.pow(x, 2) / 2;
-      console.log("[TargetManager] Spawning (no zone):", x, y, z);
-    }
+    const x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
+    const y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
+    const z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
     sphere.setPositionWorld([x, y, z]);
     sphere.startTime = performance.now();
-    if (this.useColorMode) {
-      const colorObj = this.colors[Math.floor(Math.random() * this.colors.length)];
-      sphere.colorTag = colorObj.name;
-      this.currentCue = this.colors[Math.floor(Math.random() * this.colors.length)].name;
-      const textComp = this.uiCueText?.getComponent("text");
-      if (textComp)
-        textComp.text = `Hit ${this.currentCue.toUpperCase()}`;
-      const meshComp = sphere.getComponent("mesh");
-      if (meshComp && meshComp.material) {
-        try {
-          const colorMap = {
-            "yellow": [1, 1, 0, 1],
-            // Yellow
-            "pink": [1, 0.41, 0.71, 1],
-            // Hot Pink
-            "green": [0, 1, 0, 1]
-            // Green
-          };
-          const colorRGBA = colorMap[colorObj.name];
-          if (colorRGBA) {
-            meshComp.material.diffuseColor = colorRGBA;
-            console.log(`[TargetManager] Set color to ${colorObj.name}:`, colorRGBA);
-          }
-        } catch (e) {
-          console.error(`[TargetManager] Error setting color:`, e);
-        }
+    sphere.colorTag = colorName;
+    const meshComp = sphere.getComponent("mesh");
+    if (meshComp && meshComp.material) {
+      const colorMap = {
+        "yellow": [1, 1, 0, 1],
+        "pink": [1, 0.41, 0.71, 1],
+        "green": [0, 1, 0, 1]
+      };
+      const colorRGBA = colorMap[colorName];
+      if (colorRGBA) {
+        meshComp.material = meshComp.material.clone();
+        meshComp.material.diffuseColor = colorRGBA;
       }
-    }
-    const ballCollision = sphere.getComponent("ball-collision");
-    if (ballCollision) {
-      console.log("[TargetManager] Removing ball-collision from target sphere (not needed for target drill)");
-      ballCollision.destroy();
-    }
-    let collision = sphere.getComponent("collision");
-    if (!collision) {
-      console.warn("[TargetManager] \u26A0\uFE0F Target has no collision component! Adding one...");
-      collision = sphere.addComponent("collision", {
-        collider: 2,
-        // Sphere collider
-        extents: [0.15, 0.15, 0.15],
-        group: 2
-      });
-    } else {
-      console.log("[TargetManager] \u2705 Target has collision component");
-      console.log("[TargetManager] Collision settings:", {
-        group: collision.group,
-        collider: collision.collider,
-        extents: collision.extents
-      });
     }
     let tc = sphere.getComponent("target-collision");
     if (!tc) {
-      console.log("[TargetManager] Adding target-collision component");
+      console.log("[TargetManager] No target-collision found, adding one");
       tc = sphere.addComponent("target-collision");
+    } else {
+      console.log("[TargetManager] target-collision already exists on sphere");
     }
     tc.manager = this;
-    console.log("[TargetManager] Target spawned at:", sphere.getPositionWorld());
-    console.log("[TargetManager] Active targets:", this.activeTargets.length, "/", this.simultaneousTargets);
+    console.log("[TargetManager] Set manager on target-collision, manager is:", this);
     sphere.timeoutId = setTimeout(() => {
       this.onTargetTimeout(sphere);
     }, this.targetLifetime * 1e3);
   }
   onTargetTimeout(sphere) {
-    const index = this.activeTargets.indexOf(sphere);
-    if (index === -1)
+    if (!this.roundActive)
       return;
-    console.log("[TargetManager] Target timeout - respawning");
-    this.activeTargets.splice(index, 1);
+    console.log("[TargetManager] Time run out - Resetting cycle");
+    this.roundActive = false;
     this.missCount++;
-    sphere.destroy();
     this.updateStats();
-    this.spawnTarget();
+    this.clearRound();
+    this.startRound();
   }
   onTargetHit(sphere, reactionTime) {
-    if (sphere.timeoutId) {
-      clearTimeout(sphere.timeoutId);
-      sphere.timeoutId = null;
-    }
-    const index = this.activeTargets.indexOf(sphere);
-    if (index !== -1) {
-      this.activeTargets.splice(index, 1);
-    }
-    this.hitCount++;
-    this.reactionTimes.push(reactionTime);
+    if (!this.roundActive)
+      return;
+    this.roundActive = false;
+    const isCorrectColor = sphere.colorTag === this.currentCue;
     const dm = this.dataManager?.getComponent("data-manager");
     dm?.addReactionTime(reactionTime);
-    if (this.useColorMode) {
-      const correct = sphere.colorTag === this.currentCue;
-      dm?.addAccuracySample(!!correct);
+    dm?.addAccuracySample(isCorrectColor);
+    if (isCorrectColor) {
+      console.log("[TargetManager] Correct Hit!");
+      this.hitCount++;
+      this.reactionTimes.push(reactionTime);
+    } else {
+      console.log("[TargetManager] Wrong Color Hit!");
+      this.missCount++;
     }
-    sphere.destroy();
     this.updateStats();
-    setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
+    setTimeout(() => {
+      this.clearRound();
+    }, 0);
+    setTimeout(() => {
+      this.startRound();
+    }, this.spawnInterval * 1e3);
   }
-  endGame() {
-    console.log("Game over! Reaction times: ", this.reactionTimes);
+  clearRound() {
     for (const target of this.activeTargets) {
-      if (target.timeoutId) {
+      if (target.timeoutId)
         clearTimeout(target.timeoutId);
-      }
       target.destroy();
     }
     this.activeTargets = [];
+  }
+  endGame() {
+    console.log("Game over! Finished cycles: ", this.cycleCount);
+    this.clearRound();
     const dm = this.dataManager?.getComponent("data-manager");
     const report = dm?.getReport();
     if (report)
       console.log("[TargetManager] Report summary:", report);
   }
-  startGame() {
-    for (const target of this.activeTargets) {
-      if (target.timeoutId) {
-        clearTimeout(target.timeoutId);
-      }
-      target.destroy();
-    }
-    this.activeTargets = [];
-    this.hitCount = 0;
-    this.missCount = 0;
-    this.reactionTimes = [];
-    this.updateStats();
-    for (let i = 0; i < this.simultaneousTargets; i++) {
-      this.spawnTarget();
-    }
-  }
 };
 __publicField(TargetManager, "TypeName", "target-manager");
 /* Properties that are configurable in the editor */
 __publicField(TargetManager, "Properties", {
-  spherePrefab: Property15.object(),
-  spawnZone: Property15.object(),
-  // Optional: Cube mesh object to define spawn boundaries
-  maxTargets: Property15.int(20),
-  spawnInterval: Property15.float(1),
-  // seconds
-  useColorMode: Property15.bool(false),
-  uiCueText: Property15.object(),
-  dataManager: Property15.object(),
-  targetLifetime: Property15.float(1),
+  spherePrefab: Property10.object(),
+  spawnZone: Property10.object(),
+  // cube mesh object to define spawn boundaries
+  maxTargets: Property10.int(5),
+  spawnInterval: Property10.float(1),
+  // seconds delay before respawning
+  dataManager: Property10.object(),
+  targetLifetime: Property10.float(1.5),
   // seconds - auto-respawn if not hit
-  simultaneousTargets: Property15.int(1),
+  simultaneousTargets: Property10.int(5),
   // number of targets to spawn at once
-  statsText: Property15.object(),
-  // Text component to display stats
-  // Material IDs - set these in the editor to match your scene materials
-  yellowMaterialId: Property15.int(25),
-  pinkMaterialId: Property15.int(22),
-  greenMaterialId: Property15.int(26)
+  // material IDs 
+  yellowMaterialId: Property10.int(25),
+  pinkMaterialId: Property10.int(22),
+  greenMaterialId: Property10.int(26),
+  // Game selector for unified UI
+  gameSelector: Property10.object()
 });
 
 // js/ui-plane-button.js
-import { Component as Component44, Property as Property16 } from "@wonderlandengine/api";
-var UiPlaneButton = class extends Component44 {
+import { Component as Component39, Property as Property11 } from "@wonderlandengine/api";
+var UiPlaneButton = class extends Component39 {
   start() {
     if (this.autoStartBeamDrill) {
       console.log("[UiPlaneButton] Auto-starting beam drill in 3 seconds...");
@@ -9537,20 +9148,27 @@ var UiPlaneButton = class extends Component44 {
         }
         break;
       case 5:
-        if (gs.startBallDrill) {
-          gs.startBallDrill();
+        if (gs.startDeflectDrill) {
+          gs.startDeflectDrill();
         } else {
-          console.warn("[UiPlaneButton] startBallDrill method not found");
+          console.warn("[UiPlaneButton] startDeflectDrill method not found");
         }
         break;
       case 6:
+        if (gs.startReactDrill) {
+          gs.startReactDrill();
+        } else {
+          console.warn("[UiPlaneButton] startReactDrill method not found");
+        }
+        break;
+      case 7:
         if (gs.stopDrills) {
           gs.stopDrills();
         } else {
           console.warn("[UiPlaneButton] stopDrills method not found");
         }
         break;
-      case 7:
+      case 8:
         if (gs.showReport) {
           gs.showReport();
         } else {
@@ -9564,26 +9182,27 @@ var UiPlaneButton = class extends Component44 {
 };
 __publicField(UiPlaneButton, "TypeName", "ui-plane-button");
 __publicField(UiPlaneButton, "Properties", {
-  action: Property16.enum(
+  action: Property11.enum(
     [
       "Tennis Environment",
       "Football Environment",
       "Gym Environment",
       "Start Target Drill",
       "Start Beam Walk",
-      "Start Ball Catching",
+      "Start Deflect & Catch",
+      "Start Strike & React",
       "Stop All Drills",
       "Show Report"
     ],
     "Tennis Environment"
   ),
-  debugMode: Property16.bool(true),
-  autoStartBeamDrill: Property16.bool(false)
+  debugMode: Property11.bool(true),
+  autoStartBeamDrill: Property11.bool(false)
 });
 
 // js/vr-motion-tracker.js
-import { Component as Component45, Property as Property17 } from "@wonderlandengine/api";
-var VrMotionTracker = class extends Component45 {
+import { Component as Component40, Property as Property12 } from "@wonderlandengine/api";
+var VrMotionTracker = class extends Component40 {
   init() {
     this.sessionId = this._generateSessionId();
     this.sessionData = {
@@ -9931,19 +9550,19 @@ var VrMotionTracker = class extends Component45 {
 __publicField(VrMotionTracker, "TypeName", "vr-motion-tracker");
 __publicField(VrMotionTracker, "Properties", {
   // Objects to track
-  headObject: Property17.object(),
-  leftController: Property17.object(),
-  rightController: Property17.object(),
+  headObject: Property12.object(),
+  leftController: Property12.object(),
+  rightController: Property12.object(),
   // Recording settings
-  recordingInterval: Property17.float(0.1),
+  recordingInterval: Property12.float(0.1),
   // Sample every 100ms (10Hz)
-  trackHead: Property17.bool(true),
-  trackLeftController: Property17.bool(true),
-  trackRightController: Property17.bool(true),
+  trackHead: Property12.bool(true),
+  trackLeftController: Property12.bool(true),
+  trackRightController: Property12.bool(true),
   // Auto-start recording when VR starts
-  autoStart: Property17.bool(true),
+  autoStart: Property12.bool(true),
   // Debug logging
-  debugMode: Property17.bool(false)
+  debugMode: Property12.bool(false)
 });
 
 // js/index.js
@@ -9958,18 +9577,13 @@ function js_default(engine) {
   engine.registerComponent(Trail);
   engine.registerComponent(VrModeActiveSwitch);
   engine.registerComponent(WasdControlsComponent);
-  engine.registerComponent(BallCollision);
-  engine.registerComponent(BallThrower);
   engine.registerComponent(BatManager);
   engine.registerComponent(BeamWalkManager);
   engine.registerComponent(BouncingBall);
   engine.registerComponent(CollisionDebug);
-  engine.registerComponent(ControllerHit);
   engine.registerComponent(DataManager);
   engine.registerComponent(GameSelector);
   engine.registerComponent(HeadBob);
-  engine.registerComponent(ReplayButtonCatch);
-  engine.registerComponent(ReplayButtonReact);
   engine.registerComponent(ReactionGame);
   engine.registerComponent(TargetCollision);
   engine.registerComponent(TargetManager);
