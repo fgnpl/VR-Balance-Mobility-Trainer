@@ -8,14 +8,15 @@ export class BouncingBall extends Component {
         maxSpawn: Property.int(2),
         minX: Property.float(-0.5),
         maxX: Property.float(0.5),
-        minY: Property.float(1.5),
-        maxY: Property.float(2.5),
+        minY: Property.float(5),
+        maxY: Property.float(6),
         spawnZ: Property.float(-3.0),
-        minForceX: Property.float(50.0),
-        maxForceX: Property.float(100.0),
-        minForceZ: Property.float(250.0),
-        maxForceZ: Property.float(300.0),
+        minForceX: Property.float(100.0),
+        maxForceX: Property.float(150.0),
+        minForceZ: Property.float(200.0),
+        maxForceZ: Property.float(250.0),
 
+        // Game Objects
         batObject: Property.object(),       // Reference to the Bat
         
         // Game selector for unified UI
@@ -39,8 +40,16 @@ export class BouncingBall extends Component {
     start() {
         this.rigidBody = this.object.getComponent('physx');
 
-        // Initialize game state: disable bat/ball physics/mesh so they aren't active in the menu
+        // Initialize Game State: Disable Bat/Ball physics/mesh so they aren't active in the menu
         this.setGameComponentsActive(false);
+        
+        // ENSURE bat is explicitly disabled at start
+        if (this.batObject) {
+            const batMesh = this.batObject.getComponent('mesh');
+            const batPhysx = this.batObject.getComponent('physx');
+            if(batMesh) batMesh.active = false;
+            if(batPhysx) batPhysx.active = false;
+        }
         
         // Get game selector reference
         if (!this.gameSelector) {
@@ -51,16 +60,16 @@ export class BouncingBall extends Component {
         }
 
         this.object.getComponent('physx').onCollision((type, other) => {
-           if (type === CollisionEventType.Touch) { 
+        if (type === CollisionEventType.Touch) { 
                 this.onCollision(other);
-           }
+        }
         })
     }
     
     updateUI() {
         const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
         if (gs) {
-            gs.updateCue?.(`Ball ${this.nSpawned + 1} / ${this.maxSpawn}`);
+            gs.updateCue?.(`Ball ${this.nSpawned} / ${this.maxSpawn}`);
             gs.updateStats?.(`Hits: ${this.hitCount} / ${this.nSpawned}`);
         }
     }
@@ -70,26 +79,29 @@ export class BouncingBall extends Component {
      * Called by game-selector when the button is clicked.
      */
     startGame() {
-        this.nSpawned = 0;
-        this.hitCount = 0;
-        this.isSpawning = false;
-        this.gameRunning = true;
-
-        // Update UI
-        this.updateUI();
-
-        // Start the loop
-        this.respawn();
+        if (this.gameRunning) return; // Prevent double-start
         
-        // Enable bat and ball visuals/physics
-        this.setGameComponentsActive(true);
-    }
+        setTimeout(() => {
+            this.nSpawned = 0;
+            this.hitCount = 0;
+            this.isSpawning = false;
+            this.gameRunning = true;
 
+            // Update UI
+            this.updateUI();
+
+            // Start the loop
+            this.respawn();
+            
+            // Enable Bat and Ball visuals/physics
+            this.setGameComponentsActive(true);
+        }, 1000);
+    }
     /**
-     * Helper to toggle mesh and physx components on ball and bat
+     * Helper to toggle Mesh and PhysX components on Ball and Bat.
      */
     setGameComponentsActive(isActive) {
-        // Toggle ball components
+        // Toggle Ball Components
         const ballMesh = this.object.getComponent('mesh');
         const ballPhysx = this.object.getComponent('physx');
         const ballTrail = this.object.getComponent('trail');
@@ -98,7 +110,7 @@ export class BouncingBall extends Component {
         if(ballPhysx) ballPhysx.active = isActive;
         if(ballTrail) ballTrail.active = isActive;
 
-        // Toggle bat components
+        // Toggle Bat Components
         if (this.batObject) {
             const batMesh = this.batObject.getComponent('mesh');
             const batPhysx = this.batObject.getComponent('physx');
@@ -107,11 +119,12 @@ export class BouncingBall extends Component {
             if(batPhysx) batPhysx.active = isActive;
         }
     }
-    
+
     onCollision(other) {
         if (other.object.name === 'Baseball Bat') {
-            if (this.canRegisterHit) { // If hit not already registered
-                this.hitCount++; 
+            if (this.canRegisterHit) {
+                console.log("Bat hit");
+                this.hitCount++;
                 this.canRegisterHit = false;
                 this.updateUI();
             }
@@ -122,14 +135,13 @@ export class BouncingBall extends Component {
         if (!this.gameRunning) return;
         if (this.isSpawning) return;
 
-        // If ball is on the ground and is unmoving
         if (this.isStill()) {
             this.canRegisterHit = false;
             this.groundTimer += dt;
             
             if (this.groundTimer >= 0.1) {
-                const trail = this.object.getComponent('trail'); 
-                if(trail) trail.active = false; // Deactivate trail while
+                const trail = this.object.getComponent('trail');
+                if(trail) trail.active = false;
                 
                 this.respawn();
             }
@@ -171,7 +183,6 @@ export class BouncingBall extends Component {
         this.updateUI();
     }
 
-    // Calculate random force in two directions 
     applyRandomForce() {
         const randomForceX = (Math.random() * (this.maxForceX - this.minForceX) + this.minForceX) 
                            * (Math.random() < 0.5 ? -1 : 1);
@@ -183,7 +194,7 @@ export class BouncingBall extends Component {
         console.log("Game over. Hits: " + this.hitCount);
         this.gameRunning = false;
 
-        // Disable bat and ball physics/mesh so they don't interfere with UI
+        // Disable Bat and Ball physics/mesh so they don't interfere with UI
         this.setGameComponentsActive(false);
         
         // Save data to data manager
@@ -199,7 +210,7 @@ export class BouncingBall extends Component {
         const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
         if (gs) {
             const accuracy = this.maxSpawn > 0 ? ((this.hitCount / this.maxSpawn) * 100).toFixed(0) : 0;
-            gs.updateStatus?.('Deflect');
+            gs.updateStatus?.('Deflect & Catch: COMPLETE');
             gs.updateCue?.('Game Over!');
             gs.updateStats?.(`Final: ${this.hitCount} / ${this.maxSpawn} hits (${accuracy}%)`);
         }
@@ -209,7 +220,6 @@ export class BouncingBall extends Component {
         this.startGame();
     }
 
-    // Checking if velocity is absolutely zero (to not trigger function when teleporting)
     isStill() {
         if(!this.rigidBody) return false;
         const v = this.rigidBody.linearVelocity;

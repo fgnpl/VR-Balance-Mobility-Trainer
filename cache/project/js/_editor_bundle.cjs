@@ -9661,7 +9661,17 @@
       this.running = false;
       this.totalBalanceDuration = 0;
       this.bestDuration = 0;
-      this.currentRunStart = 0;
+      this._currentRunStart = 0;
+      if (!this.headObject && this.playerObject) {
+        console.log("[BeamWalk] Searching for head/camera object...");
+        this._findHeadObject(this.playerObject);
+      }
+      if (!this.leftController) {
+        this.leftController = this.engine.scene.findByName("HandLeft")[0] || this.engine.scene.findByName("ControllerLeft")[0];
+      }
+      if (!this.rightController) {
+        this.rightController = this.engine.scene.findByName("HandRight")[0] || this.engine.scene.findByName("ControllerRight")[0];
+      }
       this.movementData = [];
       this.currentRunNumber = 0;
       this.totalFalls = 0;
@@ -9670,26 +9680,79 @@
       this.avgDeviation = 0;
       this.deviationSamples = [];
       this.lastWarningTime = 0;
-      textComp = this.statsText.getComponent("text");
+      if (!this.gameSelector) {
+        const manager = this.engine.scene.findByName("Manager")[0];
+        if (manager) {
+          this.gameSelector = manager.getComponent("game-selector");
+          console.log("[BeamWalk] Auto-found game-selector");
+        }
+      }
+      console.log("[BeamWalk] start() - statsText:", this.statsText);
+      console.log("[BeamWalk] start() - gameSelector:", this.gameSelector);
+      if (this.statsText) {
+        console.log("[BeamWalk] statsText object found:", this.statsText.name);
+        const textComp = this.statsText.getComponent("text");
+        console.log("[BeamWalk] text component:", textComp);
+      }
+      if (this.headObject) {
+        console.log("[BeamWalk] Head object set:", this.headObject.name);
+      } else {
+        console.warn("[BeamWalk] No head object - will use playerObject for fall detection (may not work in VR!)");
+      }
+    }
+    _findHeadObject(parent) {
+      const children = parent.children;
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (child.getComponent("view")) {
+          this.headObject = child;
+          console.log("[BeamWalk] Auto-found head object:", child.name);
+          return;
+        }
+        this._findHeadObject(child);
+      }
     }
     updateStats() {
-      const textComp2 = this.statsText.getComponent("text");
-      const currentRunTime = this.running ? ((performance.now() - this.currentRunStart) / 1e3).toFixed(2) : "0.00";
+      const currentRunTime = this.running ? ((performance.now() - this._currentRunStart) / 1e3).toFixed(2) : "0.00";
       const avgDev = this.deviationSamples.length > 0 ? (this.deviationSamples.reduce((a, b) => a + b, 0) / this.deviationSamples.length).toFixed(3) : "0.000";
       const totalTime = (this.totalBalanceDuration / 1e3).toFixed(2);
       const bestTime = (this.bestDuration / 1e3).toFixed(2);
-      const stats = `BEAM WALK STATS
-            Run #: ${this.currentRunNumber}
-            Current: ${currentRunTime}s
-            Total Time: ${totalTime}s
-            Best Run: ${bestTime}s
-            Success: ${this.successfulRuns}
-            Falls: ${this.totalFalls}
-            Max Dist: ${this.maxDistanceReached.toFixed(2)}m
-            Avg Dev: ${avgDev}m`;
-      textComp2.text = stats;
+      const conciseStats = `Run #${this.currentRunNumber} | Current: ${currentRunTime}s | Best: ${bestTime}s | Success: ${this.successfulRuns} | Falls: ${this.totalFalls}`;
+      const detailedStats = `BEAM WALK STATS
+Run #: ${this.currentRunNumber}
+Current: ${currentRunTime}s
+Total Time: ${totalTime}s
+Best Run: ${bestTime}s
+Success: ${this.successfulRuns}
+Falls: ${this.totalFalls}
+Max Dist: ${this.maxDistanceReached.toFixed(2)}m
+Avg Dev: ${avgDev}m`;
+      const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
+      if (gs && gs.updateStats) {
+        gs.updateStats(conciseStats);
+      }
+      if (this.statsText) {
+        const textComp = this.statsText.getComponent("text");
+        if (textComp) {
+          textComp.text = detailedStats;
+        }
+      }
     }
     startDrill() {
+      console.log("[BeamWalk] startDrill() called");
+      console.log("[BeamWalk] playerObject:", this.playerObject?.name);
+      console.log("[BeamWalk] headObject:", this.headObject?.name);
+      console.log("[BeamWalk] startPosition:", this.startPosition?.name);
+      console.log("[BeamWalk] endPosition:", this.endPosition?.name);
+      console.log("[BeamWalk] statsText:", this.statsText?.name);
+      if (!this.playerObject) {
+        console.error("[BeamWalk] ERROR: playerObject not set! Cannot start drill.");
+        return;
+      }
+      if (!this.startPosition || !this.endPosition) {
+        console.error("[BeamWalk] ERROR: Start or End position not set!");
+        return;
+      }
       this.running = true;
       this.totalBalanceDuration = 0;
       this.currentRunNumber = 1;
@@ -9698,18 +9761,26 @@
       this.maxDistanceReached = 0;
       this.deviationSamples = [];
       this.movementData = [];
-      this.currentRunStart = performance.now();
-      this.resetToStart();
+      this._currentRunStart = performance.now();
+      this._resetToStart();
       this.updateStats();
+      console.log("[BeamWalk] Drill started successfully! running=", this.running);
     }
     endDrill() {
       if (!this.running)
         return;
       this.running = false;
-      const currentDur = performance.now() - this.currentRunStart;
+      const currentDur = performance.now() - this._currentRunStart;
       if (currentDur > 100) {
-        this.commitRun();
+        this._commitRun();
       }
+      console.log("[BeamWalk] Complete Movement Data:");
+      console.log(`Total Runs: ${this.currentRunNumber}`);
+      console.log(`Successful Runs: ${this.successfulRuns}`);
+      console.log(`Total Falls: ${this.totalFalls}`);
+      console.log(`Max Distance: ${this.maxDistanceReached.toFixed(2)}m`);
+      console.log(`Movement Samples: ${this.movementData.length}`);
+      console.log("Detailed Data:", this.movementData);
       this.updateStats();
       return {
         totalBalanceDuration: this.totalBalanceDuration / 1e3,
@@ -9722,8 +9793,14 @@
       };
     }
     update(dt) {
-      if (!this.running || !this.playerObject || !this.startPosition || !this.endPosition)
+      if (!this.running)
         return;
+      if (!this.playerObject || !this.startPosition || !this.endPosition) {
+        if (this.running) {
+          console.warn("[BeamWalk] Missing required objects in update! playerObject:", !!this.playerObject, "start:", !!this.startPosition, "end:", !!this.endPosition);
+        }
+        return;
+      }
       const trackingObject = this.headObject || this.playerObject;
       const playerPos = trackingObject.getPositionWorld();
       const a = this.startPosition.getPositionWorld();
@@ -9751,36 +9828,38 @@
       this.updateStats();
       const distToEnd = vec3_exports.distance(playerPos, b);
       if (distToEnd <= this.successRadius) {
+        console.log("[BeamWalk] SUCCESS! Reached end of beam");
         this.successfulRuns++;
-        this.triggerBothControllers(HapticPatterns.BEAM_SUCCESS);
-        this.commitRun(true);
-        this.resetToStart();
+        this._triggerBothControllers(HapticPatterns.BEAM_SUCCESS);
+        this._commitRun(true);
+        this._resetToStart();
         this.currentRunNumber++;
-        this.currentRunStart = performance.now();
+        this._currentRunStart = performance.now();
         this.updateStats();
         return;
       }
       if (playerPos[1] < this.resetHeight || dist2 > this.maxDistanceFromCenter) {
+        console.log("[BeamWalk] FALL detected");
         this.totalFalls++;
-        this.triggerBothControllers(HapticPatterns.BEAM_FALL);
-        this.commitRun(false);
-        this.resetToStart();
+        this._triggerBothControllers(HapticPatterns.BEAM_FALL);
+        this._commitRun(false);
+        this._resetToStart();
         this.currentRunNumber++;
-        this.currentRunStart = performance.now();
+        this._currentRunStart = performance.now();
         this.updateStats();
       } else {
-        const currentRunDuration = performance.now() - this.currentRunStart;
+        const currentRunDuration = performance.now() - this._currentRunStart;
         this.totalBalanceDuration += dt * 1e3;
         const warningThreshold = this.maxDistanceFromCenter * 0.7;
         const now = performance.now();
         if (dist2 > warningThreshold && now - this.lastWarningTime > 2e3) {
-          this.triggerBothControllers(HapticPatterns.BEAM_WARNING);
+          this._triggerBothControllers(HapticPatterns.BEAM_WARNING);
           this.lastWarningTime = now;
         }
       }
     }
-    commitRun(isSuccess = false) {
-      const durSec = (performance.now() - this.currentRunStart) / 1e3;
+    _commitRun(isSuccess = false) {
+      const durSec = (performance.now() - this._currentRunStart) / 1e3;
       if (durSec <= 0.1)
         return;
       const dm = this.dataManager?.getComponent("data-manager");
@@ -9791,7 +9870,7 @@
       const status = isSuccess ? "SUCCESS" : "FALL";
       console.log(`[BeamWalk] Run completed: ${durSec.toFixed(2)}s - ${status}`);
     }
-    resetToStart() {
+    _resetToStart() {
       if (!this.playerObject || !this.startPosition)
         return;
       const startPos = this.startPosition.getPositionWorld();
@@ -9807,15 +9886,19 @@
           // Use start position Y
           startPos[2] - offsetZ
         ];
+        console.log("[BeamWalk] Teleporting - Head offset:", [offsetX, 0, offsetZ]);
+        console.log("[BeamWalk] Target head pos:", startPos);
+        console.log("[BeamWalk] Setting player to:", adjustedPos);
         this.playerObject.setPositionWorld(adjustedPos);
       } else {
+        console.log("[BeamWalk] Teleporting player (no head offset) to:", startPos);
         this.playerObject.setPositionWorld(startPos);
       }
     }
     /**
      * Trigger haptic feedback on both controllers
      */
-    triggerBothControllers(pattern) {
+    _triggerBothControllers(pattern) {
       if (this.leftController) {
         triggerHaptic(this.leftController, pattern);
       }
@@ -9833,10 +9916,13 @@
     startPosition: Property.object(),
     endPosition: Property.object(),
     maxDistanceFromCenter: Property.float(1),
+    // Increased to 1.0m (100cm tolerance)
     resetHeight: Property.float(-2),
     dataManager: Property.object(),
+    gameSelector: Property.object(),
+    // Reference to game-selector for unified UI
     statsText: Property.object(),
-    // Text component to display live stats
+    // Text component to display live stats (legacy, prefer gameSelector)
     successRadius: Property.float(1),
     // Radius around end point to count as success
     // Controller references for haptic feedback
@@ -9861,6 +9947,14 @@
     start() {
       this.rigidBody = this.object.getComponent("physx");
       this.setGameComponentsActive(false);
+      if (this.batObject) {
+        const batMesh = this.batObject.getComponent("mesh");
+        const batPhysx = this.batObject.getComponent("physx");
+        if (batMesh)
+          batMesh.active = false;
+        if (batPhysx)
+          batPhysx.active = false;
+      }
       if (!this.gameSelector) {
         const manager = this.engine.scene.findByName("Manager")[0];
         if (manager) {
@@ -9876,7 +9970,7 @@
     updateUI() {
       const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
       if (gs) {
-        gs.updateCue?.(`Ball ${this.nSpawned + 1} / ${this.maxSpawn}`);
+        gs.updateCue?.(`Ball ${this.nSpawned} / ${this.maxSpawn}`);
         gs.updateStats?.(`Hits: ${this.hitCount} / ${this.nSpawned}`);
       }
     }
@@ -9885,16 +9979,20 @@
      * Called by game-selector when the button is clicked.
      */
     startGame() {
-      this.nSpawned = 0;
-      this.hitCount = 0;
-      this.isSpawning = false;
-      this.gameRunning = true;
-      this.updateUI();
-      this.respawn();
-      this.setGameComponentsActive(true);
+      if (this.gameRunning)
+        return;
+      setTimeout(() => {
+        this.nSpawned = 0;
+        this.hitCount = 0;
+        this.isSpawning = false;
+        this.gameRunning = true;
+        this.updateUI();
+        this.respawn();
+        this.setGameComponentsActive(true);
+      }, 1e3);
     }
     /**
-     * Helper to toggle mesh and physx components on ball and bat
+     * Helper to toggle Mesh and PhysX components on Ball and Bat.
      */
     setGameComponentsActive(isActive) {
       const ballMesh = this.object.getComponent("mesh");
@@ -9918,6 +10016,7 @@
     onCollision(other) {
       if (other.object.name === "Baseball Bat") {
         if (this.canRegisterHit) {
+          console.log("Bat hit");
           this.hitCount++;
           this.canRegisterHit = false;
           this.updateUI();
@@ -9968,7 +10067,6 @@
       this.nSpawned++;
       this.updateUI();
     }
-    // Calculate random force in two directions 
     applyRandomForce() {
       const randomForceX = (Math.random() * (this.maxForceX - this.minForceX) + this.minForceX) * (Math.random() < 0.5 ? -1 : 1);
       const randomForceZ = Math.random() * (this.maxForceZ - this.minForceZ) + this.minForceZ;
@@ -9988,7 +10086,7 @@
       const gs = this.gameSelector?.getComponent?.("game-selector") || this.gameSelector;
       if (gs) {
         const accuracy = this.maxSpawn > 0 ? (this.hitCount / this.maxSpawn * 100).toFixed(0) : 0;
-        gs.updateStatus?.("Deflect");
+        gs.updateStatus?.("Deflect & Catch: COMPLETE");
         gs.updateCue?.("Game Over!");
         gs.updateStats?.(`Final: ${this.hitCount} / ${this.maxSpawn} hits (${accuracy}%)`);
       }
@@ -9996,7 +10094,6 @@
     resetGame() {
       this.startGame();
     }
-    // Checking if velocity is absolutely zero (to not trigger function when teleporting)
     isStill() {
       if (!this.rigidBody)
         return false;
@@ -10010,13 +10107,14 @@
     maxSpawn: Property.int(2),
     minX: Property.float(-0.5),
     maxX: Property.float(0.5),
-    minY: Property.float(1.5),
-    maxY: Property.float(2.5),
+    minY: Property.float(5),
+    maxY: Property.float(6),
     spawnZ: Property.float(-3),
-    minForceX: Property.float(50),
-    maxForceX: Property.float(100),
-    minForceZ: Property.float(250),
-    maxForceZ: Property.float(300),
+    minForceX: Property.float(100),
+    maxForceX: Property.float(150),
+    minForceZ: Property.float(200),
+    maxForceZ: Property.float(250),
+    // Game Objects
     batObject: Property.object(),
     // Reference to the Bat
     // Game selector for unified UI
@@ -10137,9 +10235,9 @@
         return;
       this._lastStatus = text;
       if (this.uiStatusText) {
-        const textComp2 = this.uiStatusText.getComponent("text");
-        if (textComp2) {
-          textComp2.text = text;
+        const textComp = this.uiStatusText.getComponent("text");
+        if (textComp) {
+          textComp.text = text;
         } else {
           console.log("[GameSelector] status:", text);
         }
@@ -10152,9 +10250,9 @@
         return;
       this._lastCue = text;
       if (this.uiCueText) {
-        const textComp2 = this.uiCueText.getComponent("text");
-        if (textComp2) {
-          textComp2.text = text;
+        const textComp = this.uiCueText.getComponent("text");
+        if (textComp) {
+          textComp.text = text;
         }
       }
     }
@@ -10163,9 +10261,9 @@
         return;
       this._lastStats = text;
       if (this.uiStatsText) {
-        const textComp2 = this.uiStatsText.getComponent("text");
-        if (textComp2) {
-          textComp2.text = text;
+        const textComp = this.uiStatsText.getComponent("text");
+        if (textComp) {
+          textComp.text = text;
         }
       }
     }
@@ -10174,9 +10272,9 @@
         return;
       this._lastReport = text;
       if (this.uiReportText) {
-        const textComp2 = this.uiReportText.getComponent("text");
-        if (textComp2) {
-          textComp2.text = text;
+        const textComp = this.uiReportText.getComponent("text");
+        if (textComp) {
+          textComp.text = text;
         }
       }
     }
@@ -10237,7 +10335,7 @@
           mgr.startGame();
         else
           mgr.start();
-        this.updateStatus("Color reactions: ON");
+        this.updateStatus("Color React: ON");
       } else {
         this.updateStatus("Error: Target Manager not found");
       }
@@ -10259,7 +10357,7 @@
       const mgr = this.deflectManager?.getComponent("bouncing-ball");
       if (mgr) {
         mgr.startGame?.();
-        this.updateStatus("Deflect the Ball: ON");
+        this.updateStatus("Deflect: ON");
         this.updateCue("Deflect with bat!");
         this.updateStats("");
       } else {
@@ -11009,10 +11107,10 @@
         "Tennis Environment",
         "Football Environment",
         "Gym Environment",
-        "Start Target Drill",
+        "Start Target Striking",
         "Start Beam Walk",
-        "Start Deflect & Catch",
-        "Start Strike & React",
+        "Start Ball Deflect",
+        "Start Color React",
         "Stop All Drills",
         "Show Report"
       ],

@@ -10,7 +10,7 @@ export class UiPlaneButton extends Component {
     static Properties = {
         action: Property.enum(
             ['Tennis Environment', 'Football Environment', 'Gym Environment', 
-             'Start Target Drill', 'Start Beam Walk', 'Start Deflect & Catch', 'Start Strike & React',
+             'Start Target Striking', 'Start Beam Walk', 'Start Ball Deflect', 'Start Color React',
              'Stop All Drills', 'Show Report'], 
             'Tennis Environment'
         ),

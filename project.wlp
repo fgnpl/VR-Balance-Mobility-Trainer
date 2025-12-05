@@ -3,7 +3,7 @@
         "14": {
             "name": "Player",
             "translation": [
-                0.0,
+                -2.5,
                 0.0,
                 1.1575535
             ],
@@ -662,48 +662,6 @@
             },
             "parent": "124"
         },
-        "126": {
-            "name": "CursorLeft",
-            "parent": "205",
-            "components": [
-                {
-                    "type": "cursor",
-                    "cursor": {
-                        "cursorObject": "376",
-                        "collisionGroup": 0,
-                        "cursorRayObject": "209",
-                        "cursorRayScalingAxis": "y",
-                        "inputObject": null,
-                        "viewObject": null
-                    }
-                },
-                {
-                    "type": "input",
-                    "input": {
-                        "type": "ray left"
-                    }
-                },
-                {
-                    "type": "vr-mode-active-switch"
-                }
-            ],
-            "translation": [
-                2.384185791015625e-7,
-                -0.0092358,
-                -2.086162567138672e-7
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "scaling": [
-                1.0,
-                1.0,
-                1.0
-            ]
-        },
         "129": {
             "name": "ControllerRight",
             "parent": "205",
@@ -717,31 +675,6 @@
                 {
                     "type": "vr-mode-active-switch",
                     "active": true
-                },
-                {
-                    "type": "controller-hit"
-                },
-                {
-                    "type": "collision",
-                    "collision": {
-                        "collider": "sphere",
-                        "box": {
-                            "extents": [
-                                0.07,
-                                0.15,
-                                0.1
-                            ]
-                        },
-                        "sphere": {
-                            "radius": 0.15
-                        }
-                    }
-                },
-                {
-                    "type": "collision-debug",
-                    "collision-debug": {
-                        "showExit": true
-                    }
                 }
             ],
             "translation": [
@@ -774,34 +707,6 @@
                 {
                     "type": "vr-mode-active-switch",
                     "active": true
-                },
-                {
-                    "type": "controller-hit",
-                    "controller-hit": {
-                        "hand": "left"
-                    }
-                },
-                {
-                    "type": "collision",
-                    "collision": {
-                        "collider": "sphere",
-                        "box": {
-                            "extents": [
-                                0.07,
-                                0.15,
-                                0.1
-                            ]
-                        },
-                        "sphere": {
-                            "radius": 0.15
-                        }
-                    }
-                },
-                {
-                    "type": "collision-debug",
-                    "collision-debug": {
-                        "showExit": true
-                    }
                 }
             ],
             "translation": [
@@ -1402,146 +1307,6 @@
                 3.0
             ]
         },
-        "209": {
-            "name": "CursorRayLeft",
-            "parent": "126",
-            "translation": [
-                0.0,
-                0.0,
-                2.384185791015625e-7
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "scaling": [
-                1.0,
-                1.0,
-                1.0
-            ]
-        },
-        "210": {
-            "name": "CursorRayMeshLeft",
-            "parent": "209",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "10",
-                        "material": "128"
-                    }
-                }
-            ],
-            "translation": [
-                2.3841928964429826e-7,
-                0.0002447,
-                0.0
-            ],
-            "rotation": [
-                0.707,
-                0.0,
-                0.0,
-                0.7072135
-            ],
-            "scaling": [
-                0.0049998,
-                0.3500002,
-                0.0049999
-            ]
-        },
-        "212": {
-            "name": "CursorRight",
-            "parent": "205",
-            "components": [
-                {
-                    "type": "cursor",
-                    "cursor": {
-                        "cursorObject": "377",
-                        "collisionGroup": 0,
-                        "cursorRayObject": "213",
-                        "cursorRayScalingAxis": "y",
-                        "inputObject": null,
-                        "viewObject": null
-                    }
-                },
-                {
-                    "type": "input",
-                    "input": {
-                        "type": "ray right"
-                    }
-                },
-                {
-                    "type": "vr-mode-active-switch"
-                }
-            ],
-            "translation": [
-                0.0,
-                0.0,
-                -2.086162567138672e-7
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "scaling": [
-                1.0,
-                1.0,
-                1.0
-            ]
-        },
-        "213": {
-            "name": "CursorRayRight",
-            "parent": "212",
-            "translation": [
-                0.0,
-                0.0,
-                2.384185791015625e-7
-            ],
-            "rotation": [
-                0.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "scaling": [
-                1.0,
-                1.0,
-                1.0
-            ]
-        },
-        "214": {
-            "name": "CursorRayMeshRight",
-            "parent": "213",
-            "components": [
-                {
-                    "type": "mesh",
-                    "mesh": {
-                        "mesh": "10",
-                        "material": "128"
-                    }
-                }
-            ],
-            "translation": [
-                2.384185791015625e-7,
-                0.0002447,
-                0.0
-            ],
-            "rotation": [
-                0.7072796,
-                0.0,
-                0.0,
-                0.7069339
-            ],
-            "scaling": [
-                0.0049998,
-                0.3499999,
-                0.0049999
-            ]
-        },
         "233": {
             "name": "Head",
             "parent": "205",
@@ -1602,7 +1367,8 @@
                         "statsText": "374",
                         "headObject": "233",
                         "leftController": "130",
-                        "rightController": "129"
+                        "rightController": "129",
+                        "gameSelector": "234"
                     }
                 },
                 {
@@ -1685,8 +1451,8 @@
             ],
             "translation": [
                 0.0,
-                1.7405011,
-                1.6482918
+                1.740501,
+                11.7541551
             ],
             "rotation": [
                 0.0,
@@ -1811,20 +1577,20 @@
                 "file": "assets\\OurModels\\balance beam model\\scene.gltf"
             },
             "scaling": [
-                0.0049998,
                 0.0049997,
-                0.0049997
+                0.0049993,
+                0.0049993
             ],
             "translation": [
-                4.3000001,
-                1.5143206,
-                -4.4442167
+                -2.544991,
+                1.5143167,
+                7.2714138
             ],
             "rotation": [
-                -0.7071023,
-                0.0,
-                0.0,
-                0.7071111
+                0.0000048,
+                0.7071073,
+                0.7071062,
+                0.0000046
             ],
             "name": "Beam",
             "components": [],
@@ -1851,27 +1617,27 @@
             },
             "parent": "344",
             "translation": [
-                1638.265625,
+                30.7394371,
                 0.0005969,
-                -0.00885
+                -0.0166988
             ],
             "rotation": [
-                1.0677015893634237e-7,
-                -0.7071068,
-                -1.0677015893634237e-7,
-                -0.7071068
+                -1.067686241640331e-7,
+                0.7071068,
+                1.067694626044613e-7,
+                0.7071067
             ],
             "scaling": [
-                0.9999982,
+                0.9999905,
                 1.0,
-                0.9999993
+                0.9999916
             ]
         },
         "349": {
             "name": "BeamStart",
             "parent": "342",
             "translation": [
-                1645.1994628,
+                29.5532226,
                 454.2001342,
                 109.7897644
             ],
@@ -1891,7 +1657,7 @@
             "name": "BeamEnd",
             "parent": "342",
             "translation": [
-                1645.1826171,
+                29.5363769,
                 -443.8601379,
                 125.2633132
             ],
@@ -1958,7 +1724,7 @@
         },
         "337": {
             "name": "UIPANEL",
-            "parent": "27",
+            "parent": "504",
             "components": [
                 {
                     "type": "mesh",
@@ -1970,9 +1736,9 @@
                 }
             ],
             "translation": [
-                -3.4199771,
-                4.2041521,
-                -3.3919343
+                0.0,
+                0.0,
+                0.0
             ],
             "rotation": [
                 0.0,
@@ -2001,7 +1767,7 @@
                 {
                     "type": "ui-plane-button",
                     "ui-plane-button": {
-                        "action": "Start Target Drill",
+                        "action": "Start Target Striking",
                         "debugMode": true,
                         "autoStartTargetDrill": false
                     }
@@ -2012,9 +1778,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.0,
+                                0.25,
+                                0.125
                             ]
                         }
                     }
@@ -2095,9 +1861,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.1,
+                                0.275,
+                                0.1375
                             ]
                         }
                     }
@@ -2176,9 +1942,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.8999999,
-                                0.1,
-                                0.05
+                                2.2,
+                                0.2444444,
+                                0.1222222
                             ]
                         }
                     },
@@ -2258,9 +2024,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.1,
+                                0.275,
+                                0.1375
                             ]
                         }
                     }
@@ -2339,9 +2105,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.1,
+                                0.275,
+                                0.1375
                             ]
                         }
                     }
@@ -2420,9 +2186,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.1,
+                                0.275,
+                                0.1375
                             ]
                         }
                     }
@@ -2501,9 +2267,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.1,
+                                0.275,
+                                0.1375
                             ]
                         }
                     }
@@ -2562,24 +2328,25 @@
             "parent": "27",
             "components": [
                 {
-                    "type": "text"
+                    "type": "text",
+                    "active": false
                 }
             ],
             "translation": [
-                16.2816524,
-                6.2210912,
-                10.3678998
+                3.5528135,
+                3.2027826,
+                12.4288301
             ],
             "rotation": [
-                0.0,
+                -0.0,
                 0.9989582,
                 0.0,
                 0.0456341
             ],
             "scaling": [
-                8.8999996,
+                8.8999977,
                 8.9000291,
-                8.8999996
+                8.8999977
             ]
         },
         "376": {
@@ -2594,9 +2361,9 @@
                 }
             ],
             "scaling": [
-                0.0099999,
-                0.0099999,
-                0.0099999
+                0.1,
+                0.1,
+                0.1
             ],
             "translation": [
                 0.0,
@@ -2622,9 +2389,9 @@
                 }
             ],
             "scaling": [
-                0.0099999,
-                0.0099999,
-                0.0099999
+                0.1,
+                0.1,
+                0.1
             ],
             "translation": [
                 0.0,
@@ -2640,7 +2407,7 @@
         },
         "378": {
             "name": "STATPANEL",
-            "parent": "27",
+            "parent": "504",
             "components": [
                 {
                     "type": "mesh",
@@ -2652,9 +2419,9 @@
                 }
             ],
             "translation": [
-                -1.464667,
-                4.2732129,
-                -3.387495
+                1.9553102,
+                0.017529,
+                0.0044403
             ],
             "rotation": [
                 0.0,
@@ -2663,9 +2430,9 @@
                 1.0
             ],
             "scaling": [
-                0.8,
-                0.8169999,
-                0.2820143
+                0.8979192,
+                0.9169999,
+                0.3165326
             ]
         },
         "393": {
@@ -2678,7 +2445,8 @@
                         "mesh": "7",
                         "material": "202",
                         "morphTargets": null
-                    }
+                    },
+                    "active": false
                 },
                 {
                     "type": "ui-plane-button",
@@ -2698,16 +2466,17 @@
                                 0.1875
                             ]
                         }
-                    }
+                    },
+                    "active": false
                 },
                 {
                     "type": "cursor-target"
                 }
             ],
             "translation": [
-                17.4678344,
-                5.0731863,
-                9.785057
+                4.7389822,
+                2.0548746,
+                11.8460149
             ],
             "rotation": [
                 0.0,
@@ -2728,7 +2497,8 @@
                     "type": "text",
                     "text": {
                         "text": "Stop"
-                    }
+                    },
+                    "active": false
                 }
             ],
             "translation": [
@@ -2758,13 +2528,14 @@
                     "mesh": {
                         "mesh": "8",
                         "material": null
-                    }
+                    },
+                    "active": true
                 }
             ],
             "translation": [
                 0.0,
                 3.562,
-                -0.7451276
+                -3.7449998
             ],
             "rotation": [
                 0.0,
@@ -2773,9 +2544,9 @@
                 1.0
             ],
             "scaling": [
-                4.3000001,
+                8.3000001,
                 2.5,
-                1.7
+                3.5
             ]
         },
         "395": {
@@ -2862,8 +2633,19 @@
                 }
             ],
             "scaling": [
-                1.5,
-                0.8,
+                3.3000001,
+                1.7600001,
+                2.2
+            ],
+            "translation": [
+                -2.3232057,
+                0.5717115,
+                -1.8643424
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
                 1.0
             ]
         },
@@ -2898,12 +2680,7 @@
                         "panelVisiblePos": 267,
                         "batObject": "424",
                         "gameSelector": "234",
-                        "minY": 3.5,
-                        "maxY": 4.0,
-                        "minForceX": 100.0,
-                        "maxForceX": 200.0,
-                        "minForceZ": 300.0,
-                        "maxForceZ": 350.0
+                        "maxSpawn": 5
                     }
                 },
                 {
@@ -2949,7 +2726,7 @@
                 {
                     "type": "ui-plane-button",
                     "ui-plane-button": {
-                        "action": "Start Deflect & Catch",
+                        "action": "Start Ball Deflect",
                         "debugMode": true
                     }
                 },
@@ -2959,9 +2736,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.0,
+                                0.25,
+                                0.125
                             ]
                         }
                     }
@@ -3030,7 +2807,7 @@
                 {
                     "type": "ui-plane-button",
                     "ui-plane-button": {
-                        "action": "Start Strike & React",
+                        "action": "Start Color React",
                         "debugMode": true,
                         "autoStartTargetDrill": false,
                         "autoStartBeamDrill": false
@@ -3042,9 +2819,9 @@
                         "collider": "aabb",
                         "aabb": {
                             "extents": [
-                                0.4,
-                                0.1,
-                                0.05
+                                1.1,
+                                0.275,
+                                0.1375
                             ]
                         }
                     }
@@ -3112,7 +2889,7 @@
             "components": [
                 {
                     "originalIndex": 0,
-                    "active": false
+                    "active": true
                 },
                 {
                     "type": "physx",
@@ -3137,7 +2914,7 @@
                         "kinematic": true,
                         "static": false
                     },
-                    "active": false
+                    "active": true
                 },
                 {
                     "type": "bat-manager"
@@ -3900,9 +3677,9 @@
                 }
             ],
             "translation": [
-                -0.8876503,
-                -0.0584923,
-                0.1178236
+                -0.8876606,
+                -0.5734565,
+                0.117986
             ],
             "rotation": [
                 0.0,
@@ -3913,7 +3690,220 @@
             "scaling": [
                 0.5889999,
                 0.576744,
-                1.6708365
+                1.6708364
+            ]
+        },
+        "504": {
+            "name": "mainpanel",
+            "parent": "27",
+            "translation": [
+                -3.4199771,
+                4.2041521,
+                -10.5083465
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                2.4,
+                2.4,
+                2.4
+            ],
+            "components": [
+                {
+                    "type": "collision",
+                    "collision": {
+                        "collider": "aabb",
+                        "aabb": {
+                            "extents": [
+                                7.1999998,
+                                2.9,
+                                0.1
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "512": {
+            "name": "CursorLeft",
+            "scaling": [
+                2.9999997,
+                2.9999997,
+                2.9999997
+            ],
+            "components": [
+                {
+                    "type": "cursor",
+                    "cursor": {
+                        "cursorObject": "376",
+                        "collisionGroup": 0,
+                        "cursorRayObject": "513",
+                        "cursorRayScalingAxis": "y"
+                    }
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "ray left"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch"
+                }
+            ],
+            "translation": [
+                -0.0017653,
+                -0.120512,
+                -0.385858
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "parent": "205"
+        },
+        "513": {
+            "name": "CursorRayLeft",
+            "parent": "512",
+            "translation": [
+                0.0,
+                0.0,
+                2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                3.0,
+                3.0,
+                3.0
+            ]
+        },
+        "514": {
+            "name": "CursorRayMeshLeft",
+            "parent": "513",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "10",
+                        "material": "128"
+                    }
+                }
+            ],
+            "translation": [
+                2.3841928964429826e-7,
+                0.0002447,
+                0.0
+            ],
+            "rotation": [
+                0.707,
+                0.0,
+                0.0,
+                0.7072135
+            ],
+            "scaling": [
+                0.014285,
+                1.0,
+                0.0142853
+            ]
+        },
+        "509": {
+            "name": "CursorRight",
+            "scaling": [
+                3.0,
+                2.9999997,
+                3.0
+            ],
+            "components": [
+                {
+                    "type": "cursor",
+                    "cursor": {
+                        "cursorObject": "377",
+                        "collisionGroup": 0,
+                        "cursorRayObject": "510",
+                        "cursorRayScalingAxis": "y"
+                    }
+                },
+                {
+                    "type": "input",
+                    "input": {
+                        "type": "ray right"
+                    }
+                },
+                {
+                    "type": "vr-mode-active-switch"
+                }
+            ],
+            "translation": [
+                -0.0017653,
+                -0.1166088,
+                -0.385858
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "parent": "205"
+        },
+        "510": {
+            "name": "CursorRayRight",
+            "parent": "509",
+            "translation": [
+                0.0,
+                0.0,
+                2.384185791015625e-7
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "511": {
+            "name": "CursorRayMeshRight",
+            "parent": "510",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "10",
+                        "material": "128"
+                    }
+                }
+            ],
+            "translation": [
+                2.384185791015625e-7,
+                0.0002447,
+                0.0
+            ],
+            "rotation": [
+                0.7072796,
+                0.0,
+                0.0,
+                0.7069339
+            ],
+            "scaling": [
+                0.014285,
+                1.0,
+                0.0142853
             ]
         }
     },
@@ -4828,12 +4818,6 @@
                 "name": "texture_0",
                 "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
             }
-        },
-        "112": {
-            "link": {
-                "name": "obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg",
-                "file": "models\\baseball\\textures\\obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg"
-            }
         }
     },
     "images": {
@@ -5019,12 +5003,6 @@
             "link": {
                 "name": "image_0",
                 "file": "assets\\OurModels\\red_clay_tennis_court\\scene.gltf"
-            }
-        },
-        "110": {
-            "link": {
-                "name": "obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg",
-                "file": "models\\baseball\\textures\\obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg"
             }
         }
     },
@@ -6224,10 +6202,6 @@
             "fileName": "assets/OurModels/red_clay_tennis_court/scene.gltf",
             "importerName": "",
             "importPhysicalAsPhongMaterials": true
-        },
-        "271": {
-            "fileName": "models/baseball/textures/obj_baseball_maps_baker1_matnet1_Baker_baseColor.jpeg",
-            "importerName": ""
         }
     },
     "fonts": {

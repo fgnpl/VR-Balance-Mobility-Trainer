@@ -133,7 +133,7 @@ export class GameSelector extends Component {
         const mgr = this.targetManager?.getComponent('target-manager');
         if (mgr) {
             if (mgr.startGame) mgr.startGame(); else mgr.start();
-            this.updateStatus('Color reactions: ON');
+            this.updateStatus('Color React: ON');
         } else {
             this.updateStatus('Error: Target Manager not found');
         }
@@ -157,7 +157,7 @@ export class GameSelector extends Component {
         const mgr = this.deflectManager?.getComponent('bouncing-ball');
         if (mgr) {
             mgr.startGame?.();
-            this.updateStatus('Deflect the Ball: ON');
+            this.updateStatus('Deflect: ON');
             this.updateCue('Deflect with bat!');
             this.updateStats('');
         } else {
