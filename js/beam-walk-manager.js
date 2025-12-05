@@ -106,7 +106,7 @@ export class BeamWalkManager extends Component {
         const bestTime = (this.bestDuration / 1000).toFixed(2);
 
         // Concise stats for unified UI (game-selector)
-        const conciseStats = `Run #${this.currentRunNumber} | Current: ${currentRunTime}s | Best: ${bestTime}s | Success: ${this.successfulRuns} | Falls: ${this.totalFalls}`;
+        const conciseStats = `Run #${this.currentRunNumber} | Current: ${currentRunTime}s | Best: ${bestTime}s\nSuccess: ${this.successfulRuns} | Falls: ${this.totalFalls}`;
 
         // Detailed stats for legacy statsText
         const detailedStats = `BEAM WALK STATS

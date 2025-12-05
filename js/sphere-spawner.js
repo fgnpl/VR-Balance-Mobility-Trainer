@@ -178,7 +178,7 @@ export class ReactionGame extends Component {
         // Update UI with final results
         const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
         if (gs) {
-            gs.updateStatus?.('Strike & React: COMPLETE');
+            gs.updateStatus?.('Target Strike: COMPLETE');
             gs.updateCue?.('Game Over!');
             gs.updateStats?.(`Avg: ${avg.toFixed(3)}s | Fast: ${fastest.toFixed(3)}s | Slow: ${slowest.toFixed(3)}s | Total: ${this.reactionTimes.length}`);
         }

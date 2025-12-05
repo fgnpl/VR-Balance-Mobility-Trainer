@@ -1812,7 +1812,7 @@
                 {
                     "type": "text",
                     "text": {
-                        "text": "Start Target"
+                        "text": "Start Color"
                     }
                 }
             ],
@@ -2680,7 +2680,11 @@
                         "panelVisiblePos": 267,
                         "batObject": "424",
                         "gameSelector": "234",
-                        "maxSpawn": 5
+                        "maxSpawn": 5,
+                        "minForceX": 50.0,
+                        "maxForceX": 8.0,
+                        "minY": 4.0,
+                        "maxY": 5.0
                     }
                 },
                 {
@@ -2853,7 +2857,7 @@
                 {
                     "type": "text",
                     "text": {
-                        "text": "Start Strike"
+                        "text": "Start Striking"
                     }
                 }
             ],
@@ -2896,8 +2900,8 @@
                     "physx": {
                         "shape": "capsule",
                         "capsule": {
-                            "radius": 0.1,
-                            "halfHeight": 0.9499999
+                            "radius": 0.2,
+                            "halfHeight": 1.45
                         },
                         "rotationOffset": [
                             -0.5,
@@ -2908,22 +2912,22 @@
                         "translationOffset": [
                             0.0,
                             0.0,
-                            1.1
+                            1.6
                         ],
                         "gravity": false,
                         "kinematic": true,
                         "static": false
                     },
-                    "active": false
+                    "active": true
                 },
                 {
                     "type": "bat-manager"
                 }
             ],
             "scaling": [
-                0.035,
-                0.0349961,
-                0.0349962
+                0.05,
+                0.0499944,
+                0.0499945
             ],
             "name": "Baseball Bat",
             "rotation": [

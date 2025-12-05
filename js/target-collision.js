@@ -13,39 +13,21 @@ export class TargetCollision extends Component {
 
     start() {
         this.hit = false;
-        
-        console.log('[TargetCollision] Starting on object:', this.object.name);
-        
-        // Skip audio component - it doesn't exist in this Wonderland Engine version
-        // this.soundSource = this.object.addComponent('audio-source', {
-        //     src: 'sfx/click.wav', 
-        //     spatial: true
-        // });
-
+                
         let cursorTarget = this.object.getComponent(CursorTarget);
         if (!cursorTarget) {
-            console.log('[TargetCollision] No cursor-target found, adding one');
             cursorTarget = this.object.addComponent(CursorTarget);
-        } else {
-            console.log('[TargetCollision] cursor-target already exists');
-        }
+        } 
 
         cursorTarget.onDown.add(this.onDown.bind(this));
-        console.log('[TargetCollision] Registered onDown callback');
     }
 
     onDown(_, cursor) {
-        console.log('[TargetCollision] onDown called! Hit status:', this.hit);
         if (this.hit) return;
-        
-        // Skip audio playback - component doesn't exist
-        // if (this.soundSource) this.soundSource.play();
-
         this.onHit();
     }
 
     onHit() {
-        console.log('[TargetCollision] onHit called! Manager:', this.manager);
         if (this.hit) return;
         this.hit = true;
         
@@ -54,8 +36,6 @@ export class TargetCollision extends Component {
         
         if (this.manager) {
             this.manager.onTargetHit(this.object, reactionTime);
-        } else {
-            console.error('[TargetCollision] No manager set!');
-        }
+        } 
     }
 }

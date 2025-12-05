@@ -58,7 +58,6 @@ export class TargetManager extends Component {
     }
     
     calculateSpawnZone() {
-        const mesh = this.spawnZone.getComponent('mesh');
         const pos = this.spawnZone.getPositionWorld();
         const scale = this.spawnZone.getScalingWorld();
         
@@ -82,7 +81,7 @@ export class TargetManager extends Component {
             : '0.0';
 
         // Statistics for the game
-        const stats = `Round: ${this.cycleCount}/${this.maxTargets} | Hits: ${this.hitCount} | Misses: ${this.missCount} | Accuracy: ${accuracy}% | Avg RT: ${avgReactionTime}s`;
+        const stats = `${this.cycleCount}/${this.maxTargets} | Hit: ${this.hitCount} | Miss: ${this.missCount} | Acc: ${accuracy}% | Avg RT: ${avgReactionTime}s`;
 
         // Update unified UI
         const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
@@ -255,7 +254,12 @@ export class TargetManager extends Component {
     endGame() {
         console.log("Game over! Finished cycles: ", this.cycleCount);
         this.clearRound();
-        
+        this.updateCue(`Game Over`);
+
+        const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
+        if (gs) gs.updateStatus?.('Color React: COMPLETE');
+
+
         const dm = this.dataManager?.getComponent('data-manager');
         const report = dm?.getReport();
         if (report) console.log('[TargetManager] Report summary:', report);

@@ -1812,7 +1812,7 @@
                 {
                     "type": "text",
                     "text": {
-                        "text": "Start Target"
+                        "text": "Start Color"
                     }
                 }
             ],
@@ -2680,7 +2680,11 @@
                         "panelVisiblePos": 267,
                         "batObject": "424",
                         "gameSelector": "234",
-                        "maxSpawn": 5
+                        "maxSpawn": 5,
+                        "minForceX": 50.0,
+                        "maxForceX": 80.0,
+                        "minY": 4.0,
+                        "maxY": 5.0
                     }
                 },
                 {
@@ -2853,7 +2857,7 @@
                 {
                     "type": "text",
                     "text": {
-                        "text": "Start Strike"
+                        "text": "Start Striking"
                     }
                 }
             ],
@@ -2882,9 +2886,9 @@
             },
             "parent": "129",
             "translation": [
-                0.0035614,
-                -0.0947094,
-                -0.0048104
+                0.0035613,
+                -0.1140439,
+                0.0485243
             ],
             "components": [
                 {
@@ -2896,8 +2900,8 @@
                     "physx": {
                         "shape": "capsule",
                         "capsule": {
-                            "radius": 0.1,
-                            "halfHeight": 0.9499999
+                            "radius": 0.2,
+                            "halfHeight": 1.45
                         },
                         "rotationOffset": [
                             -0.5,
@@ -2908,7 +2912,7 @@
                         "translationOffset": [
                             0.0,
                             0.0,
-                            1.1
+                            1.6
                         ],
                         "gravity": false,
                         "kinematic": true,
@@ -2921,15 +2925,15 @@
                 }
             ],
             "scaling": [
-                0.035,
-                0.0349961,
-                0.0349962
+                0.0499995,
+                0.0499944,
+                0.049994
             ],
             "name": "Baseball Bat",
             "rotation": [
                 -0.0,
                 1.0,
-                -4.4703490686970326e-8,
+                -5.066394805908203e-7,
                 -0.0002441
             ]
         },

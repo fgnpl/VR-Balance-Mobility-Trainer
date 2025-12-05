@@ -8,13 +8,13 @@ export class BouncingBall extends Component {
         maxSpawn: Property.int(2),
         minX: Property.float(-0.5),
         maxX: Property.float(0.5),
-        minY: Property.float(5),
-        maxY: Property.float(6),
-        spawnZ: Property.float(-3.0),
-        minForceX: Property.float(100.0),
-        maxForceX: Property.float(150.0),
-        minForceZ: Property.float(200.0),
-        maxForceZ: Property.float(250.0),
+        minY: Property.float(4),
+        maxY: Property.float(5),
+        spawnZ: Property.float(-5.0),
+        minForceX: Property.float(50.0),
+        maxForceX: Property.float(80.0),
+        minForceZ: Property.float(150.0),
+        maxForceZ: Property.float(200.0),
 
         // Game Objects
         batObject: Property.object(),       // Reference to the Bat
@@ -43,14 +43,6 @@ export class BouncingBall extends Component {
         // Initialize Game State: Disable Bat/Ball physics/mesh so they aren't active in the menu
         this.setGameComponentsActive(false);
         
-        // ENSURE bat is explicitly disabled at start
-        if (this.batObject) {
-            const batMesh = this.batObject.getComponent('mesh');
-            const batPhysx = this.batObject.getComponent('physx');
-            if(batMesh) batMesh.active = false;
-            if(batPhysx) batPhysx.active = false;
-        }
-        
         // Get game selector reference
         if (!this.gameSelector) {
             const manager = this.engine.scene.findByName('Manager')[0];
@@ -60,9 +52,9 @@ export class BouncingBall extends Component {
         }
 
         this.object.getComponent('physx').onCollision((type, other) => {
-        if (type === CollisionEventType.Touch) { 
+           if (type === CollisionEventType.Touch) { 
                 this.onCollision(other);
-        }
+           }
         })
     }
     
@@ -79,7 +71,8 @@ export class BouncingBall extends Component {
      * Called by game-selector when the button is clicked.
      */
     startGame() {
-        if (this.gameRunning) return; // Prevent double-start
+        // Make sure components are hidden before starting
+        this.setGameComponentsActive(false);
         
         setTimeout(() => {
             this.nSpawned = 0;
@@ -87,16 +80,17 @@ export class BouncingBall extends Component {
             this.isSpawning = false;
             this.gameRunning = true;
 
+            // Enable Bat and Ball visuals/physics
+            this.setGameComponentsActive(true);
+
             // Update UI
             this.updateUI();
 
             // Start the loop
             this.respawn();
-            
-            // Enable Bat and Ball visuals/physics
-            this.setGameComponentsActive(true);
         }, 1000);
     }
+
     /**
      * Helper to toggle Mesh and PhysX components on Ball and Bat.
      */
@@ -108,8 +102,6 @@ export class BouncingBall extends Component {
         
         if(ballMesh) ballMesh.active = isActive;
         if(ballPhysx) ballPhysx.active = isActive;
-        if(ballTrail) ballTrail.active = isActive;
-
         // Toggle Bat Components
         if (this.batObject) {
             const batMesh = this.batObject.getComponent('mesh');
@@ -117,7 +109,9 @@ export class BouncingBall extends Component {
             
             if(batMesh) batMesh.active = isActive;
             if(batPhysx) batPhysx.active = isActive;
+            this.batObject.active = isActive;
         }
+        if(ballTrail) ballTrail.active = isActive;
     }
 
     onCollision(other) {
@@ -136,10 +130,10 @@ export class BouncingBall extends Component {
         if (this.isSpawning) return;
 
         if (this.isStill()) {
-            this.canRegisterHit = false;
             this.groundTimer += dt;
             
             if (this.groundTimer >= 0.1) {
+                this.canRegisterHit = false;
                 const trail = this.object.getComponent('trail');
                 if(trail) trail.active = false;
                 
@@ -167,9 +161,6 @@ export class BouncingBall extends Component {
         
         this.object.setPositionWorld([randomX, randomY, this.spawnZ]);
         
-        const trail = this.object.getComponent('trail');
-        if(trail) trail.active = true; 
-
         setTimeout(() => {
             if(this.rigidBody && this.gameRunning) {
                 this.rigidBody.kinematic = false;
@@ -178,6 +169,8 @@ export class BouncingBall extends Component {
                 this.canRegisterHit = true;
             }
         }, 100);
+        const trail = this.object.getComponent('trail');
+        if(trail) trail.active = true; 
 
         this.nSpawned++;
         this.updateUI();
@@ -210,7 +203,7 @@ export class BouncingBall extends Component {
         const gs = this.gameSelector?.getComponent?.('game-selector') || this.gameSelector;
         if (gs) {
             const accuracy = this.maxSpawn > 0 ? ((this.hitCount / this.maxSpawn) * 100).toFixed(0) : 0;
-            gs.updateStatus?.('Deflect & Catch: COMPLETE');
+            gs.updateStatus?.('Deflect: COMPLETE');
             gs.updateCue?.('Game Over!');
             gs.updateStats?.(`Final: ${this.hitCount} / ${this.maxSpawn} hits (${accuracy}%)`);
         }
