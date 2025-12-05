@@ -8236,7 +8236,7 @@ var DataManager = class extends Component32 {
     if (durationSec > this.session.beam.bestDuration)
       this.session.beam.bestDuration = durationSec;
   }
-  // Deflect & Catch drill (bouncing ball)
+  // Deflect drill (bouncing ball)
   addDeflectGame(totalBalls, hits) {
     this.session.deflect.totalBalls += totalBalls;
     this.session.deflect.hits += hits;
@@ -8783,7 +8783,7 @@ var ReactionGame = class extends Component35 {
     const randX = (Math.random() - 0.5) * 2 * rangeX;
     const randY = (Math.random() - 0.5) * 2 * rangeY;
     this.targetTemplate.setTranslationWorld(this.spawnArea.getTranslationWorld([]));
-    this.targetTemplate.translateObject([randX, randY, 0.1]);
+    this.targetTemplate.translateObject([randX, randY, 0]);
     this.targetTemplate.active = true;
     this.currentTargetActive = true;
     this.currentTimer = 0;

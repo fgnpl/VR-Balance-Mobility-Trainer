@@ -130,7 +130,7 @@ export class ReactionGame extends Component {
         const randY = (Math.random() - 0.5) * 2 * rangeY;
 
         this.targetTemplate.setTranslationWorld(this.spawnArea.getTranslationWorld([]));
-        this.targetTemplate.translateObject([randX, randY, 0.1]); 
+        this.targetTemplate.translateObject([randX, randY, 0.0]); 
 
         this.targetTemplate.active = true;
         this.currentTargetActive = true;

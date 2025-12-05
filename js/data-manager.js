@@ -53,7 +53,7 @@ export class DataManager extends Component {
         if (durationSec > this.session.beam.bestDuration) this.session.beam.bestDuration = durationSec;
     }
 
-    // Deflect & Catch drill (bouncing ball)
+    // Deflect drill (bouncing ball)
     addDeflectGame(totalBalls, hits) {
         this.session.deflect.totalBalls += totalBalls;
         this.session.deflect.hits += hits;

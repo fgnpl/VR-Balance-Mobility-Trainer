@@ -2682,7 +2682,7 @@
                         "gameSelector": "234",
                         "maxSpawn": 5,
                         "minForceX": 50.0,
-                        "maxForceX": 8.0,
+                        "maxForceX": 80.0,
                         "minY": 4.0,
                         "maxY": 5.0
                     }

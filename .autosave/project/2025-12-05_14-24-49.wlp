@@ -2667,7 +2667,7 @@
                         },
                         "gravity": true,
                         "static": false,
-                        "linearDamping": 1.5,
+                        "linearDamping": 1.3999999,
                         "angularDamping": 1.0,
                         "mass": 0.5
                     }
@@ -2682,7 +2682,7 @@
                         "gameSelector": "234",
                         "maxSpawn": 5,
                         "minForceX": 50.0,
-                        "maxForceX": 8.0,
+                        "maxForceX": 80.0,
                         "minY": 4.0,
                         "maxY": 5.0
                     }
@@ -2886,9 +2886,9 @@
             },
             "parent": "129",
             "translation": [
-                0.0035614,
-                -0.0947094,
-                -0.0048104
+                0.0035613,
+                -0.1140439,
+                0.0485243
             ],
             "components": [
                 {
@@ -2925,15 +2925,15 @@
                 }
             ],
             "scaling": [
-                0.05,
+                0.0499995,
                 0.0499944,
-                0.0499945
+                0.049994
             ],
             "name": "Baseball Bat",
             "rotation": [
                 -0.0,
                 1.0,
-                -4.4703490686970326e-8,
+                -5.066394805908203e-7,
                 -0.0002441
             ]
         },
