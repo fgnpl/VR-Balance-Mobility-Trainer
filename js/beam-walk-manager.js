@@ -125,7 +125,7 @@ Avg Dev: ${avgDev}m`;
             gs.updateStats(conciseStats);
         }
         
-        // ALSO update legacy statsText (show in both places)
+        // Also update legacy statsText (show in both places)
         if (this.statsText) {
             const textComp = this.statsText.getComponent('text');
             if (textComp) {
@@ -211,7 +211,6 @@ Avg Dev: ${avgDev}m`;
         }
         
         // Use head position for XZ tracking (lateral movement) and Y (fall detection)
-        // This is critical for VR where the player's head moves independently
         const trackingObject = this.headObject || this.playerObject;
         const playerPos = trackingObject.getPositionWorld();
         

@@ -2,7 +2,6 @@ import {Component} from '@wonderlandengine/api';
 
 /**
  * DataManager: central session storage for drills.
- * Attach once in scene (e.g., on a Manager object). Accessible via engine.scene.getComponent('data-manager').
  */
 export class DataManager extends Component {
     static TypeName = 'data-manager';
@@ -53,14 +52,14 @@ export class DataManager extends Component {
         if (durationSec > this.session.beam.bestDuration) this.session.beam.bestDuration = durationSec;
     }
 
-    // Deflect drill (bouncing ball)
+    // Deflect drill
     addDeflectGame(totalBalls, hits) {
         this.session.deflect.totalBalls += totalBalls;
         this.session.deflect.hits += hits;
         this.session.deflect.games.push({ totalBalls, hits, accuracy: totalBalls > 0 ? (hits / totalBalls) * 100 : 0 });
     }
 
-    // Strike & React drill (sphere spawner)
+    // Target striking drill
     addReactTime(reactionTime) {
         this.session.react.reactionTimes.push(reactionTime);
         this.session.react.totalTargets += 1;

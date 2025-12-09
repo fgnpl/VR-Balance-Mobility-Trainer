@@ -1,5 +1,5 @@
 /**
- * Centralized Haptic Feedback System for VR Controllers
+ * Centralized haptic feedback system for VR controllers
  * 
  * Provides consistent haptic feedback across the VR application with
  * predefined intensity and duration settings for different interaction types.

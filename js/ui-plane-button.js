@@ -117,7 +117,7 @@ export class UiPlaneButton extends Component {
                 }
                 break;
 
-            case 3: // Start Target Drill
+            case 3: // Start Target Color Reaction 
                 if (gs.startTargetDrill) {
                     gs.startTargetDrill();
                 } else {
@@ -133,7 +133,7 @@ export class UiPlaneButton extends Component {
                 }
                 break;
             
-            case 5: // Start Deflect & Catch (bouncing ball)
+            case 5: // Start Deflect
                 if (gs.startDeflectDrill) {
                     gs.startDeflectDrill();
                 } else {
@@ -141,7 +141,7 @@ export class UiPlaneButton extends Component {
                 }
                 break;
             
-            case 6: // Start Strike & React (sphere spawner)
+            case 6: // Start Target Striking
                 if (gs.startReactDrill) {
                     gs.startReactDrill();
                 } else {
