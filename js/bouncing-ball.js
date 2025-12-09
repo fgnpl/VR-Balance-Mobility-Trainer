@@ -16,8 +16,8 @@ export class BouncingBall extends Component {
         minForceZ: Property.float(150.0),
         maxForceZ: Property.float(200.0),
 
-        // Game Objects
-        batObject: Property.object(),       // Reference to the Bat
+        // Game objects
+        batObject: Property.object(),       // Reference to the bat
         
         // Game selector for unified UI
         gameSelector: Property.object(),
@@ -40,7 +40,7 @@ export class BouncingBall extends Component {
     start() {
         this.rigidBody = this.object.getComponent('physx');
 
-        // Initialize Game State: Disable Bat/Ball physics/mesh so they aren't active in the menu
+        // Initialize game State: disable bat/ball physics/mesh so they aren't active in the menu
         this.setGameComponentsActive(false);
         
         // Get game selector reference
@@ -66,10 +66,8 @@ export class BouncingBall extends Component {
         }
     }
 
-    /**
-     * Dedicated function to start the game.
-     * Called by game-selector when the button is clicked.
-     */
+    // Dedicated function to start the game
+    // Called by game-selector when the button is clicked
     startGame() {
         // Make sure components are hidden before starting
         this.setGameComponentsActive(false);
@@ -80,7 +78,7 @@ export class BouncingBall extends Component {
             this.isSpawning = false;
             this.gameRunning = true;
 
-            // Enable Bat and Ball visuals/physics
+            // Enable bat and ball visuals/physics
             this.setGameComponentsActive(true);
 
             // Update UI
@@ -91,18 +89,16 @@ export class BouncingBall extends Component {
         }, 1000);
     }
 
-    /**
-     * Helper to toggle Mesh and PhysX components on Ball and Bat.
-     */
+    // Helper to toggle mesh and physx components on the ball and bat
     setGameComponentsActive(isActive) {
-        // Toggle Ball Components
+        // Toggle ball components
         const ballMesh = this.object.getComponent('mesh');
         const ballPhysx = this.object.getComponent('physx');
         const ballTrail = this.object.getComponent('trail');
         
         if(ballMesh) ballMesh.active = isActive;
         if(ballPhysx) ballPhysx.active = isActive;
-        // Toggle Bat Components
+        // Toggle bat components
         if (this.batObject) {
             const batMesh = this.batObject.getComponent('mesh');
             const batPhysx = this.batObject.getComponent('physx');
@@ -114,6 +110,7 @@ export class BouncingBall extends Component {
         if(ballTrail) ballTrail.active = isActive;
     }
 
+    // Registering hits with the baseball bats
     onCollision(other) {
         if (other.object.name === 'Baseball Bat') {
             if (this.canRegisterHit) {
@@ -125,6 +122,7 @@ export class BouncingBall extends Component {
         }
     }
 
+    // Constant game motion tracking
     update(dt) {
         if (!this.gameRunning) return;
         if (this.isSpawning) return;
@@ -132,6 +130,7 @@ export class BouncingBall extends Component {
         if (this.isStill()) {
             this.groundTimer += dt;
             
+            // If the ball is on the ground, respawn
             if (this.groundTimer >= 0.1) {
                 this.canRegisterHit = false;
                 const trail = this.object.getComponent('trail');
@@ -144,7 +143,8 @@ export class BouncingBall extends Component {
         }
     }
 
-    respawn() {                
+    respawn() {       
+        // If max number of spawns exceeded, game is over         
         if (this.nSpawned >= this.maxSpawn) {
             this.showGameOver();
             return;
@@ -154,13 +154,16 @@ export class BouncingBall extends Component {
         this.groundTimer = 0;
         this.canRegisterHit = false;
 
+        // Generating random coordinates
         const randomX = Math.random() * (this.maxX - this.minX) + this.minX;
         const randomY = Math.random() * (this.maxY - this.minY) + this.minY;
 
+        // Setting to true for the ball to not fall under gravity
         this.rigidBody.kinematic = true;
         
         this.object.setPositionWorld([randomX, randomY, this.spawnZ]);
         
+        // Spawning after small delay to avoid physics jitter
         setTimeout(() => {
             if(this.rigidBody && this.gameRunning) {
                 this.rigidBody.kinematic = false;
@@ -176,6 +179,7 @@ export class BouncingBall extends Component {
         this.updateUI();
     }
 
+    // Calculating and applying random force to the ball for it to fly towards the player
     applyRandomForce() {
         const randomForceX = (Math.random() * (this.maxForceX - this.minForceX) + this.minForceX) 
                            * (Math.random() < 0.5 ? -1 : 1);
@@ -187,7 +191,7 @@ export class BouncingBall extends Component {
         console.log("Game over. Hits: " + this.hitCount);
         this.gameRunning = false;
 
-        // Disable Bat and Ball physics/mesh so they don't interfere with UI
+        // Disable bat and ball physics/mesh so they don't interfere with UI
         this.setGameComponentsActive(false);
         
         // Save data to data manager
@@ -213,6 +217,7 @@ export class BouncingBall extends Component {
         this.startGame();
     }
 
+    // Checking if the velocity is zero (works experimentally even with float numbers)
     isStill() {
         if(!this.rigidBody) return false;
         const v = this.rigidBody.linearVelocity;

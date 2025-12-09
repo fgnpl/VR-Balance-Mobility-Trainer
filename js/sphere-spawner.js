@@ -1,4 +1,4 @@
-import { Component, Property, InputComponent } from '@wonderlandengine/api';
+import { Component, Property } from '@wonderlandengine/api';
 import { CursorTarget } from '@wonderlandengine/components'; 
 import { triggerHaptic, HapticPatterns } from './haptic-feedback.js';
 
@@ -76,12 +76,14 @@ export class ReactionGame extends Component {
     update(dt) {
         if (!this.isGameActive || !this.currentTargetActive) return;
 
+        // Handling timeout misses
         this.currentTimer += dt;
         if (this.currentTimer >= this.timeoutDuration) {
             this.handleTimeout();
         }
     }
 
+    // If sphere is clicked on
     onTargetDown = (_, cursor) => {
         if (!this.currentTargetActive) return;
         triggerHaptic(cursor.object, HapticPatterns.TARGET_HIT);
@@ -93,9 +95,7 @@ export class ReactionGame extends Component {
         triggerHaptic(cursor.object, HapticPatterns.HOVER);
     };
 
-    /**
-     * Dedicated function to start the game
-     */
+    // Dedicated function to start the game
     startGame() {
         console.log("[ReactionGame] Starting game...");
 
@@ -123,12 +123,14 @@ export class ReactionGame extends Component {
         this.targetsSpawned++;
         this.updateUI();
 
+        // Random coordinates within spawn plane
         const rangeX = this.spawnArea.scalingWorld[0]; 
         const rangeY = this.spawnArea.scalingWorld[1];
 
         const randX = (Math.random() - 0.5) * 2 * rangeX;
         const randY = (Math.random() - 0.5) * 2 * rangeY;
 
+        // Translating target sphere object
         this.targetTemplate.setTranslationWorld(this.spawnArea.getTranslationWorld([]));
         this.targetTemplate.translateObject([randX, randY, 0.0]); 
 
@@ -138,6 +140,7 @@ export class ReactionGame extends Component {
         this.sphereStartTime = Date.now() / 1000; 
     }
 
+    // Called when sphere is clicked
     onTargetHit() {
         const hitTime = Date.now() / 1000;
         const reactionTime = hitTime - this.sphereStartTime;
@@ -148,6 +151,7 @@ export class ReactionGame extends Component {
         this.spawnNextTarget();
     }
 
+    // If timeout, respawn
     handleTimeout() {
         this.reactionTimes.push(this.timeoutDuration); 
         this.targetTemplate.active = false;
@@ -161,6 +165,7 @@ export class ReactionGame extends Component {
         this.currentTargetActive = false;
         this.targetTemplate.active = false;
 
+        // Calculating stats
         const total = this.reactionTimes.reduce((a, b) => a + b, 0);
         const avg = total / (this.reactionTimes.length || 1);
         const fastest = this.reactionTimes.length ? Math.min(...this.reactionTimes) : 0;

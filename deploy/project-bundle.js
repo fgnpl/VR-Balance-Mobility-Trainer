@@ -7593,8 +7593,16 @@ __decorate19([
   property19.float(0.9)
 ], OrbitalCamera.prototype, "damping", void 0);
 
+<<<<<<< HEAD
 // js/bat-manager.js
 import { CollisionEventType, Component as Component29, Property as Property2 } from "@wonderlandengine/api";
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+// js/ball-manager.js
+import { Component as Component30, Property as Property3 } from "@wonderlandengine/api";
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
 
 // js/haptic-feedback.js
 var HapticPatterns = {
@@ -8022,6 +8030,7 @@ var BouncingBall = class extends Component31 {
     this.canRegisterHit = false;
     this.gameRunning = false;
   }
+<<<<<<< HEAD
   start() {
     this.rigidBody = this.object.getComponent("physx");
     this.setGameComponentsActive(false);
@@ -8475,6 +8484,24 @@ var GameSelector = class extends Component33 {
           rm.targetTemplate.active = false;
         }
       }
+=======
+=======
+// js/scripts/controller-hit.js
+import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
+var ControllerHit = class extends Component29 {
+  onCollisionEnter(other) {
+    if (other.object.hasComponent("target-collision")) {
+      console.log(`${this.hand} hand hit a target!`);
+      other.object.getComponent("target-collision").onHit(this.object);
+=======
+// js/scripts/controller-hit.js
+import { Component as Component29, Property as Property2 } from "@wonderlandengine/api";
+var ControllerHit = class extends Component29 {
+  onCollisionEnter(other) {
+    if (other.object.hasComponent("target-collision")) {
+      console.log(`${this.hand} hand hit a target!`);
+      other.object.getComponent("target-collision").onHit(this.object);
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
     }
     this.teleportPlayerToStart();
     this.currentDrill = null;
@@ -9061,9 +9088,527 @@ var TargetManager = class extends Component37 {
       console.log("[TargetManager] Report summary:", report);
   }
 };
+__publicField(ControllerHit, "TypeName", "controller-hit");
+/* Properties that are configurable in the editor */
+__publicField(ControllerHit, "Properties", {
+  hand: Property2.string("right")
+});
+
+// js/scripts/environment-switcher.js
+import { Component as Component30, Object as Object2, Property as Property3 } from "@wonderlandengine/api";
+var HIDDEN_SCALE = [1e-7, 1e-7, 1e-7];
+var EnvironmentSwitcher = class extends Component30 {
+  /** Store the original scales of the environments */
+  originalScales = {
+    football: vec3_exports.create(),
+    tennis: vec3_exports.create(),
+    gym: vec3_exports.create()
+  };
+  start() {
+    if (this.footballField) {
+      vec3_exports.copy(this.originalScales.football, this.footballField.scalingLocal);
+    } else {
+      console.warn('EnvironmentSwitcher: "Football Field" object is not linked in the editor properties.');
+      vec3_exports.set(this.originalScales.football, 1, 1, 1);
+    }
+    if (this.tennisCourt) {
+      vec3_exports.copy(this.originalScales.tennis, this.tennisCourt.scalingLocal);
+    } else {
+      console.warn('EnvironmentSwitcher: "Tennis Court" object is not linked in the editor properties.');
+      vec3_exports.set(this.originalScales.tennis, 1, 1, 1);
+    }
+    if (this.gymFloor) {
+      vec3_exports.copy(this.originalScales.gym, this.gymFloor.scalingLocal);
+    } else {
+      console.warn('EnvironmentSwitcher: "Gym Floor" object is not linked in the editor properties.');
+      vec3_exports.set(this.originalScales.gym, 1, 1, 1);
+    }
+    if (this.defaultEnvironment === 0) {
+      this.showFootballField();
+    } else if (this.defaultEnvironment === 1) {
+      this.showTennisCourt();
+    } else if (this.defaultEnvironment === 2) {
+      this.showGymFloor();
+    }
+  }
+  /**
+   * Activates the Football Field and deactivates the others.
+   */
+  showFootballField() {
+    console.log("Attempting to show Football Field...");
+    if (this.footballField) {
+      this.footballField.setScalingLocal(this.originalScales.football);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot show "Football Field", object is not linked.');
+    }
+    if (this.tennisCourt) {
+      this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
+    }
+    if (this.gymFloor) {
+      this.gymFloor.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
+    }
+  }
+  /**
+   * Activates the Tennis Court and deactivates the others.
+   */
+  showTennisCourt() {
+    console.log("Attempting to show Tennis Court...");
+    if (this.footballField) {
+      this.footballField.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
+    }
+    if (this.tennisCourt) {
+      this.tennisCourt.setScalingLocal(this.originalScales.tennis);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot show "Tennis Court", object is not linked.');
+    }
+    if (this.gymFloor) {
+      this.gymFloor.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
+    }
+  }
+  /**
+   * Activates the Gym Floor and deactivates the others.
+   */
+  showGymFloor() {
+    console.log("Attempting to show Gym Floor...");
+    if (this.footballField) {
+      this.footballField.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
+    }
+    if (this.tennisCourt) {
+      this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
+    }
+    if (this.gymFloor) {
+      this.gymFloor.setScalingLocal(this.originalScales.gym);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot show "Gym Floor", object is not linked.');
+    }
+  }
+};
+__publicField(EnvironmentSwitcher, "TypeName", "environment-switcher");
+__publicField(EnvironmentSwitcher, "Properties", {
+  /** The parent object for the Football Field environment */
+  footballField: Property3.object(null),
+  // Default to null
+  /** The parent object for the Tennis Court environment */
+  tennisCourt: Property3.object(null),
+  // Default to null
+  /** The parent object for the Gym Floor environment */
+  gymFloor: Property3.object(null),
+  // Default to null
+  /** Which environment to show by default when the scene loads */
+  defaultEnvironment: Property3.enum(["football", "tennis", "gym"], "football")
+});
+
+// js/scripts/head-bob.js
+import { Component as Component31, Object as Object3, Property as Property4 } from "@wonderlandengine/api";
+var HeadBob = class extends Component31 {
+  start() {
+    this.initialLocalPosition = vec3_exports.create();
+    this.object.getTranslationLocal(this.initialLocalPosition);
+    this.lastPlayerPosition = vec3_exports.create();
+    if (this.playerObject) {
+      this.playerObject.getTranslationWorld(this.lastPlayerPosition);
+    }
+    this.bobTime = 0;
+  }
+  update(dt) {
+    if (!this.playerObject) {
+      if (this.engine.frame % 60 === 0) {
+        console.warn('HeadBob: "Player Object" property is not set.');
+      }
+      return;
+    }
+    const currentPlayerPosition = vec3_exports.create();
+    this.playerObject.getTranslationWorld(currentPlayerPosition);
+    const deltaX = this.lastPlayerPosition[0] - currentPlayerPosition[0];
+    const deltaZ = this.lastPlayerPosition[2] - currentPlayerPosition[2];
+    const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+    let bobOffset = 0;
+    if (distanceMoved > this.epsilon) {
+      this.bobTime += dt * this.bobFrequency;
+      bobOffset = Math.sin(this.bobTime) * this.bobAmount;
+    } else {
+      this.bobTime = 0;
+    }
+    const newLocalPosition = vec3_exports.create();
+    vec3_exports.copy(newLocalPosition, this.initialLocalPosition);
+    newLocalPosition[1] += bobOffset;
+    this.object.setTranslationLocal(newLocalPosition);
+    vec3_exports.copy(this.lastPlayerPosition, currentPlayerPosition);
+  }
+};
+__publicField(HeadBob, "TypeName", "head-bob");
+__publicField(HeadBob, "Properties", {
+  /** The Player object that has the wasd-controls component */
+  playerObject: Property4.object(),
+  /** How fast the bobbing effect is (e.g., 10.0) */
+  bobFrequency: Property4.float(10),
+  /** How much the camera bobs up and down (e.g., 0.03) */
+  bobAmount: Property4.float(0.03),
+  /** A small value to ignore tiny movements and stop bobbing */
+  epsilon: Property4.float(1e-3)
+});
+
+// js/scripts/target-collision.js
+import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
+var TargetCollision = class extends Component32 {
+  start() {
+    this.hit = false;
+  }
+  update() {
+    if (this.hit) {
+      return;
+    }
+    const spherePos = this.object.getPositionWorld();
+    const sticks = [
+      this.engine.scene.getObjectByName("ControllerRight"),
+      this.engine.scene.getObjectByName("ControllerLeft")
+    ];
+    for (let stick of sticks) {
+      if (!stick) {
+        continue;
+      }
+      const stickPos = stick.getPositionWorld();
+      const dx = spherePos[0] - stickPos[0];
+      const dy = spherePos[1] - stickPos[1];
+      const dz = spherePos[2] - stickPos[2];
+      const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const radiusSphere = 0.2;
+      const radiusStick = 0.15;
+      const tolerance = 0.05;
+      if (distance2 < radiusSphere + radiusStick + tolerance) {
+        this.hit = true;
+        const reactionTime = (performance.now() - this.object.startTime) / 1e3;
+        this.manager.onTargetHit(this.object, reactionTime);
+      }
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+    }
+  }
+  onHit(controllerObject) {
+    console.log("Target was hit by: ", controllerObject.name);
+    this.object.active = false;
+  }
+};
+__publicField(TargetCollision, "TypeName", "target-collision");
+/* Properties that are configurable in the editor */
+__publicField(TargetCollision, "Properties", {
+  manager: Property5.object()
+});
+
+// js/scripts/target-manager.js
+import { Component as Component33, Property as Property6 } from "@wonderlandengine/api";
+console.log("target-manager.js loaded");
+var TargetManager = class extends Component33 {
+  start() {
+    this.hitCount = 0;
+    this.reactionTimes = [];
+    this.activeTarget = null;
+    this.spherePrefab.active = false;
+    this.spawnTarget();
+  }
+  spawnTarget() {
+    if (this.hitCount >= this.maxTargets) {
+      this.endGame();
+      return;
+    }
+    const sphere = this.spherePrefab.clone(this.object);
+    sphere.active = true;
+    this.activeTarget = sphere;
+    const x = (Math.random() - 0.5) * 1.5;
+    const y = 1.5 + Math.random() * 0.5;
+    const z = -1.5 - Math.pow(x, 2) / 2;
+    console.log("Target position:", x, y, z);
+    sphere.setPositionWorld([x, y, z]);
+    sphere.startTime = performance.now();
+    const collisionComp = sphere.addComponent("target-collision");
+    collisionComp.manager = this;
+    console.log("Spawned at:", sphere.getPositionWorld());
+  }
+  onTargetHit(sphere, reactionTime) {
+    this.hitCount++;
+    this.reactionTimes.push(reactionTime);
+    sphere.destroy();
+    setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
+  }
+  endGame() {
+    console.log("Game over! Reaction times: ", this.reactionTimes);
+  }
+};
+__publicField(ControllerHit, "TypeName", "controller-hit");
+/* Properties that are configurable in the editor */
+__publicField(ControllerHit, "Properties", {
+  hand: Property2.string("right")
+});
+
+// js/scripts/environment-switcher.js
+import { Component as Component30, Object as Object2, Property as Property3 } from "@wonderlandengine/api";
+var HIDDEN_SCALE = [1e-7, 1e-7, 1e-7];
+var EnvironmentSwitcher = class extends Component30 {
+  /** Store the original scales of the environments */
+  originalScales = {
+    football: vec3_exports.create(),
+    tennis: vec3_exports.create(),
+    gym: vec3_exports.create()
+  };
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+  start() {
+    if (this.footballField) {
+      vec3_exports.copy(this.originalScales.football, this.footballField.scalingLocal);
+    } else {
+      console.warn('EnvironmentSwitcher: "Football Field" object is not linked in the editor properties.');
+      vec3_exports.set(this.originalScales.football, 1, 1, 1);
+    }
+    if (this.tennisCourt) {
+      vec3_exports.copy(this.originalScales.tennis, this.tennisCourt.scalingLocal);
+    } else {
+      console.warn('EnvironmentSwitcher: "Tennis Court" object is not linked in the editor properties.');
+      vec3_exports.set(this.originalScales.tennis, 1, 1, 1);
+    }
+    if (this.gymFloor) {
+      vec3_exports.copy(this.originalScales.gym, this.gymFloor.scalingLocal);
+    } else {
+      console.warn('EnvironmentSwitcher: "Gym Floor" object is not linked in the editor properties.');
+      vec3_exports.set(this.originalScales.gym, 1, 1, 1);
+    }
+    if (this.defaultEnvironment === 0) {
+      this.showFootballField();
+    } else if (this.defaultEnvironment === 1) {
+      this.showTennisCourt();
+    } else if (this.defaultEnvironment === 2) {
+      this.showGymFloor();
+    }
+  }
+  /**
+   * Activates the Football Field and deactivates the others.
+   */
+  showFootballField() {
+    console.log("Attempting to show Football Field...");
+    if (this.footballField) {
+      this.footballField.setScalingLocal(this.originalScales.football);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot show "Football Field", object is not linked.');
+    }
+    if (this.tennisCourt) {
+      this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
+    }
+    if (this.gymFloor) {
+      this.gymFloor.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
+    }
+  }
+  /**
+   * Activates the Tennis Court and deactivates the others.
+   */
+  showTennisCourt() {
+    console.log("Attempting to show Tennis Court...");
+    if (this.footballField) {
+      this.footballField.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
+    }
+    if (this.tennisCourt) {
+      this.tennisCourt.setScalingLocal(this.originalScales.tennis);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot show "Tennis Court", object is not linked.');
+    }
+    if (this.gymFloor) {
+      this.gymFloor.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Gym Floor", object is not linked.');
+    }
+  }
+  /**
+   * Activates the Gym Floor and deactivates the others.
+   */
+  showGymFloor() {
+    console.log("Attempting to show Gym Floor...");
+    if (this.footballField) {
+      this.footballField.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Football Field", object is not linked.');
+    }
+    if (this.tennisCourt) {
+      this.tennisCourt.setScalingLocal(HIDDEN_SCALE);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot hide "Tennis Court", object is not linked.');
+    }
+    if (this.gymFloor) {
+      this.gymFloor.setScalingLocal(this.originalScales.gym);
+    } else {
+      console.error('EnvironmentSwitcher: Cannot show "Gym Floor", object is not linked.');
+    }
+  }
+};
+__publicField(EnvironmentSwitcher, "TypeName", "environment-switcher");
+__publicField(EnvironmentSwitcher, "Properties", {
+  /** The parent object for the Football Field environment */
+  footballField: Property3.object(null),
+  // Default to null
+  /** The parent object for the Tennis Court environment */
+  tennisCourt: Property3.object(null),
+  // Default to null
+  /** The parent object for the Gym Floor environment */
+  gymFloor: Property3.object(null),
+  // Default to null
+  /** Which environment to show by default when the scene loads */
+  defaultEnvironment: Property3.enum(["football", "tennis", "gym"], "football")
+});
+
+=======
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
+// js/scripts/head-bob.js
+import { Component as Component29, Object as Object2, Property as Property2 } from "@wonderlandengine/api";
+var HeadBob = class extends Component29 {
+  start() {
+    this.initialLocalPosition = vec3_exports.create();
+    this.object.getTranslationLocal(this.initialLocalPosition);
+    this.lastPlayerPosition = vec3_exports.create();
+    if (this.playerObject) {
+      this.playerObject.getTranslationWorld(this.lastPlayerPosition);
+    }
+    this.bobTime = 0;
+  }
+  update(dt) {
+    if (!this.playerObject) {
+      if (this.engine.frame % 60 === 0) {
+        console.warn('HeadBob: "Player Object" property is not set.');
+      }
+      return;
+    }
+    const currentPlayerPosition = vec3_exports.create();
+    this.playerObject.getTranslationWorld(currentPlayerPosition);
+    const deltaX = this.lastPlayerPosition[0] - currentPlayerPosition[0];
+    const deltaZ = this.lastPlayerPosition[2] - currentPlayerPosition[2];
+    const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+    let bobOffset = 0;
+    if (distanceMoved > this.epsilon) {
+      this.bobTime += dt * this.bobFrequency;
+      bobOffset = Math.sin(this.bobTime) * this.bobAmount;
+    } else {
+      this.bobTime = 0;
+    }
+    const newLocalPosition = vec3_exports.create();
+    vec3_exports.copy(newLocalPosition, this.initialLocalPosition);
+    newLocalPosition[1] += bobOffset;
+    this.object.setTranslationLocal(newLocalPosition);
+    vec3_exports.copy(this.lastPlayerPosition, currentPlayerPosition);
+  }
+};
+__publicField(HeadBob, "TypeName", "head-bob");
+__publicField(HeadBob, "Properties", {
+  /** The Player object that has the wasd-controls component */
+  playerObject: Property2.object(),
+  /** How fast the bobbing effect is (e.g., 10.0) */
+  bobFrequency: Property2.float(10),
+  /** How much the camera bobs up and down (e.g., 0.03) */
+  bobAmount: Property2.float(0.03),
+  /** A small value to ignore tiny movements and stop bobbing */
+<<<<<<< HEAD
+  epsilon: Property4.float(1e-3)
+});
+
+// js/scripts/target-collision.js
+import { Component as Component32, Property as Property5 } from "@wonderlandengine/api";
+var TargetCollision = class extends Component32 {
+  start() {
+    this.hit = false;
+  }
+  update() {
+    if (this.hit) {
+      return;
+    }
+    const spherePos = this.object.getPositionWorld();
+    const sticks = [
+      this.engine.scene.getObjectByName("ControllerRight"),
+      this.engine.scene.getObjectByName("ControllerLeft")
+    ];
+    for (let stick of sticks) {
+      if (!stick) {
+        continue;
+      }
+      const stickPos = stick.getPositionWorld();
+      const dx = spherePos[0] - stickPos[0];
+      const dy = spherePos[1] - stickPos[1];
+      const dz = spherePos[2] - stickPos[2];
+      const distance2 = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const radiusSphere = 0.2;
+      const radiusStick = 0.15;
+      const tolerance = 0.05;
+      if (distance2 < radiusSphere + radiusStick + tolerance) {
+        this.hit = true;
+        const reactionTime = (performance.now() - this.object.startTime) / 1e3;
+        this.manager.onTargetHit(this.object, reactionTime);
+      }
+    }
+  }
+  onHit(controllerObject) {
+    console.log("Target was hit by: ", controllerObject.name);
+    this.object.active = false;
+  }
+};
+__publicField(TargetCollision, "TypeName", "target-collision");
+/* Properties that are configurable in the editor */
+__publicField(TargetCollision, "Properties", {
+  manager: Property5.object()
+});
+
+// js/scripts/target-manager.js
+import { Component as Component33, Property as Property6 } from "@wonderlandengine/api";
+console.log("target-manager.js loaded");
+var TargetManager = class extends Component33 {
+  start() {
+    this.hitCount = 0;
+    this.reactionTimes = [];
+    this.activeTarget = null;
+    this.spherePrefab.active = false;
+    this.spawnTarget();
+  }
+  spawnTarget() {
+    if (this.hitCount >= this.maxTargets) {
+      this.endGame();
+      return;
+    }
+    const sphere = this.spherePrefab.clone(this.object);
+    sphere.active = true;
+    this.activeTarget = sphere;
+    const x = (Math.random() - 0.5) * 1.5;
+    const y = 1.5 + Math.random() * 0.5;
+    const z = -1.5 - Math.pow(x, 2) / 2;
+    console.log("Target position:", x, y, z);
+    sphere.setPositionWorld([x, y, z]);
+    sphere.startTime = performance.now();
+    const collisionComp = sphere.addComponent("target-collision");
+    collisionComp.manager = this;
+    console.log("Spawned at:", sphere.getPositionWorld());
+  }
+  onTargetHit(sphere, reactionTime) {
+    this.hitCount++;
+    this.reactionTimes.push(reactionTime);
+    sphere.destroy();
+    setTimeout(() => this.spawnTarget(), this.spawnInterval * 1e3);
+  }
+  endGame() {
+    console.log("Game over! Reaction times: ", this.reactionTimes);
+  }
+};
 __publicField(TargetManager, "TypeName", "target-manager");
 /* Properties that are configurable in the editor */
 __publicField(TargetManager, "Properties", {
+<<<<<<< HEAD
   spherePrefab: Property9.object(),
   spawnZone: Property9.object(),
   // cube mesh object to define spawn boundaries
@@ -9596,6 +10141,36 @@ __publicField(VrMotionTracker, "Properties", {
   autoStart: Property11.bool(true),
   // Debug logging
   debugMode: Property11.bool(false)
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  targetPrefab: Property5.object(),
+  totalTargets: Property5.int(20),
+  spawnDelay: Property5.float(1.5),
+  // seconds between targets
+  surfaceWidth: Property5.float(2),
+  // width of spawn area
+  surfaceHeight: Property5.float(1),
+  // height of spawn area
+  surfaceCenterY: Property5.float(1.5),
+  // center height
+  surfaceDistance: Property5.float(2)
+  // distance from player
+=======
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+  spherePrefab: Property6.object(),
+  maxTargets: Property6.int(20),
+  spawnInterval: Property6.float(1)
+  // seconds
+<<<<<<< HEAD
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
+  epsilon: Property2.float(1e-3)
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
 });
 
 // js/index.js
@@ -9609,6 +10184,7 @@ function js_default(engine) {
   engine.registerComponent(PlayerHeight);
   engine.registerComponent(Trail);
   engine.registerComponent(VrModeActiveSwitch);
+<<<<<<< HEAD
   engine.registerComponent(WasdControlsComponent);
   engine.registerComponent(BatManager);
   engine.registerComponent(BeamWalkManager);
@@ -9621,6 +10197,28 @@ function js_default(engine) {
   engine.registerComponent(TargetManager);
   engine.registerComponent(UiPlaneButton);
   engine.registerComponent(VrMotionTracker);
+=======
+<<<<<<< HEAD
+  engine.registerComponent(BallManager);
+  engine.registerComponent(BallPhysics);
+  engine.registerComponent(TargetBehavior);
+=======
+  engine.registerComponent(WasdControlsComponent);
+<<<<<<< HEAD
+  engine.registerComponent(HeadBob);
+<<<<<<< HEAD
+  engine.registerComponent(TargetCollision);
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
+  engine.registerComponent(ControllerHit);
+  engine.registerComponent(EnvironmentSwitcher);
+  engine.registerComponent(HeadBob);
+  engine.registerComponent(TargetCollision);
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+  engine.registerComponent(TargetManager);
+=======
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
 }
 export {
   js_default as default

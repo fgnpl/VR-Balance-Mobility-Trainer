@@ -3905,9 +3905,170 @@
                 0.7069339
             ],
             "scaling": [
+<<<<<<< HEAD
                 0.014285,
                 1.0,
                 0.0142853
+=======
+                0.0049998,
+                0.3499999,
+                0.0049999
+            ]
+        },
+        "233": {
+            "name": "Head",
+            "parent": "205",
+            "components": [
+                {
+                    "type": "vr-mode-active-switch",
+                    "active": true
+                },
+                {
+                    "type": "audio-listener",
+                    "active": false
+                },
+                {
+                    "type": "input"
+                }
+            ]
+        },
+        "27": {
+            "name": "TargetSphere",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": "9",
+                        "material": "22"
+                    },
+                    "active": true
+                },
+                {
+                    "type": "collision",
+                    "collision": {
+                        "sphere": {
+                            "radius": 0.2
+                        }
+                    },
+                    "active": true
+<<<<<<< HEAD
+=======
+                },
+                {
+                    "type": "target-collision",
+                    "target-collision": {
+                        "manager": "234"
+                    }
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+                },
+                {
+                    "type": "target-collision",
+                    "target-collision": {
+                        "manager": "234"
+                    }
+                }
+            ],
+            "scaling": [
+<<<<<<< HEAD
+<<<<<<< HEAD
+                0.101,
+                0.101,
+                0.101
+            ]
+        },
+        "238": {
+            "name": "BallGameManager",
+            "components": [
+                {
+                    "type": "ball-manager",
+                    "ball-manager": {
+                        "ballPrefab": "234"
+                    }
+                }
+=======
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+                0.2,
+                0.2,
+                0.2
+            ],
+            "translation": [
+                0.0,
+                3.875,
+                0.9792991
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+<<<<<<< HEAD
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+            ]
+        },
+        "234": {
+            "name": "Manager",
+            "components": [
+                {
+                    "type": "mesh",
+                    "mesh": {
+                        "mesh": null,
+                        "material": null
+<<<<<<< HEAD
+=======
+                    }
+                },
+                {
+                    "type": "target-manager",
+                    "target-manager": {
+                        "spherePrefab": "27"
+                    }
+                }
+            ]
+        },
+        "235": {
+            "name": "Environment"
+        },
+        "236": {
+            "name": "Level",
+            "parent": "235",
+            "translation": [
+                0.0,
+                -1.5,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scaling": [
+                1.0,
+                1.0,
+                1.0
+            ]
+        },
+        "237": {
+            "name": "WebPlayer",
+            "components": [
+                {
+                    "type": "wasd-controls",
+                    "wasd-controls": {
+                        "headObject": "17",
+                        "lockY": true
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+                    }
+                },
+                {
+                    "type": "target-manager",
+                    "target-manager": {
+                        "spherePrefab": "27"
+                    }
+                }
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
             ]
         }
     },

@@ -6,7 +6,6 @@ import {CursorTarget} from '@wonderlandengine/components';
  */
 export class TargetManager extends Component {
     static TypeName = 'target-manager';
-    /* Properties that are configurable in the editor */
     static Properties = {
         spherePrefab: Property.object(),
         spawnZone: Property.object(), // cube mesh object to define spawn boundaries
@@ -57,6 +56,7 @@ export class TargetManager extends Component {
         console.log('[TargetManager] Initialized, waiting for startGame()');
     }
     
+    // Calculating spawn bounds from parent mesh
     calculateSpawnZone() {
         const pos = this.spawnZone.getPositionWorld();
         const scale = this.spawnZone.getScalingWorld();
@@ -159,6 +159,7 @@ export class TargetManager extends Component {
         
         this.activeTargets.push(sphere);
 
+        // Generating random coordinates within bounds
         const x = this.spawnBounds.minX + Math.random() * (this.spawnBounds.maxX - this.spawnBounds.minX);
         const y = this.spawnBounds.minY + Math.random() * (this.spawnBounds.maxY - this.spawnBounds.minY);
         const z = this.spawnBounds.minZ + Math.random() * (this.spawnBounds.maxZ - this.spawnBounds.minZ);
@@ -167,6 +168,7 @@ export class TargetManager extends Component {
         sphere.startTime = performance.now();
         sphere.colorTag = colorName;
 
+        // Color map 
         const meshComp = sphere.getComponent('mesh');
         if (meshComp && meshComp.material) {
             const colorMap = {
@@ -191,6 +193,7 @@ export class TargetManager extends Component {
         tc.manager = this;
         console.log('[TargetManager] Set manager on target-collision, manager is:', this);
         
+        // If life time is exceeded, restart
         sphere.timeoutId = setTimeout(() => {
             this.onTargetTimeout(sphere);
         }, this.targetLifetime * 1000);
@@ -218,10 +221,12 @@ export class TargetManager extends Component {
 
         const isCorrectColor = sphere.colorTag === this.currentCue;
         
+        // Logging info to data manager
         const dm = this.dataManager?.getComponent('data-manager');
         dm?.addReactionTime(reactionTime);
         dm?.addAccuracySample(isCorrectColor);
 
+        // Checking if correct/incorrect color sphere was hit
         if (isCorrectColor) {
             console.log('[TargetManager] Correct Hit!');
             this.hitCount++;

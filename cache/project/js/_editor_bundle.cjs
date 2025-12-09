@@ -9502,10 +9502,19 @@
     property.float(0.9)
   ], OrbitalCamera.prototype, "damping", void 0);
 
+<<<<<<< HEAD
   // js/bat-manager.js
   var bat_manager_exports = {};
   __export(bat_manager_exports, {
     BatManager: () => BatManager
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  // js/ball-manager.js
+  var ball_manager_exports = {};
+  __export(ball_manager_exports, {
+    BallManager: () => BallManager
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
   });
 
   // js/haptic-feedback.js
@@ -10777,6 +10786,7 @@ Avg Dev: ${avgDev}m`;
     gameSelector: Property.object()
   });
 
+<<<<<<< HEAD
   // js/target-collision.js
   var target_collision_exports = {};
   __export(target_collision_exports, {
@@ -10810,13 +10820,27 @@ Avg Dev: ${avgDev}m`;
   __publicField(TargetCollision, "TypeName", "target-collision");
   __publicField(TargetCollision, "Properties", {
     manager: Property.object()
+=======
+  // js/target-behavior.js
+  var target_behavior_exports = {};
+  __export(target_behavior_exports, {
+    TargetBehavior: () => TargetBehavior
+=======
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+  // js/app.js
+  var app_exports = {};
+  loadRuntime("WonderlandRuntime-physx-threads", { threads: false }).then((runtime) => {
+    runtime.start();
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
   });
 
-  // js/target-manager.js
-  var target_manager_exports = {};
-  __export(target_manager_exports, {
-    TargetManager: () => TargetManager
+  // js/button-3d.js
+  var button_3d_exports = {};
+  __export(button_3d_exports, {
+    Button3D: () => Button3D
   });
+<<<<<<< HEAD
   var TargetManager = class extends Component3 {
     start() {
       this.hitCount = 0;
@@ -11543,10 +11567,267 @@ Avg Dev: ${avgDev}m`;
     autoStart: Property.bool(true),
     // Debug logging
     debugMode: Property.bool(false)
+=======
+  var Button3D = class extends Component3 {
+    start() {
+      this.leftController = this.engine.scene.findByName("ControllerLeft")[0];
+      this.rightController = this.engine.scene.findByName("ControllerRight")[0];
+      if (this.usePlayerForDesktop && (!this.leftController || !this.rightController)) {
+        this.playerObject = this.engine.scene.findByName("Player")[0];
+        if (!this.playerObject) {
+          this.playerObject = this.engine.scene.findByName("NonVrCamera")[0];
+        }
+        if (this.debugMode) {
+          if (this.playerObject) {
+            console.log(`Button3D: Using desktop mode with ${this.playerObject.name}`);
+          } else {
+            console.warn("Button3D: No controllers or Player/Camera found!");
+          }
+        }
+      }
+      this.isHovered = false;
+      this.isPressed = false;
+      this.cooldownTimer = 0;
+      this.originalScale = vec3_exports.create();
+      this.object.getScalingLocal(this.originalScale);
+      this.buttonPos = vec3_exports.create();
+      this.controllerPos = vec3_exports.create();
+      this.tempScale = vec3_exports.create();
+      if (this.debugMode) {
+        console.log(`Button3D: Initialized on ${this.object.name}`);
+        console.log(`  Trigger Distance: ${this.triggerDistance}`);
+        console.log(`  Hover Distance: ${this.triggerDistance * 2}`);
+        console.log(`  Original Scale: [${this.originalScale[0].toFixed(2)}, ${this.originalScale[1].toFixed(2)}, ${this.originalScale[2].toFixed(2)}]`);
+      }
+      this.controllersWarningShown = false;
+    }
+    update(dt) {
+      if (this.cooldownTimer > 0) {
+        this.cooldownTimer -= dt;
+      }
+      this.object.getPositionWorld(this.buttonPos);
+      let closestDistance = Infinity;
+      let closestControllerName = "";
+      const objectsToCheck = [];
+      if (this.leftController)
+        objectsToCheck.push(this.leftController);
+      if (this.rightController)
+        objectsToCheck.push(this.rightController);
+      if (this.playerObject && objectsToCheck.length === 0) {
+        objectsToCheck.push(this.playerObject);
+      }
+      if (objectsToCheck.length === 0) {
+        if (this.debugMode && !this.controllersWarningShown) {
+          console.warn("Button3D: No controllers or player object found!");
+          this.controllersWarningShown = true;
+        }
+        return;
+      }
+      for (const obj of objectsToCheck) {
+        if (!obj)
+          continue;
+        obj.getPositionWorld(this.controllerPos);
+        const distance2 = vec3_exports.distance(this.buttonPos, this.controllerPos);
+        if (distance2 < closestDistance) {
+          closestDistance = distance2;
+          closestControllerName = obj.name;
+        }
+      }
+      const wasHovered = this.isHovered;
+      const wasPressed = this.isPressed;
+      this.isHovered = closestDistance < this.triggerDistance * 2;
+      this.isPressed = closestDistance < this.triggerDistance;
+      if (this.debugMode) {
+        if (this.isHovered && !wasHovered) {
+          console.log(`Button3D: HOVER ENTER - Distance: ${closestDistance.toFixed(3)}m (${closestControllerName})`);
+        }
+        if (!this.isHovered && wasHovered) {
+          console.log(`Button3D: HOVER EXIT - Distance: ${closestDistance.toFixed(3)}m`);
+        }
+        if (this.isPressed && !wasPressed) {
+          console.log(`Button3D: PRESS - Distance: ${closestDistance.toFixed(3)}m (${closestControllerName})`);
+        }
+      }
+      if (this.isPressed && !wasPressed && this.cooldownTimer <= 0) {
+        this.onPress();
+        this.cooldownTimer = this.cooldownTime;
+      }
+      this.updateVisuals();
+    }
+    updateVisuals() {
+      if (this.isPressed) {
+        vec3_exports.scale(this.tempScale, this.originalScale, this.pressScaleMultiplier);
+      } else if (this.isHovered) {
+        vec3_exports.scale(this.tempScale, this.originalScale, this.hoverScaleMultiplier);
+      } else {
+        vec3_exports.copy(this.tempScale, this.originalScale);
+      }
+      this.object.setScalingLocal(this.tempScale);
+    }
+    onPress() {
+      if (this.debugMode) {
+        console.log("Button3D: Button pressed!");
+      }
+    }
+  };
+  __publicField(Button3D, "TypeName", "button-3d");
+  __publicField(Button3D, "Properties", {
+    triggerDistance: Property.float(0.5),
+    cooldownTime: Property.float(0.5),
+    hoverScaleMultiplier: Property.float(1.2),
+    pressScaleMultiplier: Property.float(0.85),
+    debugMode: Property.bool(true),
+    usePlayerForDesktop: Property.bool(true)
+  });
+
+  // js/button.js
+  var button_exports = {};
+  __export(button_exports, {
+    ButtonComponent: () => ButtonComponent,
+    hapticFeedback: () => hapticFeedback
+<<<<<<< HEAD
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+  });
+  function hapticFeedback(object, strength, duration) {
+    const input = object.getComponent(InputComponent);
+    if (input && input.xrInputSource) {
+      const gamepad = input.xrInputSource.gamepad;
+      if (gamepad && gamepad.hapticActuators)
+        gamepad.hapticActuators[0].pulse(strength, duration);
+    }
+  }
+  var ButtonComponent = class extends Component3 {
+    static onRegister(engine) {
+      engine.registerComponent(AudioSource);
+      engine.registerComponent(CursorTarget);
+    }
+    /* Position to return to when "unpressing" the button */
+    returnPos = new Float32Array(3);
+    start() {
+      this.mesh = this.buttonMeshObject.getComponent(MeshComponent);
+      this.defaultMaterial = this.mesh.material;
+      this.buttonMeshObject.getTranslationLocal(this.returnPos);
+      this.target = this.object.getComponent(CursorTarget) || this.object.addComponent(CursorTarget);
+      this.soundClick = this.object.addComponent(AudioSource, {
+        src: "sfx/click.wav",
+        hrtf: true
+      });
+      this.soundUnClick = this.object.addComponent(AudioSource, {
+        src: "sfx/unclick.wav",
+        hrtf: true
+      });
+    }
+    onActivate() {
+      this.target.onHover.add(this.onHover);
+      this.target.onUnhover.add(this.onUnhover);
+      this.target.onDown.add(this.onDown);
+      this.target.onUp.add(this.onUp);
+    }
+    onDeactivate() {
+      this.target.onHover.remove(this.onHover);
+      this.target.onUnhover.remove(this.onUnhover);
+      this.target.onDown.remove(this.onDown);
+      this.target.onUp.remove(this.onUp);
+    }
+    /* Called by 'cursor-target' */
+    onHover = (_, cursor) => {
+      this.mesh.material = this.hoverMaterial;
+      if (cursor.type === "finger-cursor") {
+        this.onDown(_, cursor);
+      }
+      hapticFeedback(cursor.object, 0.5, 50);
+    };
+    /* Called by 'cursor-target' */
+    onDown = (_, cursor) => {
+      this.soundClick.play();
+      this.buttonMeshObject.translate([0, -0.1, 0]);
+      hapticFeedback(cursor.object, 1, 20);
+    };
+    /* Called by 'cursor-target' */
+    onUp = (_, cursor) => {
+      this.soundUnClick.play();
+      this.buttonMeshObject.setTranslationLocal(this.returnPos);
+      hapticFeedback(cursor.object, 0.7, 20);
+    };
+    /* Called by 'cursor-target' */
+    onUnhover = (_, cursor) => {
+      this.mesh.material = this.defaultMaterial;
+      if (cursor.type === "finger-cursor") {
+        this.onUp(_, cursor);
+      }
+      hapticFeedback(cursor.object, 0.3, 50);
+    };
+  };
+  __publicField(ButtonComponent, "TypeName", "button");
+  __publicField(ButtonComponent, "Properties", {
+    /** Object that has the button's mesh attached */
+    buttonMeshObject: Property.object(),
+    /** Material to apply when the user hovers the button */
+    hoverMaterial: Property.material()
+<<<<<<< HEAD
+  });
+
+  // js/scripts/head-bob.js
+  var head_bob_exports = {};
+  __export(head_bob_exports, {
+    HeadBob: () => HeadBob
+  });
+  var HeadBob = class extends Component3 {
+    start() {
+      this.initialLocalPosition = vec3_exports.create();
+      this.object.getTranslationLocal(this.initialLocalPosition);
+      this.lastPlayerPosition = vec3_exports.create();
+      if (this.playerObject) {
+        this.playerObject.getTranslationWorld(this.lastPlayerPosition);
+      }
+      this.bobTime = 0;
+    }
+    update(dt) {
+      if (!this.playerObject) {
+        if (this.engine.frame % 60 === 0) {
+          console.warn('HeadBob: "Player Object" property is not set.');
+        }
+        return;
+      }
+      const currentPlayerPosition = vec3_exports.create();
+      this.playerObject.getTranslationWorld(currentPlayerPosition);
+      const deltaX = this.lastPlayerPosition[0] - currentPlayerPosition[0];
+      const deltaZ = this.lastPlayerPosition[2] - currentPlayerPosition[2];
+      const distanceMoved = Math.sqrt(deltaX * deltaX + deltaZ * deltaZ);
+      let bobOffset = 0;
+      if (distanceMoved > this.epsilon) {
+        this.bobTime += dt * this.bobFrequency;
+        bobOffset = Math.sin(this.bobTime) * this.bobAmount;
+      } else {
+        this.bobTime = 0;
+      }
+      const newLocalPosition = vec3_exports.create();
+      vec3_exports.copy(newLocalPosition, this.initialLocalPosition);
+      newLocalPosition[1] += bobOffset;
+      this.object.setTranslationLocal(newLocalPosition);
+      vec3_exports.copy(this.lastPlayerPosition, currentPlayerPosition);
+    }
+  };
+  __publicField(HeadBob, "TypeName", "head-bob");
+  __publicField(HeadBob, "Properties", {
+    /** The Player object that has the wasd-controls component */
+    playerObject: Property.object(),
+    /** How fast the bobbing effect is (e.g., 10.0) */
+    bobFrequency: Property.float(10),
+    /** How much the camera bobs up and down (e.g., 0.03) */
+    bobAmount: Property.float(0.03),
+    /** A small value to ignore tiny movements and stop bobbing */
+    epsilon: Property.float(1e-3)
+=======
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
   });
 
   // cache/project/js/_editor_index.js
   _registerEditor(dist_exports);
+<<<<<<< HEAD
   _registerEditor(bat_manager_exports);
   _registerEditor(beam_walk_manager_exports);
   _registerEditor(bouncing_ball_exports);
@@ -11559,4 +11840,26 @@ Avg Dev: ${avgDev}m`;
   _registerEditor(target_manager_exports);
   _registerEditor(ui_plane_button_exports);
   _registerEditor(vr_motion_tracker_exports);
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+  _registerEditor(ball_manager_exports);
+  _registerEditor(ball_physics_exports);
+  _registerEditor(target_behavior_exports);
+  _registerEditor(target_manager_exports);
+=======
+  _registerEditor(app_exports);
+  _registerEditor(button_3d_exports);
+  _registerEditor(button_exports);
+<<<<<<< HEAD
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+=======
+  _registerEditor(head_bob_exports);
+>>>>>>> parent of 3454228 (Remove HeadBob component from editor bundle)
+=======
+  _registerEditor(app_exports);
+  _registerEditor(button_3d_exports);
+  _registerEditor(button_exports);
+>>>>>>> parent of f723fc5 (Refactor game logic: add managers and update prefabs)
+>>>>>>> 68f6094687044fff7e4045639a1df966a690f498
 })();
